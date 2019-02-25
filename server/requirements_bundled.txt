@@ -1,0 +1,6 @@
+# These libraries are already bundled with the runtime and are only needed for
+# local testing.
+Flask==0.12
+numpy==1.6.1
+Pillow==1.1.7
+pytz==2017.3
