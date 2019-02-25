@@ -6,14 +6,16 @@ TODO: Add intro with picture and link to Medium article.
 
 The Accent server is built on [Google App Engine Python Standard Environment](https://cloud.google.com/appengine/docs/standard/python/).
 
+To add user-specific data:
+1. [Obtain a Google Maps API key](https://cloud.google.com/maps-platform/#get-started) and add it to [`commute_data.py`](server/commute_data.py#L3).
+2. Add home and work addresses and a commute travel mode to [`commute_data.py`](server/commute_data.py#L6).
+3. [Obtain a Google Calendar API client configuration](https://developers.google.com/calendar/quickstart/python) and save it to [`g_calendar_secrets.json`](server/g_calendar_secrets.json).
+4. [Run the Google Calendar API authentication flow](server/g_calendar.py#L92), which fills in [`g_calendar_credentials.json`](server/g_calendar_credentials.json).
+
 To test the server locally:
 1. Run `cd server && virtualenv venv && . venv/bin/activate`.
 2. Run `pip install -r requirements.txt -r requirements_bundled.txt`.
-3. [Obtain a Google Maps API key](https://cloud.google.com/maps-platform/#get-started) and add it to [`commute_data.py`](server/commute_data.py#L3).
-4. Add home and work addresses and a commute travel mode to [`commute_data.py`](server/commute_data.py#L6).
-5. [Obtain a Google Calendar API client configuration](https://developers.google.com/calendar/quickstart/python) and save it to [`g_calendar_secrets.json`](server/g_calendar_secrets.json).
-6. [Run the Google Calendar API authentication flow](server/g_calendar.py#L92), which fills in [`g_calendar_credentials.json`](server/g_calendar_credentials.json).
-7. Run the server with `dev_appserver.py --log_level=debug app.yaml`.
+3. Run the server with `dev_appserver.py --log_level=debug app.yaml`.
 
 To deploy the server:
 1. Run `pip install -t lib -r requirements.txt`.
