@@ -1,0 +1,5 @@
+# Blender
+*.blend[1-9]
+
+# FreeCAD
+*.FCStd[1-9]
