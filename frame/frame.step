@@ -1,8 +1,7 @@
 ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('FreeCAD Model'),'2;1');
-FILE_NAME('/Users/maxbraun/github/paper/accent/frame.step',
-  '2018-12-30T22:57:48',('Author'),(''),
+FILE_NAME('frame.step', '2018-12-30T22:57:48',('Author'),(''),
   'Open CASCADE STEP processor 7.2','FreeCAD','Unknown');
 FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
 ENDSEC;
