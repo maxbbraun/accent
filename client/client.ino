@@ -22,6 +22,9 @@ const esp_sleep_pd_domain_t power_domains[] = {
     ESP_PD_DOMAIN_RTC_FAST_MEM,
     ESP_PD_DOMAIN_XTAL};
 
+// The time in milliseconds to wait before restarting after an error.
+uint64_t restart_delay_ms = 60 * 1000;
+
 void setup() {
   // Workaround for a bug where sometimes waking up from deep sleep fails.
   // https://www.hackster.io/nickthegreek82/esp32-deep-sleep-tutorial-4398a7
@@ -47,9 +50,9 @@ void setup() {
 }
 
 void loop() {
-  // The setup() function should never return.
-  Serial.println("Unexpectedly entered main loop");
-  delay(ULONG_MAX);
+  // The setup() function only returns if there was an error.
+  Serial.println("Restarting after error");
+  deepSleep(restart_delay_ms);
 }
 
 // Connects to the Wifi access point.
@@ -149,17 +152,21 @@ void scheduleSleep() {
   String delay_ms_str = http.getString();
   http.end();
   Serial.printf("Sleep server response: %s\n", delay_ms_str.c_str());
+  uint64_t delay_ms = strtoull(delay_ms_str.c_str(), NULL, 10);
+  deepSleep(delay_ms);
+}
 
+// Goes into deep sleep for a fixed time.
+void deepSleep(uint64_t delay_ms) {
   // Set all power domain configs to off.
-  for (esp_sleep_pd_domain_t power_domain : power_domains) {
-    esp_err_t status = esp_sleep_pd_config(power_domain, ESP_PD_OPTION_OFF);
-    if (status != ESP_OK) {
+  for (auto power_domain : power_domains) {
+    if (esp_sleep_pd_config(power_domain, ESP_PD_OPTION_OFF) != ESP_OK) {
       Serial.printf("Failed to apply power domain config: %d\n", power_domain);
     }
   }
 
-  // Go to deep sleep.
-  uint64_t delay_us = 1000 * strtoull(delay_ms_str.c_str(), NULL, 10);
+  // Start the deep sleep.
+  uint64_t delay_us = 1000 * delay_ms;
   Serial.printf("Sleeping for %llu us\n", delay_us);
   esp_deep_sleep(delay_us);
 }
