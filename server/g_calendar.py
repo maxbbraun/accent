@@ -64,13 +64,13 @@ DOT_MARGIN = 4
 HIGHLIGHT_COLOR = (255, 0, 0)
 
 # The size of any text.
-TEXT_SIZE = 20
+TEXT_SIZE = 24
 
 # The font to use for any text.
-FONT = ImageFont.truetype("assets/Roboto-Bold.ttf", size=TEXT_SIZE)
+FONT = ImageFont.truetype("assets/SubVario-CondMedium.otf", size=TEXT_SIZE)
 
 # The vertical offset for any text.
-TEXT_Y_OFFSET = int(0.6 * TEXT_SIZE)
+TEXT_Y_OFFSET = int(0.5 * TEXT_SIZE)
 
 # The maximum number of events to show.
 MAX_EVENTS = 3
