@@ -12,7 +12,6 @@ from oauth2client.file import Storage
 from oauth2client.tools import message_if_missing
 from oauth2client.tools import run_flow
 from PIL import Image
-from PIL import ImageFont
 from PIL.ImageDraw import Draw
 
 from timezone import get_now
@@ -46,31 +45,28 @@ WEEKS_IN_MONTH = 6
 BACKGROUND_COLOR = (255, 255, 255)
 
 # The color used for days.
-TEXT_COLOR = (0, 0, 0)
+NUMBER_COLOR = (0, 0, 0)
 
 # The color used for the current day and events.
 TODAY_COLOR = (255, 255, 255)
 
 # The squircle image file.
-SQUIRCLE_FILE = "assets/squircle.png"
+SQUIRCLE_FILE = "assets/squircle.gif"
 
 # The dot image file.
-DOT_FILE = "assets/dot.png"
+DOT_FILE = "assets/dot.gif"
 
-# The margin between dots.
+# The number image file pattern.
+NUMBER_FILE = "assets/numbers/%d.gif"
+
+# The horizontal margin between dots.
 DOT_MARGIN = 4
+
+# The vertical offset between dots and numbers.
+DOT_OFFSET = 16
 
 # The color used to highlight the current day and events.
 HIGHLIGHT_COLOR = (255, 0, 0)
-
-# The size of any text.
-TEXT_SIZE = 24
-
-# The font to use for any text.
-FONT = ImageFont.truetype("assets/SubVario-CondMedium.otf", size=TEXT_SIZE)
-
-# The vertical offset for any text.
-TEXT_Y_OFFSET = int(0.5 * TEXT_SIZE)
 
 # The maximum number of events to show.
 MAX_EVENTS = 3
@@ -160,8 +156,8 @@ def get_calendar_image(width, height):
     draw = Draw(image)
 
     # Determine the spacing of the days in the image.
-    x_stride = width / (DAYS_IN_WEEK + 1)
-    y_stride = height / (WEEKS_IN_MONTH + 1)
+    x_stride = width // (DAYS_IN_WEEK + 1)
+    y_stride = height // (WEEKS_IN_MONTH + 1)
 
     # Get this month's calendar.
     calendar = Calendar(firstweekday=SUNDAY)
@@ -185,35 +181,36 @@ def get_calendar_image(width, height):
 
             # Mark the current day with a squircle.
             if day == now.day:
-                squircle = Image.open(SQUIRCLE_FILE)
-                squircle_position = (x - squircle.size[0] / 2,
-                                     y - squircle.size[1] / 2)
+                squircle = Image.open(SQUIRCLE_FILE).convert(mode="RGBA")
+                squircle_position = (x - squircle.size[0] // 2,
+                                     y - squircle.size[1] // 2)
                 draw.bitmap(squircle_position, squircle, HIGHLIGHT_COLOR)
-                text_color = TODAY_COLOR
+                number_color = TODAY_COLOR
                 event_color = TODAY_COLOR
             else:
-                text_color = TEXT_COLOR
+                number_color = NUMBER_COLOR
                 event_color = HIGHLIGHT_COLOR
 
-            # Draw the day of the month text.
-            text = str(day)
-            text_width, _ = draw.textsize(text, FONT)
-            text_position = (x - text_width / 2,
-                             y - TEXT_Y_OFFSET)
-            draw.text(text_position, text, text_color, FONT)
+            # Draw the day of the month number.
+            number_file = NUMBER_FILE % day
+            number = Image.open(number_file).convert(mode="RGBA")
+            number_width, number_height = number.size
+            number_position = (x - number_width // 2,
+                               y - number_height // 2)
+            draw.bitmap(number_position, number, number_color)
 
             # Draw a dot for each event.
             num_events = min(MAX_EVENTS, event_counts[day])
-            dot = Image.open(DOT_FILE)
+            dot = Image.open(DOT_FILE).convert(mode="RGBA")
             if num_events > 0:
                 events_width = (num_events * dot.size[0] +
                                 (num_events - 1) * DOT_MARGIN)
                 for event_index in range(num_events):
                     event_offset = (event_index * (dot.size[0] +
-                                    DOT_MARGIN) - events_width / 2)
+                                    DOT_MARGIN) - events_width // 2)
                     dot_position = [
                         x + event_offset,
-                        y + TEXT_Y_OFFSET + DOT_MARGIN - dot.size[0] / 2]
+                        y + DOT_OFFSET - dot.size[0] // 2]
                     draw.bitmap(dot_position, dot, event_color)
 
     return image
