@@ -49,7 +49,7 @@ BACKGROUND_COLOR = (255, 255, 255)
 TEXT_COLOR = (0, 0, 0)
 
 # The color used for the current day and events.
-TODAY_DOLOR = (255, 255, 255)
+TODAY_COLOR = (255, 255, 255)
 
 # The squircle image file.
 SQUIRCLE_FILE = "assets/squircle.png"
@@ -102,10 +102,9 @@ def get_event_counts(now):
     authed_http = credentials.authorize(http=http)
     service = discovery.build(API_NAME, API_VERSION, http=authed_http)
 
-    # Process calendar events for eahc day of the current month.
-    first_day, last_day = monthrange(now.year, now.month)
-    first_date = now.replace(day=first_day, hour=0, minute=0, second=0,
-                             microsecond=0)
+    # Process calendar events for each day of the current month.
+    first_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    _, last_day = monthrange(now.year, now.month)
     last_date = first_date.replace(day=last_day)
     page_token = None
     while True:
@@ -190,8 +189,8 @@ def get_calendar_image(width, height):
                 squircle_position = (x - squircle.size[0] / 2,
                                      y - squircle.size[1] / 2)
                 draw.bitmap(squircle_position, squircle, HIGHLIGHT_COLOR)
-                text_color = TODAY_DOLOR
-                event_color = TODAY_DOLOR
+                text_color = TODAY_COLOR
+                event_color = TODAY_COLOR
             else:
                 text_color = TEXT_COLOR
                 event_color = HIGHLIGHT_COLOR
