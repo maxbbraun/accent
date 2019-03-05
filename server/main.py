@@ -5,11 +5,13 @@ from flask import Flask
 from flask import Response
 from flask import send_file
 from io import BytesIO
+from logging import exception
 from numpy import argmin
 from numpy import array
 from numpy import packbits
 from numpy import sum
 from PIL import Image
+from time import time
 
 from schedule import get_scheduled_delay
 from schedule import get_scheduled_image
@@ -93,3 +95,14 @@ def next():
     milliseconds = get_scheduled_delay()
 
     return Response(str(milliseconds), mimetype="text/plain")
+
+
+@app.errorhandler(500)
+def server_error(e):
+    """Logs the stack trace for server errors."""
+
+    timestamp = int(time())
+    message = "Internal Server Error @ %d" % timestamp
+    exception(message)
+
+    return message, 500
