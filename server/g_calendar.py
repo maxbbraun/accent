@@ -3,6 +3,7 @@ from calendar import monthrange
 from calendar import SUNDAY
 from collections import Counter
 from datetime import datetime
+from datetime import timedelta
 from dateutil.parser import parse
 from googleapiclient import discovery
 from googleapiclient.http import build_http
@@ -72,7 +73,17 @@ HIGHLIGHT_COLOR = (255, 0, 0)
 MAX_EVENTS = 3
 
 
-def get_event_counts(now):
+def _get_days_range(start, end):
+    """Returns a list of days of the month between two datetimes."""
+
+    # Exclude the exact end time to avoid counting the last day if
+    # the end falls exactly on midnight.
+    end -= timedelta(microseconds=1)
+
+    return range(start.day, end.day + 1)
+
+
+def _get_event_counts(now):
     """Retrieves a daily count of events using the Google Calendar API."""
 
     event_counts = Counter()
@@ -114,23 +125,21 @@ def get_event_counts(now):
 
         # Iterate over the events from the current page.
         for event in response["items"]:
-            # Count regular events.
             try:
+                # Count regular events.
                 start = parse(event["start"]["dateTime"])
-                event_counts[start.day] += 1
                 end = parse(event["end"]["dateTime"])
-                if start.day != end.day:
-                    event_counts[end.day] += 1
+                for day in _get_days_range(start, end):
+                    event_counts[day] += 1
             except KeyError:
                 pass
 
-            # Count all-day events.
             try:
+                # Count all-day events.
                 start = datetime.strptime(event["start"]["date"], "%Y-%m-%d")
-                event_counts[start.day] += 1
                 end = datetime.strptime(event["end"]["date"], "%Y-%m-%d")
-                if start.day != end.day:
-                    event_counts[end.day] += 1
+                for day in _get_days_range(start, end):
+                    event_counts[day] += 1
             except KeyError:
                 pass
 
@@ -149,7 +158,7 @@ def get_calendar_image(width, height):
     now = get_now()
 
     # Get the number of events per day from the API.
-    event_counts = get_event_counts(now)
+    event_counts = _get_event_counts(now)
 
     # Create a blank image.
     image = Image.new(mode="RGB", size=(width, height), color=BACKGROUND_COLOR)
