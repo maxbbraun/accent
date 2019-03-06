@@ -30,7 +30,7 @@ BWR_2_BIT = array([[0, 0], [0, 1], [1, 1]], dtype="uint8")
 app = Flask(__name__)
 
 
-def vq(obs, code_book):
+def _vq(obs, code_book):
     """Mimics scipy.cluster.vq.vq, which is not available."""
 
     repeated_shape = obs.shape[:1] + code_book.shape
@@ -41,7 +41,7 @@ def vq(obs, code_book):
     return indices
 
 
-def get_image():
+def _get_image():
     """Generates the image to show."""
 
     # Get the scheduled image.
@@ -49,7 +49,7 @@ def get_image():
 
     # Map each color to the closest black, white, or red.
     image_data = array(image).reshape((DISPLAY_WIDTH * DISPLAY_HEIGHT, 3))
-    indices = vq(image_data, BWR_8_BIT)
+    indices = _vq(image_data, BWR_8_BIT)
     bwr_image_data = BWR_8_BIT[indices.reshape(
         (DISPLAY_HEIGHT, DISPLAY_WIDTH))]
     bwr_image = Image.fromarray(bwr_image_data)
@@ -61,7 +61,7 @@ def get_image():
 def png():
     """Responds with a PNG image for debugging."""
 
-    image = get_image()
+    image = _get_image()
 
     # Encode the image to PNG bytes.
     buffer = BytesIO()
@@ -75,11 +75,11 @@ def png():
 def epd():
     """Responds with image data encoded for the EPD."""
 
-    image = get_image()
+    image = _get_image()
 
     # Encode the image to 2-bit black, white, or red.
     image_data = array(image).reshape((DISPLAY_WIDTH * DISPLAY_HEIGHT, 3))
-    indices = vq(image_data, BWR_8_BIT)
+    indices = _vq(image_data, BWR_8_BIT)
     bwr_image_data = BWR_2_BIT[indices.reshape(
         (DISPLAY_HEIGHT * DISPLAY_WIDTH))]
     bwr_bytes = packbits(bwr_image_data).tostring()

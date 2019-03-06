@@ -16,7 +16,7 @@ STATIC_MAP_URL = "https://maps.googleapis.com/maps/api/staticmap"
 DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
 
 
-def get_route_url(api_key, home, work, mode):
+def _get_route_url(api_key, home, work, mode):
     """Constructs the URL for the Directions API request."""
 
     url = DIRECTIONS_URL
@@ -27,7 +27,7 @@ def get_route_url(api_key, home, work, mode):
     return url
 
 
-def get_static_map_url(api_key, polyline, width, height):
+def _get_static_map_url(api_key, polyline, width, height):
     """Constructs the URL for the Static Map API request."""
 
     url = STATIC_MAP_URL
@@ -48,15 +48,15 @@ def get_commute_image(width, height):
     """Generates an image with the commute route on a map."""
 
     # Get the directions from home to work and extract the route polyline.
-    directions_url = get_route_url(MAPS_API_KEY, HOME_ADDRESS, WORK_ADDRESS,
-                                   TRAVEL_MODE)
+    directions_url = _get_route_url(MAPS_API_KEY, HOME_ADDRESS, WORK_ADDRESS,
+                                    TRAVEL_MODE)
     directions_response = urlfetch.fetch(directions_url)
     directions = json_loads(directions_response.content)
     route = directions["routes"][0]
     polyline = route["overview_polyline"]["points"]
 
     # Get the static map as an image.
-    image_url = get_static_map_url(MAPS_API_KEY, polyline, width, height)
+    image_url = _get_static_map_url(MAPS_API_KEY, polyline, width, height)
     image_response = urlfetch.fetch(image_url)
     image = Image.open(StringIO(image_response.content)).convert("RGB")
 
