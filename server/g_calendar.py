@@ -13,6 +13,7 @@ from oauth2client.file import Storage
 from oauth2client.tools import message_if_missing
 from oauth2client.tools import run_flow
 from PIL import Image
+from PIL import ImageFont
 from PIL.ImageDraw import Draw
 
 from timezone import get_now
@@ -57,8 +58,15 @@ SQUIRCLE_FILE = "assets/squircle.gif"
 # The dot image file.
 DOT_FILE = "assets/dot.gif"
 
-# The number image file pattern.
-NUMBER_FILE = "assets/numbers/%d.gif"
+# The size of the numbers.
+TEXT_SIZE = 24
+
+# The font of the numbers.
+FONT = ImageFont.truetype("assets/SubVario-Condensed-Medium.otf",
+                          size=TEXT_SIZE)
+
+# The offset used to vertically center the numbers in the squircle.
+TEXT_OFFSET = 2
 
 # The horizontal margin between dots.
 DOT_MARGIN = 4
@@ -191,9 +199,9 @@ def get_calendar_image(width, height):
             # Mark the current day with a squircle.
             if day == now.day:
                 squircle = Image.open(SQUIRCLE_FILE).convert(mode="RGBA")
-                squircle_position = (x - squircle.size[0] // 2,
-                                     y - squircle.size[1] // 2)
-                draw.bitmap(squircle_position, squircle, HIGHLIGHT_COLOR)
+                squircle_xy = (x - squircle.size[0] // 2,
+                               y - squircle.size[1] // 2)
+                draw.bitmap(squircle_xy, squircle, HIGHLIGHT_COLOR)
                 number_color = TODAY_COLOR
                 event_color = TODAY_COLOR
             else:
@@ -201,12 +209,11 @@ def get_calendar_image(width, height):
                 event_color = HIGHLIGHT_COLOR
 
             # Draw the day of the month number.
-            number_file = NUMBER_FILE % day
-            number = Image.open(number_file).convert(mode="RGBA")
-            number_width, number_height = number.size
-            number_position = (x - number_width // 2,
-                               y - number_height // 2)
-            draw.bitmap(number_position, number, number_color)
+            number = str(day)
+            number_width, number_height = draw.textsize(number, FONT)
+            number_xy = (x - number_width // 2,
+                         y - number_height // 2 - TEXT_OFFSET)
+            draw.text(number_xy, number, number_color, FONT)
 
             # Draw a dot for each event.
             num_events = min(MAX_EVENTS, event_counts[day])
@@ -217,9 +224,8 @@ def get_calendar_image(width, height):
                 for event_index in range(num_events):
                     event_offset = (event_index * (dot.size[0] +
                                     DOT_MARGIN) - events_width // 2)
-                    dot_position = [
-                        x + event_offset,
-                        y + DOT_OFFSET - dot.size[0] // 2]
-                    draw.bitmap(dot_position, dot, event_color)
+                    dot_xy = [x + event_offset,
+                              y + DOT_OFFSET - dot.size[0] // 2]
+                    draw.bitmap(dot_xy, dot, event_color)
 
     return image
