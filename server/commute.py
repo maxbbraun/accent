@@ -30,14 +30,23 @@ TEXT_COLOR = (255, 255, 255)
 # The color of the box behind the text.
 BOX_COLOR = (0, 0, 0)
 
+# The color of the border around the box.
+BORDER_COLOR = (255, 255, 255)
+
+# The width of the border around the box.
+BORDER_WIDTH = 3
+
 # The offset used to vertically center the text in the box.
 TEXT_OFFSET = 1
+
+# The text height. Not measured to work with older PIL versions.
+TEXT_HEIGHT = 20
 
 # The padding of the box around the text.
 TEXT_PADDING = 8
 
 # The weight of the directions path.
-PATH_WEIGHT = 8
+PATH_WEIGHT = 6
 
 
 def _get_route_url(api_key, home, work, mode):
@@ -92,14 +101,17 @@ def get_commute_image(width, height):
     # Draw the directions text inside a centered box.
     draw = Draw(image)
     text = "%s via %s" % (duration, summary)
-    text_width, text_height = draw.textsize(text, FONT)
+    text_width, _ = draw.textsize(text, FONT)
     box_xy = [image.size[0] // 2 - text_width // 2 - TEXT_PADDING,
-              image.size[1] // 2 - text_height // 2 - TEXT_PADDING,
+              image.size[1] // 2 - TEXT_HEIGHT // 2 - TEXT_PADDING,
               image.size[0] // 2 + text_width // 2 + TEXT_PADDING,
-              image.size[1] // 2 + text_height // 2 + TEXT_PADDING]
+              image.size[1] // 2 + TEXT_HEIGHT // 2 + TEXT_PADDING]
+    border_xy = [box_xy[0] - BORDER_WIDTH, box_xy[1] - BORDER_WIDTH,
+                 box_xy[2] + BORDER_WIDTH, box_xy[3] + BORDER_WIDTH]
+    draw.rectangle(border_xy, BORDER_COLOR)
     draw.rectangle(box_xy, BOX_COLOR)
     text_xy = (image.size[0] // 2 - text_width // 2,
-               image.size[1] // 2 - text_height // 2 - TEXT_OFFSET)
+               image.size[1] // 2 - TEXT_HEIGHT // 2 - TEXT_OFFSET)
     draw.text(text_xy, text, TEXT_COLOR, FONT)
 
     return image
