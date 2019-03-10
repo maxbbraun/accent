@@ -8,10 +8,7 @@ from dateutil.parser import parse
 from googleapiclient import discovery
 from googleapiclient.http import build_http
 from logging import error
-from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
-from oauth2client.tools import message_if_missing
-from oauth2client.tools import run_flow
 from PIL import Image
 from PIL import ImageFont
 from PIL.ImageDraw import Draw
@@ -19,14 +16,15 @@ from PIL.ImageDraw import Draw
 from timezone import get_now
 
 # The file containing Google Calendar API authentication secrets.
-# https://developers.google.com/calendar/quickstart/python
 CLIENT_SECRETS_FILE = "g_calendar_secrets.json"
 
 # The file containing Google Calendar API authentication credentials.
 CREDENTIALS_STORAGE_FILE = "g_calendar_credentials.json"
 
-# The scope for retrieving events with the Google Calendar API.
-API_SCOPE = "https://www.googleapis.com/auth/calendar.readonly"
+# The error shown for missing authentication credentials.
+CREDENTIALS_ERROR = (
+    'Update "g_calendar_secrets.json" and "g_calendar_credentials.json" by '
+    'following these instructions: https://goo.gl/k2LVAh')
 
 # The name of the Google Calendar API.
 API_NAME = "calendar"
@@ -96,15 +94,12 @@ def _get_event_counts(now):
 
     event_counts = Counter()
 
-    # TODO: Manage the full auth redirect flow starting without credentials.
     # Read the credentials from file or use the auth flow to create it.
     storage = Storage(CREDENTIALS_STORAGE_FILE)
     credentials = storage.get()
     if not credentials or credentials.invalid:
-        message = message_if_missing(CLIENT_SECRETS_FILE)
-        flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=API_SCOPE,
-                                       message=message)
-        credentials = run_flow(flow, storage)
+        error(CREDENTIALS_ERROR)
+        return event_counts
 
     # Create an authorized connection to the API.
     http = build_http()

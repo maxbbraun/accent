@@ -11,8 +11,7 @@ The Accent server is built on [Google App Engine Python Standard Environment](ht
 To add user-specific data:
 1. [Obtain a Google Maps API key](https://cloud.google.com/maps-platform/#get-started) and add it to [`commute_data.py`](server/commute_data.py#L3).
 2. Add home and work addresses and a commute travel mode to [`commute_data.py`](server/commute_data.py#L6).
-3. [Obtain a Google Calendar API client configuration](https://developers.google.com/calendar/quickstart/python) and save it to [`g_calendar_secrets.json`](server/g_calendar_secrets.json).
-4. [Run the Google Calendar API authentication flow](server/g_calendar.py#L92), which fills in [`g_calendar_credentials.json`](server/g_calendar_credentials.json).
+3. [Authenticate with the Google Calendar API](https://goo.gl/k2LVAh) to create `g_calendar_secrets.json` and `g_calendar_credentials.json`, then save them to [`server`](server).
 
 To test the server locally:
 1. Run `cd server && virtualenv venv && . venv/bin/activate`.
