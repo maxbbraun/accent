@@ -8,6 +8,7 @@ from dateutil.parser import parse
 from googleapiclient import discovery
 from googleapiclient.http import build_http
 from logging import error
+from logging import warning
 from oauth2client.file import Storage
 from PIL import Image
 from PIL import ImageFont
@@ -108,7 +109,7 @@ def _get_event_counts(now):
             credentials.refresh(http)
             storage.put(credentials)
         except IOError as e:
-            error("Failed to save credentials: %s", e)
+            warning("Failed to save credentials: %s", e)
     authed_http = credentials.authorize(http=http)
     service = discovery.build(API_NAME, API_VERSION, http=authed_http)
 
