@@ -57,6 +57,7 @@ def _get_route_url(api_key, home, work, mode):
     url += "&origin=%s" % quote(home)
     url += "&destination=%s" % quote(work)
     url += "&mode=%s" % mode
+    url += "&departure_time=now"
     return url
 
 
