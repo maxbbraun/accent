@@ -24,8 +24,9 @@ CREDENTIALS_STORAGE_FILE = "g_calendar_credentials.json"
 
 # The error shown for missing authentication credentials.
 CREDENTIALS_ERROR = (
-    'Update "g_calendar_secrets.json" and "g_calendar_credentials.json" by '
-    'following these instructions: https://goo.gl/k2LVAh')
+    "Update g_calendar_secrets.json and g_calendar_credentials.json by followi"
+    "ng these instructions: https://colab.research.google.com/drive/1mcgu_8cxx"
+    "b-MMDKICr8oy9kFPSFPYlZ7#sandboxMode=true&scrollTo=ThqaE4cyA4R1")
 
 # The name of the Google Calendar API.
 API_NAME = "calendar"
