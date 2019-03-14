@@ -1,4 +1,5 @@
 from google.appengine.api import urlfetch
+from time import time
 from json import loads as json_loads
 from PIL import Image
 from PIL import ImageFont
@@ -49,7 +50,7 @@ TEXT_PADDING = 8
 PATH_WEIGHT = 6
 
 
-def _get_route_url(api_key, home, work, mode):
+def _get_route_url(api_key, home, work, mode, timestamp):
     """Constructs the URL for the Directions API request."""
 
     url = DIRECTIONS_URL
@@ -57,7 +58,7 @@ def _get_route_url(api_key, home, work, mode):
     url += "&origin=%s" % quote(home)
     url += "&destination=%s" % quote(work)
     url += "&mode=%s" % mode
-    url += "&departure_time=now"
+    url += "&departure_time=%d" % timestamp
     return url
 
 
@@ -73,6 +74,8 @@ def _get_static_map_url(api_key, polyline, width, height):
     url += "&style=feature:all|element:labels|visibility:off"
     url += "&style=feature:landscape|color:0xffffff"
     url += "&style=feature:road|color:0x000000"
+    url += "&style=feature:transit|color:0xffffff"
+    url += "&style=feature:transit.line|color:0x000000"
     url += "&style=feature:water|color:0x000000"
     url += "&path=color:0xff0000ff|weight:%d|enc:%s" % (PATH_WEIGHT,
                                                         quote(polyline))
@@ -82,9 +85,12 @@ def _get_static_map_url(api_key, polyline, width, height):
 def get_commute_image(width, height):
     """Generates an image with the commute route on a map."""
 
+    # Use the current time for live traffic.
+    timestamp = int(time())
+
     # Get the directions from home to work.
     directions_url = _get_route_url(MAPS_API_KEY, HOME_ADDRESS, WORK_ADDRESS,
-                                    TRAVEL_MODE)
+                                    TRAVEL_MODE, timestamp)
     directions_response = urlfetch.fetch(directions_url)
     directions = json_loads(directions_response.content)
 
