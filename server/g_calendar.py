@@ -11,9 +11,9 @@ from logging import error
 from logging import warning
 from oauth2client.file import Storage
 from PIL import Image
-from PIL import ImageFont
 from PIL.ImageDraw import Draw
 
+from graphics import draw_text
 from timezone import get_now
 
 # The file containing Google Calendar API authentication secrets.
@@ -61,12 +61,8 @@ DOT_FILE = "assets/dot.gif"
 # The size of the numbers.
 TEXT_SIZE = 24
 
-# The font of the numbers.
-FONT = ImageFont.truetype("assets/SubVario-Condensed-Medium.otf",
-                          size=TEXT_SIZE)
-
 # The offset used to vertically center the numbers in the squircle.
-TEXT_OFFSET = 2
+TEXT_Y_OFFSET = 2
 
 # The horizontal margin between dots.
 DOT_MARGIN = 4
@@ -207,10 +203,8 @@ def get_calendar_image(width, height):
 
             # Draw the day of the month number.
             number = str(day)
-            number_width, number_height = draw.textsize(number, FONT)
-            number_xy = (x - number_width // 2,
-                         y - number_height // 2 - TEXT_OFFSET)
-            draw.text(number_xy, number, number_color, FONT)
+            draw_text(number, TEXT_SIZE, number_color, xy=(x, y),
+                      text_y_offset=TEXT_Y_OFFSET, draw=draw)
 
             # Draw a dot for each event.
             num_events = min(MAX_EVENTS, event_counts[day])

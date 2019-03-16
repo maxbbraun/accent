@@ -2,8 +2,6 @@ from google.appengine.api import urlfetch
 from time import time
 from json import loads as json_loads
 from PIL import Image
-from PIL import ImageFont
-from PIL.ImageDraw import Draw
 from StringIO import StringIO
 from urllib import quote
 
@@ -11,6 +9,7 @@ from commute_data import MAPS_API_KEY
 from commute_data import HOME_ADDRESS
 from commute_data import WORK_ADDRESS
 from commute_data import TRAVEL_MODE
+from graphics import draw_text
 
 # The endpoint of the Static Map API.
 STATIC_MAP_URL = "https://maps.googleapis.com/maps/api/staticmap"
@@ -20,10 +19,6 @@ DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
 
 # The size of the directions text.
 TEXT_SIZE = 24
-
-# The font of the directions text.
-FONT = ImageFont.truetype("assets/SubVario-Condensed-Medium.otf",
-                          size=TEXT_SIZE)
 
 # The color of the directions text.
 TEXT_COLOR = (255, 255, 255)
@@ -38,13 +33,10 @@ BORDER_COLOR = (255, 255, 255)
 BORDER_WIDTH = 3
 
 # The offset used to vertically center the text in the box.
-TEXT_OFFSET = 1
-
-# The text height. Not measured to work with older PIL versions.
-TEXT_HEIGHT = 20
+TEXT_Y_OFFSET = 1
 
 # The padding of the box around the text.
-TEXT_PADDING = 8
+BOX_PADDING = 8
 
 # The weight of the directions path.
 PATH_WEIGHT = 6
@@ -106,19 +98,10 @@ def get_commute_image(width, height):
     image = Image.open(StringIO(image_response.content)).convert("RGB")
 
     # Draw the directions text inside a centered box.
-    draw = Draw(image)
     text = "%s via %s" % (duration, summary)
-    text_width, _ = draw.textsize(text, FONT)
-    box_xy = [image.size[0] // 2 - text_width // 2 - TEXT_PADDING,
-              image.size[1] // 2 - TEXT_HEIGHT // 2 - TEXT_PADDING,
-              image.size[0] // 2 + text_width // 2 + TEXT_PADDING,
-              image.size[1] // 2 + TEXT_HEIGHT // 2 + TEXT_PADDING]
-    border_xy = [box_xy[0] - BORDER_WIDTH, box_xy[1] - BORDER_WIDTH,
-                 box_xy[2] + BORDER_WIDTH, box_xy[3] + BORDER_WIDTH]
-    draw.rectangle(border_xy, BORDER_COLOR)
-    draw.rectangle(box_xy, BOX_COLOR)
-    text_xy = (image.size[0] // 2 - text_width // 2,
-               image.size[1] // 2 - TEXT_HEIGHT // 2 - TEXT_OFFSET)
-    draw.text(text_xy, text, TEXT_COLOR, FONT)
+    draw_text(text, text_size=TEXT_SIZE, text_color=TEXT_COLOR,
+              box_color=BOX_COLOR, box_padding=BOX_PADDING,
+              border_color=BORDER_COLOR, border_width=BORDER_WIDTH,
+              text_y_offset=TEXT_Y_OFFSET, image=image)
 
     return image
