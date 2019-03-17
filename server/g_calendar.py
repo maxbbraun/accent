@@ -14,6 +14,7 @@ from PIL import Image
 from PIL.ImageDraw import Draw
 
 from graphics import draw_text
+from graphics import SUBVARIO_CONDENSED_MEDIUM
 from timezone import get_now
 
 # The file containing Google Calendar API authentication secrets.
@@ -58,11 +59,8 @@ SQUIRCLE_FILE = "assets/squircle.gif"
 # The dot image file.
 DOT_FILE = "assets/dot.gif"
 
-# The size of the numbers.
-TEXT_SIZE = 24
-
 # The offset used to vertically center the numbers in the squircle.
-TEXT_Y_OFFSET = 2
+NUMBER_Y_OFFSET = 1
 
 # The horizontal margin between dots.
 DOT_MARGIN = 4
@@ -203,8 +201,8 @@ def get_calendar_image(width, height):
 
             # Draw the day of the month number.
             number = str(day)
-            draw_text(number, TEXT_SIZE, number_color, xy=(x, y),
-                      text_y_offset=TEXT_Y_OFFSET, draw=draw)
+            draw_text(number, SUBVARIO_CONDENSED_MEDIUM, number_color,
+                      xy=(x, y - NUMBER_Y_OFFSET), image=image)
 
             # Draw a dot for each event.
             num_events = min(MAX_EVENTS, event_counts[day])

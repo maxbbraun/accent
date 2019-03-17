@@ -10,6 +10,9 @@ from commute_data import HOME_ADDRESS
 from commute_data import WORK_ADDRESS
 from commute_data import TRAVEL_MODE
 from graphics import draw_text
+from graphics import SCREENSTAR_SMALL_REGULAR
+from graphics import SUBVARIO_CONDENSED_MEDIUM
+from timezone import get_now
 
 # The endpoint of the Static Map API.
 STATIC_MAP_URL = "https://maps.googleapis.com/maps/api/staticmap"
@@ -17,29 +20,32 @@ STATIC_MAP_URL = "https://maps.googleapis.com/maps/api/staticmap"
 # The endpoint of the Directions API.
 DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
 
-# The size of the directions text.
-TEXT_SIZE = 24
-
 # The color of the directions text.
-TEXT_COLOR = (255, 255, 255)
+DIRECTIONS_TEXT_COLOR = (255, 255, 255)
 
-# The color of the box behind the text.
-BOX_COLOR = (0, 0, 0)
+# The color of the box behind the directions text.
+DIRECTIONS_BOX_COLOR = (0, 0, 0)
 
-# The color of the border around the box.
-BORDER_COLOR = (255, 255, 255)
+# The color of the border around the directions text.
+DIRECTIONS_BORDER_COLOR = (255, 255, 255)
 
-# The width of the border around the box.
-BORDER_WIDTH = 3
+# The width of the border around the directions text.
+DIRECTIONS_BORDER_WIDTH = 3
 
-# The offset used to vertically center the text in the box.
-TEXT_Y_OFFSET = 1
-
-# The padding of the box around the text.
-BOX_PADDING = 8
+# The padding of the box around the directions text.
+DIRECTIONS_BOX_PADDING = 8
 
 # The weight of the directions path.
 PATH_WEIGHT = 6
+
+# The color of the copyright text.
+COPYRIGHT_TEXT_COLOR = (0, 0, 0)
+
+# The color of the box behind the copyright text.
+COPYRIGHT_BOX_COLOR = (255, 255, 255)
+
+# The padding of the box around the copyright text.
+COPYRIGHT_BOX_PADDING = 2
 
 
 def _get_route_url(api_key, home, work, mode, timestamp):
@@ -97,11 +103,24 @@ def get_commute_image(width, height):
     image_response = urlfetch.fetch(image_url)
     image = Image.open(StringIO(image_response.content)).convert("RGB")
 
+    # Draw the map copyright notice.
+    draw_text(u"Map data \xa9%d Google" % get_now().year,
+              font_spec=SCREENSTAR_SMALL_REGULAR,
+              text_color=COPYRIGHT_TEXT_COLOR,
+              anchor="bottom_right",
+              box_color=COPYRIGHT_BOX_COLOR,
+              box_padding=COPYRIGHT_BOX_PADDING,
+              image=image)
+
     # Draw the directions text inside a centered box.
-    text = "%s via %s" % (duration, summary)
-    draw_text(text, text_size=TEXT_SIZE, text_color=TEXT_COLOR,
-              box_color=BOX_COLOR, box_padding=BOX_PADDING,
-              border_color=BORDER_COLOR, border_width=BORDER_WIDTH,
-              text_y_offset=TEXT_Y_OFFSET, image=image)
+    draw_text("%s via %s" % (duration, summary),
+              font_spec=SUBVARIO_CONDENSED_MEDIUM,
+              text_color=DIRECTIONS_TEXT_COLOR,
+              anchor="center",
+              box_color=DIRECTIONS_BOX_COLOR,
+              box_padding=DIRECTIONS_BOX_PADDING,
+              border_color=DIRECTIONS_BORDER_COLOR,
+              border_width=DIRECTIONS_BORDER_WIDTH,
+              image=image)
 
     return image
