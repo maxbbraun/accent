@@ -1,7 +1,8 @@
 from google.appengine.api import urlfetch
-from time import time
+from time import mktime
 from json import loads as json_loads
 from PIL import Image
+from pytz import utc
 from StringIO import StringIO
 from urllib import quote
 
@@ -84,7 +85,8 @@ def get_commute_image(width, height):
     """Generates an image with the commute route on a map."""
 
     # Use the current time for live traffic.
-    timestamp = int(time())
+    now = get_now()
+    timestamp = int(mktime(now.astimezone(utc).timetuple()))
 
     # Get the directions from home to work.
     directions_url = _get_route_url(MAPS_API_KEY, HOME_ADDRESS, WORK_ADDRESS,
@@ -93,10 +95,14 @@ def get_commute_image(width, height):
     directions = json_loads(directions_response.content)
 
     # Extract the route polyline, duration, and description.
-    route = directions["routes"][0]
+    route = directions["routes"][0]  # Expect one route.
     polyline = route["overview_polyline"]["points"]
     summary = route["summary"]
-    duration = route["legs"][0]["duration"]["text"]
+    leg = route["legs"][0]  # Expect one leg.
+    try:
+        duration = leg["duration_in_traffic"]["text"]
+    except KeyError:
+        duration = leg["duration"]["text"]
 
     # Get the static map as an image.
     image_url = _get_static_map_url(MAPS_API_KEY, polyline, width, height)
@@ -104,7 +110,7 @@ def get_commute_image(width, height):
     image = Image.open(StringIO(image_response.content)).convert("RGB")
 
     # Draw the map copyright notice.
-    draw_text(u"Map data \xa9%d Google" % get_now().year,
+    draw_text(u"Map data \xa9%d Google" % now.year,
               font_spec=SCREENSTAR_SMALL_REGULAR,
               text_color=COPYRIGHT_TEXT_COLOR,
               anchor="bottom_right",
