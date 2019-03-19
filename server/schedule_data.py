@@ -11,7 +11,7 @@ from timezone import TIMEZONE
 SCHEDULE = [
     {
         "name": "Weekday Morning - Commute",
-        "start": "0 5 * * 1-5",
+        "start": "30 6 * * 1-5",
         "image": get_commute_image
     },
     {
@@ -21,7 +21,7 @@ SCHEDULE = [
     },
     {
         "name": "Weekend Morning - Calendar",
-        "start": "0 5 * * 6,0",
+        "start": "0 8 * * 6,0",
         "image": get_calendar_image
     },
     {
