@@ -1,8 +1,8 @@
 # Accent
 
-Accent is a smart picture frame that knows your routine, blends in like paper, and doesn't need any cables. Read more about it in [this article](https://medium.com/@maxbraun/this-is-accent-352cfa95813a).
+Accent is a smart picture frame that knows your routine, blends in like paper, and doesn't need any cables. Read more about it in [this article](https://medium.com/@maxbraun/meet-accent-352cfa95813a).
 
-[![Accent](accent-commute.jpg)](https://medium.com/@maxbraun/this-is-accent-352cfa95813a)
+[![Accent](accent-commute.jpg)](https://medium.com/@maxbraun/meet-accent-352cfa95813a)
 
 ## Server
 
