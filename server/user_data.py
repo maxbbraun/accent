@@ -1,4 +1,6 @@
-# The key for the Directions and Static Map APIs.
+from pytz import timezone
+
+# The key for the Google Directions and Static Map APIs.
 # https://cloud.google.com/maps-platform/#get-started
 MAPS_API_KEY = "MAPS_API_KEY"
 
@@ -11,3 +13,6 @@ WORK_ADDRESS = "WORK_ADDRESS"
 # The travel mode for the commute.
 # https://developers.google.com/maps/documentation/directions/intro#TravelModes
 TRAVEL_MODE = "TRAVEL_MODE"
+
+# The time zone used for the current time.
+TIMEZONE = timezone("US/Pacific")

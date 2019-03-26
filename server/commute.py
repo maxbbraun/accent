@@ -6,14 +6,14 @@ from pytz import utc
 from StringIO import StringIO
 from urllib import quote
 
-from commute_data import MAPS_API_KEY
-from commute_data import HOME_ADDRESS
-from commute_data import WORK_ADDRESS
-from commute_data import TRAVEL_MODE
 from graphics import draw_text
 from graphics import SCREENSTAR_SMALL_REGULAR
 from graphics import SUBVARIO_CONDENSED_MEDIUM
 from timezone import get_now
+from user_data import HOME_ADDRESS
+from user_data import MAPS_API_KEY
+from user_data import TRAVEL_MODE
+from user_data import WORK_ADDRESS
 
 # The endpoint of the Static Map API.
 STATIC_MAP_URL = "https://maps.googleapis.com/maps/api/staticmap"
