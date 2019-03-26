@@ -3,7 +3,7 @@ from astral import GoogleGeocoder
 from croniter import croniter
 from datetime import datetime
 from datetime import timedelta
-from logging import debug
+from logging import info
 from requests_toolbelt.adapters.appengine import monkeypatch
 
 from timezone import get_now
@@ -41,10 +41,10 @@ def rewrite_cron(cron, after):
         next_sunrise = min(filter(lambda x: x >= after, sunrises))
         sunrise_cron = cron.replace("sunrise", "%d %d" % (next_sunrise.minute,
                                                           next_sunrise.hour))
-        debug("Rewrote cron: (%s) -> (%s), after %s" % (
-            cron,
-            sunrise_cron,
-            after.strftime("%A %B %d %Y %H:%M:%S %Z")))
+        info("Rewrote cron: (%s) -> (%s), after %s" % (
+             cron,
+             sunrise_cron,
+             after.strftime("%A %B %d %Y %H:%M:%S %Z")))
         return sunrise_cron
 
     # Calculate the closest future sunset time and replace the term in the cron
@@ -55,10 +55,10 @@ def rewrite_cron(cron, after):
         next_sunset = min(filter(lambda x: x >= after, sunsets))
         sunset_cron = cron.replace("sunset", "%d %d" % (next_sunset.minute,
                                                         next_sunset.hour))
-        debug("Rewrote cron: (%s) -> (%s), after %s" % (
-            cron,
-            sunset_cron,
-            after.strftime("%A %B %d %Y %H:%M:%S %Z")))
+        info("Rewrote cron: (%s) -> (%s), after %s" % (
+             cron,
+             sunset_cron,
+             after.strftime("%A %B %d %Y %H:%M:%S %Z")))
         return sunset_cron
 
 
@@ -72,7 +72,7 @@ def is_daylight():
 
     is_daylight = now > sunrise and now < sunset
 
-    debug("Daylight: %s (%s)" % (is_daylight,
-                                 now.strftime("%A %B %d %Y %H:%M:%S %Z")))
+    info("Daylight: %s (%s)" % (is_daylight,
+                                now.strftime("%A %B %d %Y %H:%M:%S %Z")))
 
     return is_daylight

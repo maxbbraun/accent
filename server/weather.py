@@ -1,6 +1,6 @@
 from google.appengine.api import urlfetch
 from json import loads as json_loads
-from logging import debug
+from logging import info
 from logging import error
 from urllib import quote
 
@@ -41,7 +41,7 @@ def _get_daily_icon():
 
     # Get the icon encoding today's weather.
     icon = forecast["daily"]["icon"]
-    debug("Weather: %s" % icon)
+    info("Weather: %s" % icon)
 
     return icon
 
