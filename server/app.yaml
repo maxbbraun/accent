@@ -15,3 +15,5 @@ libraries:
   version: "1.1.7"
 - name: pytz
   version: "2017.3"
+- name: ssl
+  version: "2.7.11"

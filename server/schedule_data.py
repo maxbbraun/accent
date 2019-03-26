@@ -4,7 +4,9 @@ from g_calendar import get_calendar_image
 
 # The schedule determining when to wake and which images to show. Each entry
 # defines a name, a cron expression for the start time, and a function to
-# generate the image. The end time is the start time of the next entry.
+# generate the image. The end time is the start time of the next entry. The
+# cron expressions additionally support the keywords "sunrise" and "sunset"
+# instead of hours and minutes.
 SCHEDULE = [
     # Weekdays:
     {
@@ -20,7 +22,7 @@ SCHEDULE = [
     # Weekends:
     {
         "name": "Weekend Morning - Calendar",
-        "start": "0 8 * * 6,0",
+        "start": "sunrise * * 6,0",
         "image": get_calendar_image
     },
     {

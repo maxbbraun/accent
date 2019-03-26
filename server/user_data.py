@@ -4,7 +4,7 @@ from pytz import timezone
 # https://cloud.google.com/maps-platform/#get-started
 MAPS_API_KEY = "MAPS_API_KEY"
 
-# The home address for the commute and weather.
+# The home address for the commute, weather, and daylight.
 HOME_ADDRESS = "HOME_ADDRESS"
 
 # The work address for the commute.
