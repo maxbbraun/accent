@@ -14,6 +14,7 @@ from PIL import Image
 from time import time
 
 from artwork import get_artwork_image
+from city import get_city_image
 from commute import get_commute_image
 from g_calendar import get_calendar_image
 from schedule import get_scheduled_delay
@@ -71,6 +72,14 @@ def artwork():
     """Responds with a PNG version of the artwork image."""
 
     image = get_artwork_image(DISPLAY_WIDTH, DISPLAY_HEIGHT)
+    return _send_png(image)
+
+
+@app.route("/city")
+def city():
+    """Responds with a PNG version of the city image."""
+
+    image = get_city_image(DISPLAY_WIDTH, DISPLAY_HEIGHT)
     return _send_png(image)
 
 

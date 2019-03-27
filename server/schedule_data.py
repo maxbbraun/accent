@@ -1,4 +1,4 @@
-from artwork import get_artwork_image
+from city import get_city_image
 from commute import get_commute_image
 from g_calendar import get_calendar_image
 
@@ -15,9 +15,14 @@ SCHEDULE = [
         "image": get_commute_image
     },
     {
-        "name": "Weekday Day - Artwork",
+        "name": "Weekday Day - City",
         "start": "0 9 * * 1-5",
-        "image": get_artwork_image
+        "image": get_city_image
+    },
+    {
+        "name": "Weekday Night - City",
+        "start": "sunset * * 1-5",
+        "image": get_city_image
     },
     # Weekends:
     {
@@ -26,8 +31,13 @@ SCHEDULE = [
         "image": get_calendar_image
     },
     {
-        "name": "Weekend Day - Artwork",
+        "name": "Weekend Day - City",
         "start": "0 12 * * 6,0",
-        "image": get_artwork_image
+        "image": get_city_image
+    },
+    {
+        "name": "Weekend Night - City",
+        "start": "sunset * * 6,0",
+        "image": get_city_image
     }
 ]

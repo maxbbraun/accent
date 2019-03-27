@@ -22,6 +22,7 @@ To test the server locally:
    - [/epd](http://localhost:8080/epd) for the currently scheduled 2-bit image used by the e-paper display.
    - [/png](http://localhost:8080/png) for a PNG version of the currently scheduled image for easier debugging.
    - [/artwork](http://localhost:8080/artwork) to bypass the schedule and get the artwork image directly.
+   - [/city](http://localhost:8080/city) to bypass the schedule and get the city image directly.
    - [/commute](http://localhost:8080/commute) to bypass the schedule and get the commute image directly.
    - [/calendar](http://localhost:8080/calendar) to bypass the schedule and get the calendar image directly.
 
