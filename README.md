@@ -17,6 +17,13 @@ To test the server locally:
 1. Run `cd server && virtualenv venv && . venv/bin/activate`.
 2. Run `pip install -r requirements.txt -r requirements_bundled.txt`.
 3. Run the server with `dev_appserver.py --log_level=debug app.yaml`.
+4. Test it with:
+   - [/next](http://localhost:8080/next) for the time in milliseconds until the next schedule entry.
+   - [/epd](http://localhost:8080/epd) for the currently scheduled 2-bit image used by the e-paper display.
+   - [/png](http://localhost:8080/png) for a PNG version of the currently scheduled image for easier debugging.
+   - [/artwork](http://localhost:8080/artwork) to bypass the schedule and get the artwork image directly.
+   - [/commute](http://localhost:8080/commute) to bypass the schedule and get the commute image directly.
+   - [/calendar](http://localhost:8080/calendar) to bypass the schedule and get the calendar image directly.
 
 To deploy the server:
 1. Run `pip install -t lib -r requirements.txt`.
