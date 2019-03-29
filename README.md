@@ -13,11 +13,13 @@ To add user-specific data:
 2. Add home and work addresses and a commute travel mode to [`commute_data.py`](server/commute_data.py#L6).
 3. [Authenticate with the Google Calendar API](https://colab.research.google.com/drive/1mcgu_8cxxb-MMDKICr8oy9kFPSFPYlZ7#sandboxMode=true&scrollTo=ThqaE4cyA4R1) to create `g_calendar_secrets.json` and `g_calendar_credentials.json`, then save them to [`server`](server).
 
-To test the server locally:
-1. Run `cd server && virtualenv venv && . venv/bin/activate`.
-2. Run `pip install -r requirements.txt -r requirements_bundled.txt`.
-3. Run the server with `dev_appserver.py --log_level=debug app.yaml`.
-4. Test it with:
+To test and deploy the server:
+1. [Install the Google Cloud SDK](https://cloud.google.com/sdk/docs/).
+2. Run `cd server && virtualenv venv && . venv/bin/activate`.
+3. Run `pip install -r requirements.txt -r requirements_bundled.txt`.
+4. Run `pip install -t lib -r requirements.txt`.
+5. Run the server locally with `dev_appserver.py app.yaml`.
+6. Test the local server with:
    - [/next](http://localhost:8080/next) for the time in milliseconds until the next schedule entry.
    - [/epd](http://localhost:8080/epd) for the currently scheduled 2-bit image used by the e-paper display.
    - [/png](http://localhost:8080/png) for a PNG version of the currently scheduled image for easier debugging.
@@ -25,10 +27,7 @@ To test the server locally:
    - [/city](http://localhost:8080/city) to bypass the schedule and get the city image directly.
    - [/commute](http://localhost:8080/commute) to bypass the schedule and get the commute image directly.
    - [/calendar](http://localhost:8080/calendar) to bypass the schedule and get the calendar image directly.
-
-To deploy the server:
-1. Run `pip install -t lib -r requirements.txt`.
-2. Run `gcloud app deploy`.
+7. Deploy the server with `gcloud app deploy`.
 
 ## Client
 
