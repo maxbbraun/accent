@@ -9,9 +9,10 @@ Accent is a smart picture frame with a pop of color and no cables. Read more ab
 The Accent server is built on [Google App Engine Python Standard Environment](https://cloud.google.com/appengine/docs/standard/python/).
 
 To add user-specific data:
-1. [Obtain a Google Maps API key](https://cloud.google.com/maps-platform/#get-started) and add it to [`commute_data.py`](server/commute_data.py#L3).
-2. Add home and work addresses and a commute travel mode to [`commute_data.py`](server/commute_data.py#L6).
+1. [Obtain a Google Maps API key](https://cloud.google.com/maps-platform/#get-started) and add it to [`user_data.py`](server/user_data.py#L5).
+2. Add home and work addresses and a commute travel mode to [`user_data.py`](server/user_data.py#L8).
 3. [Authenticate with the Google Calendar API](https://colab.research.google.com/drive/1mcgu_8cxxb-MMDKICr8oy9kFPSFPYlZ7#sandboxMode=true&scrollTo=ThqaE4cyA4R1) to create `g_calendar_secrets.json` and `g_calendar_credentials.json`, then save them to [`server`](server).
+4. [Obtain a Dark Sky API key](https://darksky.net/dev) and add it to [`user_data.py`](server/user_data.py#L19).
 
 To test and deploy the server:
 1. [Install the Google Cloud SDK](https://cloud.google.com/sdk/docs/).
