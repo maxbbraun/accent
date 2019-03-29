@@ -2,5 +2,5 @@
 # local testing.
 Flask==0.12
 numpy==1.6.1
-Pillow==1.1.7
+Pillow  # 1.1.7 is not available
 pytz==2017.3
