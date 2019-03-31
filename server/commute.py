@@ -110,7 +110,8 @@ def get_commute_image(width, height):
     image = Image.open(StringIO(image_response.content)).convert("RGB")
 
     # Draw the map copyright notice.
-    draw_text(u"Map data \xa9%d Google" % now.year,
+    copyright_text = u"Map data \xa9%d Google" % now.year
+    draw_text(copyright_text,
               font_spec=SCREENSTAR_SMALL_REGULAR,
               text_color=COPYRIGHT_TEXT_COLOR,
               anchor="bottom_right",
@@ -119,7 +120,11 @@ def get_commute_image(width, height):
               image=image)
 
     # Draw the directions text inside a centered box.
-    draw_text("%s via %s" % (duration, summary),
+    if summary:
+        directions_text = "%s via %s" % (duration, summary)
+    else:
+        directions_text = duration
+    draw_text(directions_text,
               font_spec=SUBVARIO_CONDENSED_MEDIUM,
               text_color=DIRECTIONS_TEXT_COLOR,
               anchor="center",
