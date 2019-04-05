@@ -1,3 +1,5 @@
+from cachetools import cached
+from cachetools import TTLCache
 from google.appengine.api import urlfetch
 from json import loads as json_loads
 from logging import info
@@ -15,6 +17,7 @@ GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 FORECAST_URL = "https://api.darksky.net/forecast/%s/%f,%f"
 
 
+@cached(cache=TTLCache(maxsize=1, ttl=3600))  # Cache for 1 hour.
 def _get_daily_icon():
     """Gets today's weather from the Dark Sky API."""
 
