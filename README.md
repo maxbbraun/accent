@@ -17,7 +17,7 @@ To add user-specific data:
 To test and deploy the server:
 1. [Install the Google Cloud SDK](https://cloud.google.com/sdk/docs/).
 2. Run `cd server && virtualenv venv && . venv/bin/activate`.
-3. Run `pip install -r requirements.txt -r requirements_bundled.txt`.
+3. Run `pip install -r requirements_bundled.txt`.
 4. Run `pip install -t lib -r requirements.txt`.
 5. Run the server locally with `dev_appserver.py app.yaml`.
 6. Test the local server with:
