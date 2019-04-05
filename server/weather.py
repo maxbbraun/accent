@@ -53,7 +53,14 @@ def is_cloudy():
     """Checks if today's weather is cloudy."""
 
     icon = _get_daily_icon()
-    return icon in ["cloudy", "partly-cloudy-day", "partly-cloudy-night"]
+    return icon == "cloudy"
+
+
+def is_partly_cloudy():
+    """Checks if today's weather is partly cloudy."""
+
+    icon = _get_daily_icon()
+    return icon in ["partly-cloudy-day", "partly-cloudy-night"]
 
 
 def is_rainy():
