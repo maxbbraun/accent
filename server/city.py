@@ -3,6 +3,7 @@ from random import random
 
 from sun import is_daylight
 from timezone import get_now
+from weather import is_clear
 from weather import is_cloudy
 from weather import is_partly_cloudy
 from weather import is_rainy
@@ -92,7 +93,8 @@ LAYERS = [
             },
             {
                 "file": "city/day/vehicles/van2-247-yp-day.gif",
-                "xy": (156, 116)
+                "xy": (156, 116),
+                "probability": 50
             },
             {
                 "file": "city/day/misc/streetlight-xp-day.gif",
@@ -108,16 +110,19 @@ LAYERS = [
             },
             {
                 "file": "city/day/vehicles/boat3-yp-day.gif",
-                "xy": (590, 87)
+                "xy": (590, 87),
+                "probability": 50
             },
             {
                 "file": "city/day/characters/blockbob/blockbob-driving-xp-day.gif",
                 "xy": (418, 109),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/day/characters/blockbob/blockbob-driving-xp-day-rain.gif",
                 "xy": (418, 93),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -137,6 +142,7 @@ LAYERS = [
             {
                 "file": "city/day/characters/blockbob/blockbob-sitting-day.gif",
                 "xy": (276, 78),
+                "probability": 50
             },
             {
                 "file": "city/day/misc/computersays/billboard-computer-no-day.gif",
@@ -169,11 +175,13 @@ LAYERS = [
             {
                 "file": "city/day/characters/robogroup/robogroup-day.gif",
                 "xy": (554, 168),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/day/characters/robogroup/robogroup-day-rain.gif",
                 "xy": (547, 157),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -187,11 +195,13 @@ LAYERS = [
             {
                 "file": "city/day/characters/deliverybiker/deliverybiker-xm-day.gif",
                 "xy": (500, 142),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/day/characters/deliverybiker/deliverybiker-xm-day-rain.gif",
                 "xy": (492, 135),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -207,11 +217,13 @@ LAYERS = [
             {
                 "file": "city/day/vehicles/boat1/boat1-yp-day.gif",
                 "xy": (6, 238),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/day/vehicles/boat1/boat1-yp-day-rain.gif",
                 "xy": (6, 216),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -220,16 +232,19 @@ LAYERS = [
             },
             {
                 "file": "city/day/vehicles/boat2-ym-day.gif",
-                "xy": (12, 261)
+                "xy": (12, 261),
+                "probability": 50
             },
             {
                 "file": "city/day/characters/ladybiker/ladybiker-day.gif",
                 "xy": (102, 251),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/day/characters/ladybiker/ladybiker-day-rain.gif",
                 "xy": (102, 234),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -238,23 +253,28 @@ LAYERS = [
             },
             {
                 "file": "city/day/vehicles/van1-yp-day.gif",
-                "xy": (412, 164)
+                "xy": (412, 164),
+                "probability": 50
             },
             {
                 "file": "city/day/vehicles/van2-milk-yp-day.gif",
-                "xy": (440, 158)
+                "xy": (440, 158),
+                "probability": 50
             },
             {
                 "file": "city/day/vehicles/van2-yp-day.gif",
-                "xy": (388, 184)
+                "xy": (388, 184),
+                "probability": 50
             },
             {
                 "file": "city/day/vehicles/car2-xp-day.gif",
-                "xy": (236, 213)
+                "xy": (236, 213),
+                "probability": 50
             },
             {
                 "file": "city/day/vehicles/car1-yp-day.gif",
-                "xy": (152, 266)
+                "xy": (152, 266),
+                "probability": 50
             },
             {
                 "file": "city/day/blocks/block-B-day.gif",
@@ -267,11 +287,13 @@ LAYERS = [
             {
                 "file": "city/day/characters/robogroup/robogroup-barge-empty-xm-day.gif",
                 "xy": (574, 222),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/day/characters/robogroup/robogroup-barge-empty-xm-day-rain.gif",
                 "xy": (574, 218),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -288,16 +310,19 @@ LAYERS = [
             },
             {
                 "file": "city/day/characters/dogcouple-day.gif",
-                "xy": (509, 312)
+                "xy": (509, 312),
+                "probability": 50
             },
             {
                 "file": "city/day/characters/girl/girlwbird-day.gif",
                 "xy": (400, 315),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/day/characters/girl/girlwbird-day-rain.gif",
                 "xy": (404, 303),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -315,21 +340,25 @@ LAYERS = [
             {
                 "file": "city/day/characters/vrguys/vrguy-A-day.gif",
                 "xy": (217, 298),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/day/characters/vrguys/vrguy-A-day-rain.gif",
                 "xy": (203, 276),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
                 "file": "city/day/characters/vrguys/vrguy-B-day.gif",
                 "xy": (240, 305),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/day/characters/vrguys/vrguy-B-day-rain.gif",
                 "xy": (234, 293),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -354,15 +383,18 @@ LAYERS = [
             },
             {
                 "file": "city/day/vehicles/yacht2-xm-day.gif",
-                "xy": (544, 302)
+                "xy": (544, 302),
+                "probability": 50
             },
             {
                 "file": "city/day/vehicles/yacht1-xm-day.gif",
-                "xy": (506, 334)
+                "xy": (506, 334),
+                "probability": 50
             },
             {
                 "file": "city/day/vehicles/houseboat/houseboat-day.gif",
-                "xy": (163, 326)
+                "xy": (163, 326),
+                "probability": 50
             },
             {
                 "file": "city/day/misc/streetlight-xp-day.gif",
@@ -370,7 +402,8 @@ LAYERS = [
             },
             {
                 "file": "city/day/environment/sun-day.gif",
-                "xy": (21, 19)
+                "xy": (19, 17),
+                "or_condition": [is_clear, is_partly_cloudy]
             },
             {
                 "file": "city/day/environment/rain1-day.gif",
@@ -380,12 +413,12 @@ LAYERS = [
             {
                 "file": "city/day/environment/cloud1-day.gif",
                 "xy": (523, 5),
-                "or_condition": [is_cloudy, is_partly_cloudy, is_rainy]
+                "or_condition": [is_partly_cloudy, is_cloudy, is_rainy]
             },
             {
                 "file": "city/day/environment/cloud2-day.gif",
                 "xy": (-43, 41),
-                "or_condition": [is_cloudy, is_partly_cloudy, is_rainy]
+                "or_condition": [is_partly_cloudy, is_cloudy, is_rainy]
             },
             {
                 "file": "city/day/environment/cloud2-day.gif",
@@ -511,7 +544,7 @@ LAYERS = [
             },
             {
                 "file": "city/night/characters/blockbob/blockbob-sitting-night.gif",
-                "xy": (276, 78),
+                "xy": (276, 78)
             },
             {
                 "file": "city/night/misc/computersays/billboard-computer-no-night.gif",
@@ -669,7 +702,7 @@ LAYERS = [
             },
             {
                 "file": "city/night/environment/moon-night.gif",
-                "xy": (21, 19)
+                "xy": (19, 17)
             },
             {
                 "file": "city/night/environment/rain1-night.gif",
@@ -679,12 +712,12 @@ LAYERS = [
             {
                 "file": "city/night/environment/cloud1-night.gif",
                 "xy": (523, 5),
-                "or_condition": [is_cloudy, is_partly_cloudy, is_rainy]
+                "or_condition": [is_partly_cloudy, is_cloudy, is_rainy]
             },
             {
                 "file": "city/night/environment/cloud2-night.gif",
                 "xy": (-43, 41),
-                "or_condition": [is_cloudy, is_partly_cloudy, is_rainy]
+                "or_condition": [is_partly_cloudy, is_cloudy, is_rainy]
             },
             {
                 "file": "city/night/environment/cloud2-night.gif",
