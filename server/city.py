@@ -492,7 +492,8 @@ LAYERS = [
             },
             {
                 "file": "city/night/vehicles/van2-247-yp-night.gif",
-                "xy": (142, 116)
+                "xy": (142, 116),
+                "probability": 50
             },
             {
                 "file": "city/night/misc/streetlight-xp-night.gif",
@@ -508,16 +509,19 @@ LAYERS = [
             },
             {
                 "file": "city/night/vehicles/boat3-yp-night.gif",
-                "xy": (590, 87)
+                "xy": (590, 87),
+                "probability": 50
             },
             {
                 "file": "city/night/characters/blockbob/blockbob-driving-xp-night.gif",
                 "xy": (418, 109),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/night/characters/blockbob/blockbob-driving-xp-night-rain.gif",
                 "xy": (418, 93),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -530,7 +534,8 @@ LAYERS = [
             },
             {
                 "file": "city/night/vehicles/car3-yp-night.gif",
-                "xy": (532, 186)
+                "xy": (532, 186),
+                "probability": 50
             },
             {
                 "file": "city/night/blocks/block-A/block-A-night.gif",
@@ -544,7 +549,8 @@ LAYERS = [
             },
             {
                 "file": "city/night/characters/blockbob/blockbob-sitting-night.gif",
-                "xy": (276, 78)
+                "xy": (276, 78),
+                "probability": 50
             },
             {
                 "file": "city/night/misc/computersays/billboard-computer-no-night.gif",
@@ -589,11 +595,13 @@ LAYERS = [
             {
                 "file": "city/night/vehicles/boat1-yp-night.gif",
                 "xy": (6, 238),
+                "probability": 50,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/night/vehicles/boat1-yp-night-rain.gif",
                 "xy": (6, 216),
+                "probability": 50,
                 "condition": is_rainy
             },
             {
@@ -602,7 +610,8 @@ LAYERS = [
             },
             {
                 "file": "city/night/vehicles/boat2-ym-night.gif",
-                "xy": (12, 261)
+                "xy": (12, 261),
+                "probability": 50
             },
             {
                 "file": "city/night/misc/streetlight-ym-night.gif",
@@ -610,23 +619,28 @@ LAYERS = [
             },
             {
                 "file": "city/night/vehicles/van1-yp-night.gif",
-                "xy": (400, 164)
+                "xy": (400, 164),
+                "probability": 50
             },
             {
                 "file": "city/night/vehicles/van2-milk-yp-night.gif",
-                "xy": (440, 158)
+                "xy": (440, 158),
+                "probability": 50
             },
             {
                 "file": "city/night/vehicles/van2-yp-night.gif",
-                "xy": (374, 184)
+                "xy": (374, 184),
+                "probability": 50
             },
             {
                 "file": "city/night/vehicles/car2-xp-night.gif",
-                "xy": (236, 213)
+                "xy": (236, 213),
+                "probability": 50
             },
             {
                 "file": "city/night/vehicles/car1-yp-night.gif",
-                "xy": (138, 266)
+                "xy": (138, 266),
+                "probability": 50
             },
             {
                 "file": "city/night/blocks/block-B-night.gif",
@@ -638,7 +652,8 @@ LAYERS = [
             },
             {
                 "file": "city/night/characters/robogroup/robogroup-barge-xm-night.gif",
-                "xy": (574, 222)
+                "xy": (574, 222),
+                "probability": 50
             },
             {
                 "file": "city/night/blocks/bldg-jetty-night.gif",
@@ -686,15 +701,18 @@ LAYERS = [
             },
             {
                 "file": "city/night/vehicles/yacht2-xm-night.gif",
-                "xy": (544, 302)
+                "xy": (544, 302),
+                "probability": 50
             },
             {
                 "file": "city/night/vehicles/yacht1-xm-night.gif",
-                "xy": (506, 334)
+                "xy": (506, 334),
+                "probability": 50
             },
             {
                 "file": "city/night/vehicles/houseboat/houseboat-night.gif",
-                "xy": (163, 326)
+                "xy": (163, 326),
+                "probability": 50
             },
             {
                 "file": "city/night/misc/streetlight-xp-night.gif",
@@ -702,7 +720,8 @@ LAYERS = [
             },
             {
                 "file": "city/night/environment/moon-night.gif",
-                "xy": (19, 17)
+                "xy": (19, 17),
+                "or_condition": [is_clear, is_partly_cloudy]
             },
             {
                 "file": "city/night/environment/rain1-night.gif",
