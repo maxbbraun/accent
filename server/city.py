@@ -1,17 +1,11 @@
 from PIL import Image
-from random import choice
+from random import randint
 
 from sun import is_daylight
 from timezone import get_now
 from weather import is_cloudy
 from weather import is_partly_cloudy
 from weather import is_rainy
-
-
-def _flip_coin():
-    """Returns True or False with equal probability."""
-
-    return choice([True, False])
 
 
 def _modulo_3_0():
@@ -44,6 +38,9 @@ def _modulo_3_2():
 #                  this layer to be drawn.
 #  "or_condition": A list of functions where at least one has to evaluate to
 #                  True for this layer to be drawn.
+#
+# And optionally...
+#   "probability": The probability in percent for this layer to be drawn.
 #
 # Either a layer group...
 #        "layers": A list of layer dictionaries to be drawn recursively.
@@ -148,7 +145,7 @@ LAYERS = [
             {
                 "file": "city/day/misc/computersays/billboard-computer-yes-day.gif",
                 "xy": (386, 51),
-                "condition": _flip_coin
+                "probability": 50
             },
             {
                 "file": "city/day/misc/3letterLED/3letterLED-UFO-day.gif",
@@ -523,7 +520,7 @@ LAYERS = [
             {
                 "file": "city/night/misc/computersays/billboard-computer-yes-night.gif",
                 "xy": (386, 51),
-                "condition": _flip_coin
+                "probability": 50
             },
             {
                 "file": "city/night/misc/3letterLED/3letterLED-UFO-night.gif",
@@ -758,6 +755,13 @@ def _draw_layers(image, layers):
         try:
             # One or-condition has to be true.
             if not any([c() for c in layer["or_condition"]]):
+                continue
+        except KeyError:
+            pass
+
+        try:
+            # Evaluate a random probability.
+            if layer["probability"] < randint(0, 100):
                 continue
         except KeyError:
             pass
