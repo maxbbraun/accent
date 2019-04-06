@@ -49,6 +49,13 @@ def _get_daily_icon():
     return icon
 
 
+def is_clear():
+    """Checks if today's weather is clear."""
+
+    icon = _get_daily_icon()
+    return icon in ["clear-day", "clear-night"]
+
+
 def is_cloudy():
     """Checks if today's weather is cloudy."""
 
