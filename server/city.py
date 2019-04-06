@@ -1,5 +1,5 @@
 from PIL import Image
-from random import randint
+from random import random
 
 from sun import is_daylight
 from timezone import get_now
@@ -761,7 +761,7 @@ def _draw_layers(image, layers):
 
         try:
             # Evaluate a random probability.
-            if layer["probability"] < randint(0, 100):
+            if layer["probability"] <= 100 * random():
                 continue
         except KeyError:
             pass
