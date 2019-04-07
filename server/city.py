@@ -31,32 +31,34 @@ def _modulo_3_2():
 # a combination of the following keys.
 #
 # Exactly one of...
-#     "condition": A function that needs to evaluate to True for this layer to
-#                  be drawn.
-# "not_condition": A function that needs to evaluate to False for this layer to
-#                  be drawn.
-# "and_condition": A list of functions that all have to evaluate to True for
-#                  this layer to be drawn.
-#  "or_condition": A list of functions where at least one has to evaluate to
-#                  True for this layer to be drawn.
+#      "condition": A function that needs to evaluate to True for this layer to
+#                   be drawn.
+#  "not_condition": A function that needs to evaluate to False for this layer
+#                   to be drawn.
+#  "and_condition": A list of functions that all have to evaluate to True for
+#                   this layer to be drawn.
+#   "or_condition": A list of functions where at least one has to evaluate to
+#                   True for this layer to be drawn.
+# "else_condition": A list of file paths (identifying layers) that have to not
+#                   have been drawn for this layer to be drawn.
 #
 # And optionally...
-#   "probability": The probability in percent for this layer to be drawn.
+#    "probability": The probability in percent for this layer to be drawn.
 #
 # Either a layer group...
-#        "layers": A list of layer dictionaries to be drawn recursively.
+#         "layers": A list of layer dictionaries to be drawn recursively.
 #
 # Or layer content...
-#          "file": The relative path of the image file for this layer.
+#           "file": The relative path of the image file for this layer.
 #
 # With a fixed position...
-#            "xy": A tuple defining the top left corner of this layer.
+#             "xy": A tuple defining the top left corner of this layer.
 #
 # Or a dynamic position...
-#  "xy_transform": A function that evaluates to a tuple defining the top left
-#                  corner of this layer.
-#       "xy_data": The argument passed to the function specified in
-#                  "xy_transform".
+#   "xy_transform": A function that evaluates to a tuple defining the top left
+#                   corner of this layer.
+#        "xy_data": The argument passed to the function specified in
+#                   "xy_transform".
 LAYERS = [
     {
         "condition": is_daylight,
@@ -142,16 +144,22 @@ LAYERS = [
             {
                 "file": "city/day/characters/blockbob/blockbob-sitting-day.gif",
                 "xy": (276, 78),
-                "probability": 50
+                "else_condition": [
+                    "city/day/characters/blockbob/blockbob-driving-xp-day.gif",
+                    "city/day/characters/blockbob/blockbob-driving-xp-day-rain.gif"
+                ],
             },
             {
                 "file": "city/day/misc/computersays/billboard-computer-no-day.gif",
-                "xy": (386, 51)
+                "xy": (386, 51),
+                "probability": 50
             },
             {
                 "file": "city/day/misc/computersays/billboard-computer-yes-day.gif",
                 "xy": (386, 51),
-                "probability": 50
+                "else_condition": [
+                    "city/day/misc/computersays/billboard-computer-no-day.gif"
+                ]
             },
             {
                 "file": "city/day/misc/3letterLED/3letterLED-UFO-day.gif",
@@ -549,16 +557,22 @@ LAYERS = [
             {
                 "file": "city/night/characters/blockbob/blockbob-sitting-night.gif",
                 "xy": (276, 78),
-                "probability": 50
+                "else_condition": [
+                    "city/night/characters/blockbob/blockbob-driving-xp-night.gif",
+                    "city/night/characters/blockbob/blockbob-driving-xp-night-rain.gif"
+                ]
             },
             {
                 "file": "city/night/misc/computersays/billboard-computer-no-night.gif",
-                "xy": (386, 51)
+                "xy": (386, 51),
+                "probability": 50
             },
             {
                 "file": "city/night/misc/computersays/billboard-computer-yes-night.gif",
                 "xy": (386, 51),
-                "probability": 50
+                "else_condition": [
+                    "city/night/misc/computersays/billboard-computer-no-night.gif"
+                ]
             },
             {
                 "file": "city/night/misc/3letterLED/3letterLED-UFO-night.gif",
@@ -779,6 +793,9 @@ LAYERS = [
 def _draw_layers(image, layers):
     """Draws a list of layers onto an image."""
 
+    # Keep track of drawn layers.
+    drawn_files = []
+
     # Draw the layers in order.
     for layer in layers:
         try:
@@ -810,6 +827,13 @@ def _draw_layers(image, layers):
             pass
 
         try:
+            # Else layers have to not have been drawn.
+            if not set(layer["else_condition"]).isdisjoint(drawn_files):
+                continue
+        except KeyError:
+            pass
+
+        try:
             # Evaluate a random probability.
             if layer["probability"] <= 100 * random():
                 continue
@@ -832,6 +856,7 @@ def _draw_layers(image, layers):
         # Draw the layer.
         bitmap = Image.open(layer["file"]).convert("RGBA")
         image.paste(bitmap, (x, y), bitmap)
+        drawn_files.append(layer["file"])
 
 
 def get_city_image(width, height):
