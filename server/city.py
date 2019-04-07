@@ -402,8 +402,7 @@ LAYERS = [
             },
             {
                 "file": "city/day/environment/sun-day.gif",
-                "xy": (19, 17),
-                "or_condition": [is_clear, is_partly_cloudy]
+                "xy": (19, 17)
             },
             {
                 "file": "city/day/environment/rain1-day.gif",
@@ -510,7 +509,7 @@ LAYERS = [
             {
                 "file": "city/night/vehicles/boat3-yp-night.gif",
                 "xy": (590, 87),
-                "probability": 50
+                "probability": 80
             },
             {
                 "file": "city/night/characters/blockbob/blockbob-driving-xp-night.gif",
@@ -595,13 +594,13 @@ LAYERS = [
             {
                 "file": "city/night/vehicles/boat1-yp-night.gif",
                 "xy": (6, 238),
-                "probability": 50,
+                "probability": 80,
                 "not_condition": is_rainy
             },
             {
                 "file": "city/night/vehicles/boat1-yp-night-rain.gif",
                 "xy": (6, 216),
-                "probability": 50,
+                "probability": 80,
                 "condition": is_rainy
             },
             {
@@ -611,7 +610,7 @@ LAYERS = [
             {
                 "file": "city/night/vehicles/boat2-ym-night.gif",
                 "xy": (12, 261),
-                "probability": 50
+                "probability": 80
             },
             {
                 "file": "city/night/misc/streetlight-ym-night.gif",
@@ -702,17 +701,17 @@ LAYERS = [
             {
                 "file": "city/night/vehicles/yacht2-xm-night.gif",
                 "xy": (544, 302),
-                "probability": 50
+                "probability": 80
             },
             {
                 "file": "city/night/vehicles/yacht1-xm-night.gif",
                 "xy": (506, 334),
-                "probability": 50
+                "probability": 80
             },
             {
                 "file": "city/night/vehicles/houseboat/houseboat-night.gif",
                 "xy": (163, 326),
-                "probability": 50
+                "probability": 80
             },
             {
                 "file": "city/night/misc/streetlight-xp-night.gif",
@@ -720,8 +719,7 @@ LAYERS = [
             },
             {
                 "file": "city/night/environment/moon-night.gif",
-                "xy": (19, 17),
-                "or_condition": [is_clear, is_partly_cloudy]
+                "xy": (19, 17)
             },
             {
                 "file": "city/night/environment/rain1-night.gif",
