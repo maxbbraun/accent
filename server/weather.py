@@ -18,8 +18,8 @@ FORECAST_URL = "https://api.darksky.net/forecast/%s/%f,%f"
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=3600))  # Cache for 1 hour.
-def _get_daily_icon():
-    """Gets today's weather from the Dark Sky API."""
+def _get_current_icon():
+    """Gets the current weather icon from the Dark Sky API."""
 
     # Look up the latitude and longitude of the weather address.
     geocoding_url = GEOCODING_URL
@@ -42,57 +42,57 @@ def _get_daily_icon():
     forecast_response = urlfetch.fetch(forecast_url)
     forecast = json_loads(forecast_response.content)
 
-    # Get the icon encoding today's weather.
-    icon = forecast["daily"]["icon"]
+    # Get the icon encoding the current weather.
+    icon = forecast["currently"]["icon"]
     info("Weather: %s" % icon)
 
     return icon
 
 
 def is_clear():
-    """Checks if today's weather is clear."""
+    """Checks if the current weather is clear."""
 
-    icon = _get_daily_icon()
+    icon = _get_current_icon()
     return icon in ["clear-day", "clear-night"]
 
 
 def is_cloudy():
-    """Checks if today's weather is cloudy."""
+    """Checks if the current weather is cloudy."""
 
-    icon = _get_daily_icon()
+    icon = _get_current_icon()
     return icon == "cloudy"
 
 
 def is_partly_cloudy():
-    """Checks if today's weather is partly cloudy."""
+    """Checks if the current weather is partly cloudy."""
 
-    icon = _get_daily_icon()
+    icon = _get_current_icon()
     return icon in ["partly-cloudy-day", "partly-cloudy-night"]
 
 
 def is_rainy():
-    """Checks if today's weather is rainy."""
+    """Checks if the current weather is rainy."""
 
-    icon = _get_daily_icon()
+    icon = _get_current_icon()
     return icon in ["rain", "sleet"]
 
 
 def is_windy():
-    """Checks if today's weather is windy."""
+    """Checks if the current weather is windy."""
 
-    icon = _get_daily_icon()
+    icon = _get_current_icon()
     return icon == "wind"
 
 
 def is_snowy():
-    """Checks if today's weather is snowy."""
+    """Checks if the current weather is snowy."""
 
-    icon = _get_daily_icon()
+    icon = _get_current_icon()
     return icon == "snow"
 
 
 def is_foggy():
-    """Checks if today's weather is foggy."""
+    """Checks if the current weather is foggy."""
 
-    icon = _get_daily_icon()
+    icon = _get_current_icon()
     return icon == "fog"
