@@ -1,8 +1,8 @@
 # Accent
 
-Accent is a smart picture frame with a pop of color and no cables. Read more about it in [this article](https://medium.com/@maxbraun/meet-accent-352cfa95813a).
+Accent is a smart picture frame with a pop of color and no cables. Read more about it [on Medium](https://medium.com/@maxbraun/meet-accent-352cfa95813a).
 
-[![Accent](accent-commute.jpg)](https://medium.com/@maxbraun/meet-accent-352cfa95813a)
+[![Accent](accent.gif)](https://medium.com/@maxbraun/meet-accent-352cfa95813a)
 
 ## Server
 
