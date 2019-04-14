@@ -15,8 +15,7 @@ from user_data import HOME_ADDRESS
 from user_data import MAPS_API_KEY
 from user_data import TIMEZONE
 
-# TODO: Rewrite GoogleGeocoder for App Engine, then remove dependencies on
-# requests, requests-toolbelt, ssl, and this patch.
+# See https://github.com/maxbbraun/accent/issues/5
 monkeypatch()
 
 # A reference to a calculator for sunrise and sunset times.
