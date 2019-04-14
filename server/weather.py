@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from cachetools import cached
 from cachetools import TTLCache
 from google.appengine.api import urlfetch
@@ -18,7 +22,7 @@ FORECAST_URL = "https://api.darksky.net/forecast/%s/%f,%f"
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=3600))  # Cache for 1 hour.
-def _get_current_icon():
+def _current_icon():
     """Gets the current weather icon from the Dark Sky API."""
 
     # Look up the latitude and longitude of the weather address.
@@ -52,47 +56,47 @@ def _get_current_icon():
 def is_clear():
     """Checks if the current weather is clear."""
 
-    icon = _get_current_icon()
+    icon = _current_icon()
     return icon in ["clear-day", "clear-night"]
 
 
 def is_cloudy():
     """Checks if the current weather is cloudy."""
 
-    icon = _get_current_icon()
+    icon = _current_icon()
     return icon == "cloudy"
 
 
 def is_partly_cloudy():
     """Checks if the current weather is partly cloudy."""
 
-    icon = _get_current_icon()
+    icon = _current_icon()
     return icon in ["partly-cloudy-day", "partly-cloudy-night"]
 
 
 def is_rainy():
     """Checks if the current weather is rainy."""
 
-    icon = _get_current_icon()
+    icon = _current_icon()
     return icon in ["rain", "sleet"]
 
 
 def is_windy():
     """Checks if the current weather is windy."""
 
-    icon = _get_current_icon()
+    icon = _current_icon()
     return icon == "wind"
 
 
 def is_snowy():
     """Checks if the current weather is snowy."""
 
-    icon = _get_current_icon()
+    icon = _current_icon()
     return icon == "snow"
 
 
 def is_foggy():
     """Checks if the current weather is foggy."""
 
-    icon = _get_current_icon()
+    icon = _current_icon()
     return icon == "fog"

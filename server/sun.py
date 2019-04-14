@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from astral import Astral
 from astral import GoogleGeocoder
 from croniter import croniter
@@ -6,10 +10,10 @@ from datetime import timedelta
 from logging import info
 from requests_toolbelt.adapters.appengine import monkeypatch
 
-from timezone import get_now
-from timezone import TIMEZONE
+from now import now
 from user_data import HOME_ADDRESS
 from user_data import MAPS_API_KEY
+from user_data import TIMEZONE
 
 # TODO: Rewrite GoogleGeocoder for App Engine, then remove dependencies on
 # requests, requests-toolbelt, ssl, and this patch.
@@ -66,13 +70,13 @@ def is_daylight():
     """Calculates whether the sun is currently up."""
 
     # Find the sunrise and sunset times for today.
-    now = get_now()
-    sunrise = ASTRAL.sunrise(now).astimezone(TIMEZONE)
-    sunset = ASTRAL.sunset(now).astimezone(TIMEZONE)
+    time = now()
+    sunrise = ASTRAL.sunrise(time).astimezone(TIMEZONE)
+    sunset = ASTRAL.sunset(time).astimezone(TIMEZONE)
 
-    is_daylight = now > sunrise and now < sunset
+    is_daylight = time > sunrise and time < sunset
 
     info("Daylight: %s (%s)" % (is_daylight,
-                                now.strftime("%A %B %d %Y %H:%M:%S %Z")))
+                                time.strftime("%A %B %d %Y %H:%M:%S %Z")))
 
     return is_daylight

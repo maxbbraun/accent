@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from google.appengine.api import urlfetch
 from time import mktime
 from json import loads as json_loads
@@ -6,10 +10,12 @@ from pytz import utc
 from StringIO import StringIO
 from urllib import quote
 
+from epd import DISPLAY_WIDTH
+from epd import DISPLAY_HEIGHT
 from graphics import draw_text
 from graphics import SCREENSTAR_SMALL_REGULAR
 from graphics import SUBVARIO_CONDENSED_MEDIUM
-from timezone import get_now
+from now import now
 from user_data import HOME_ADDRESS
 from user_data import MAPS_API_KEY
 from user_data import TRAVEL_MODE
@@ -49,7 +55,7 @@ COPYRIGHT_BOX_COLOR = (255, 255, 255)
 COPYRIGHT_BOX_PADDING = 2
 
 
-def _get_route_url(api_key, home, work, mode, timestamp):
+def _route_url(api_key, home, work, mode, timestamp):
     """Constructs the URL for the Directions API request."""
 
     url = DIRECTIONS_URL
@@ -61,7 +67,7 @@ def _get_route_url(api_key, home, work, mode, timestamp):
     return url
 
 
-def _get_static_map_url(api_key, polyline, width, height):
+def _static_map_url(api_key, polyline, width, height):
     """Constructs the URL for the Static Map API request."""
 
     url = STATIC_MAP_URL
@@ -81,16 +87,16 @@ def _get_static_map_url(api_key, polyline, width, height):
     return url
 
 
-def get_commute_image(width, height):
+def commute_image():
     """Generates an image with the commute route on a map."""
 
     # Use the current time for live traffic.
-    now = get_now()
-    timestamp = int(mktime(now.astimezone(utc).timetuple()))
+    time = now()
+    timestamp = int(mktime(time.astimezone(utc).timetuple()))
 
     # Get the directions from home to work.
-    directions_url = _get_route_url(MAPS_API_KEY, HOME_ADDRESS, WORK_ADDRESS,
-                                    TRAVEL_MODE, timestamp)
+    directions_url = _route_url(MAPS_API_KEY, HOME_ADDRESS, WORK_ADDRESS,
+                                TRAVEL_MODE, timestamp)
     directions_response = urlfetch.fetch(directions_url)
     directions = json_loads(directions_response.content)
 
@@ -105,12 +111,13 @@ def get_commute_image(width, height):
         duration = leg["duration"]["text"]
 
     # Get the static map as an image.
-    image_url = _get_static_map_url(MAPS_API_KEY, polyline, width, height)
+    image_url = _static_map_url(MAPS_API_KEY, polyline, DISPLAY_WIDTH,
+                                DISPLAY_HEIGHT)
     image_response = urlfetch.fetch(image_url)
     image = Image.open(StringIO(image_response.content)).convert("RGB")
 
     # Draw the map copyright notice.
-    copyright_text = u"Map data \xa9%d Google" % now.year
+    copyright_text = u"Map data \xa9%d Google" % time.year
     draw_text(copyright_text,
               font_spec=SCREENSTAR_SMALL_REGULAR,
               text_color=COPYRIGHT_TEXT_COLOR,

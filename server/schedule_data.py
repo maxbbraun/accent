@@ -1,6 +1,10 @@
-from city import get_city_image
-from commute import get_commute_image
-from g_calendar import get_calendar_image
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+from city import city_image
+from commute import commute_image
+from g_calendar import calendar_image
 
 # The schedule determining when to wake and which images to show. Each entry
 # defines a name, a cron expression for the start time, and a function to
@@ -12,32 +16,32 @@ SCHEDULE = [
     {
         "name": "Weekday Morning - Commute",
         "start": "30 6 * * 1-5",
-        "image": get_commute_image
+        "image": commute_image
     },
     {
         "name": "Weekday Day - City",
         "start": "0 9 * * 1-5",
-        "image": get_city_image
+        "image": city_image
     },
     {
         "name": "Weekday Night - City",
         "start": "sunset * * 1-5",
-        "image": get_city_image
+        "image": city_image
     },
     # Weekends:
     {
         "name": "Weekend Morning - Calendar",
         "start": "sunrise * * 6,0",
-        "image": get_calendar_image
+        "image": calendar_image
     },
     {
         "name": "Weekend Day - City",
         "start": "0 12 * * 6,0",
-        "image": get_city_image
+        "image": city_image
     },
     {
         "name": "Weekend Night - City",
         "start": "sunset * * 6,0",
-        "image": get_city_image
+        "image": city_image
     }
 ]
