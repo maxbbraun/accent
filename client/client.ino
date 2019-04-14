@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include "credentials.h"
 #include "display.h"
+#include "error_image.h"
 
 // Display: https://www.waveshare.com/wiki/7.5inch_e-Paper_HAT_(B)
 // Board: https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board
@@ -12,7 +13,7 @@
 // The baud rate for the serial connection.
 const long serial_speed = 115200;
 
-// The size in bytes of the streaming HTTP response buffer.
+// The size in bytes of the streaming HTTP response and image buffers.
 const size_t buffer_size = 1024;
 
 // The power domains to turn off for deep sleep.
@@ -23,7 +24,7 @@ const esp_sleep_pd_domain_t power_domains[] = {
     ESP_PD_DOMAIN_XTAL};
 
 // The time in milliseconds to wait before restarting after an error.
-uint64_t restart_delay_ms = 60 * 1000;
+uint64_t restart_delay_ms = 60 * 60 * 1000;
 
 void setup() {
   // Workaround for a bug where sometimes waking up from deep sleep fails.
@@ -35,15 +36,11 @@ void setup() {
   // Connect to the Wifi access point.
   connectWifi();
 
-  // Initialize the display.
-  initDisplay();
-
   // Show the latest image.
+  initDisplay();
   if (downloadImage()) {
     updateDisplay();
   }
-
-  // TODO: Report battery level/voltage to server.
 
   // Go to sleep until the next refresh.
   scheduleSleep();
@@ -51,6 +48,8 @@ void setup() {
 
 void loop() {
   // The setup() function only returns if there was an error.
+  showErrorImage();
+
   Serial.println("Restarting after error");
   deepSleep(restart_delay_ms);
 }
@@ -169,4 +168,23 @@ void deepSleep(uint64_t delay_ms) {
   uint64_t delay_us = 1000 * delay_ms;
   Serial.printf("Sleeping for %llu us\n", delay_us);
   esp_deep_sleep(delay_us);
+}
+
+// Shows a static error image.
+void showErrorImage() {
+  Serial.println("Showing error image");
+
+  initDisplay();
+
+  const char* error_image_ptr = error_image;
+  unsigned long error_image_length =
+      sizeof(error_image) - 1 /* null terminator */;
+  const char* error_image_end = error_image_ptr + error_image_length;
+  do {
+    size_t length = error_image_end - error_image_ptr;
+    loadImage(error_image_ptr, length);
+    error_image_ptr += length;
+  } while (error_image_ptr < error_image_end);
+
+  updateDisplay();
 }
