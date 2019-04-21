@@ -1,22 +1,14 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from astral import Astral
 from astral import GoogleGeocoder
 from croniter import croniter
 from datetime import datetime
 from datetime import timedelta
 from logging import info
-from requests_toolbelt.adapters.appengine import monkeypatch
 
 from now import now
 from user_data import HOME_ADDRESS
 from user_data import MAPS_API_KEY
 from user_data import TIMEZONE
-
-# See https://github.com/maxbbraun/accent/issues/5
-monkeypatch()
 
 # A reference to a calculator for sunrise and sunset times.
 ASTRAL = Astral(geocoder=GoogleGeocoder, api_key=MAPS_API_KEY)[HOME_ADDRESS]

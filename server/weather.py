@@ -1,14 +1,9 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from cachetools import cached
 from cachetools import TTLCache
-from google.appengine.api import urlfetch
-from json import loads as json_loads
 from logging import info
 from logging import error
-from urllib import quote
+from requests import get
+from urllib.parse import quote
 
 from user_data import DARK_SKY_API_KEY
 from user_data import HOME_ADDRESS
@@ -29,8 +24,7 @@ def _current_icon():
     geocoding_url = GEOCODING_URL
     geocoding_url += "?key=%s" % MAPS_API_KEY
     geocoding_url += "&address=%s" % quote(HOME_ADDRESS)
-    geocoding_response = urlfetch.fetch(geocoding_url)
-    geocoding = json_loads(geocoding_response.content)
+    geocoding = get(geocoding_url).json()
 
     if geocoding["status"] != "OK":
         error(geocoding["error_message"])
@@ -43,8 +37,7 @@ def _current_icon():
 
     # Look up the weather forecast.
     forecast_url = FORECAST_URL % (DARK_SKY_API_KEY, latitude, longitude)
-    forecast_response = urlfetch.fetch(forecast_url)
-    forecast = json_loads(forecast_response.content)
+    forecast = get(forecast_url).json()
 
     # Get the icon encoding the current weather.
     icon = forecast["currently"]["icon"]

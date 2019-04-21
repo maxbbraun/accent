@@ -1,14 +1,9 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-from google.appengine.api import urlfetch
 from time import mktime
-from json import loads as json_loads
 from PIL import Image
 from pytz import utc
-from StringIO import StringIO
-from urllib import quote
+from requests import get
+from io import BytesIO
+from urllib.parse import quote
 
 from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
@@ -97,8 +92,7 @@ def commute_image():
     # Get the directions from home to work.
     directions_url = _route_url(MAPS_API_KEY, HOME_ADDRESS, WORK_ADDRESS,
                                 TRAVEL_MODE, timestamp)
-    directions_response = urlfetch.fetch(directions_url)
-    directions = json_loads(directions_response.content)
+    directions = get(directions_url).json()
 
     # Extract the route polyline, duration, and description.
     route = directions["routes"][0]  # Expect one route.
@@ -113,8 +107,8 @@ def commute_image():
     # Get the static map as an image.
     image_url = _static_map_url(MAPS_API_KEY, polyline, DISPLAY_WIDTH,
                                 DISPLAY_HEIGHT)
-    image_response = urlfetch.fetch(image_url)
-    image = Image.open(StringIO(image_response.content)).convert("RGB")
+    image_response = get(image_url).content
+    image = Image.open(BytesIO(image_response)).convert("RGB")
 
     # Draw the map copyright notice.
     copyright_text = u"Map data \xa9%d Google" % time.year

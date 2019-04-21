@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from glob import glob
 from logging import info
 from PIL import Image
@@ -25,8 +21,8 @@ def artwork_image():
     image = image.convert("RGB")
 
     # Crop the image to a random display-sized area.
-    x = randint(0, max(0, image.size[0] - DISPLAY_WIDTH))
-    y = randint(0, max(0, image.size[1] - DISPLAY_HEIGHT))
+    x = randint(0, max(0, image.width - DISPLAY_WIDTH))
+    y = randint(0, max(0, image.height - DISPLAY_HEIGHT))
     image = image.crop((x, y, x + DISPLAY_WIDTH, y + DISPLAY_HEIGHT))
 
     return image

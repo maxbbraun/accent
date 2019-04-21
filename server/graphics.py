@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from PIL import ImageFont
 from PIL.ImageDraw import Draw
 
@@ -56,11 +52,11 @@ def draw_text(text, font_spec, text_color, xy=None, anchor=None,
         x = xy[0] - text_width // 2
         y = xy[1] - text_height // 2
     elif anchor == "center":
-        x = image.size[0] // 2 - text_width // 2
-        y = image.size[1] // 2 - text_height // 2
+        x = image.width // 2 - text_width // 2
+        y = image.height // 2 - text_height // 2
     elif anchor == "bottom_right":
-        x = image.size[0] - box_padding - border_width - text_width
-        y = image.size[1] - box_padding - border_width - text_height
+        x = image.width - box_padding - border_width - text_width
+        y = image.height - box_padding - border_width - text_height
 
     # Draw the box background and border.
     box_xy = [x - box_padding,

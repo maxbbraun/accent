@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from calendar import Calendar
 from calendar import monthrange
 from calendar import SUNDAY
@@ -112,7 +108,8 @@ def _event_counts(time):
         except IOError as e:
             warning("Failed to save credentials: %s", e)
     authed_http = credentials.authorize(http=http)
-    service = discovery.build(API_NAME, API_VERSION, http=authed_http)
+    service = discovery.build(API_NAME, API_VERSION, http=authed_http,
+                              cache_discovery=False)
 
     # Process calendar events for each day of the current month.
     first_date = time.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -197,8 +194,8 @@ def calendar_image():
             # Mark the current day with a squircle.
             if day == time.day:
                 squircle = Image.open(SQUIRCLE_FILE).convert(mode="RGBA")
-                squircle_xy = (x - squircle.size[0] // 2,
-                               y - squircle.size[1] // 2)
+                squircle_xy = (x - squircle.width // 2,
+                               y - squircle.height // 2)
                 draw.bitmap(squircle_xy, squircle, HIGHLIGHT_COLOR)
                 number_color = TODAY_COLOR
                 event_color = TODAY_COLOR
@@ -215,13 +212,13 @@ def calendar_image():
             num_events = min(MAX_EVENTS, event_counts[day])
             dot = Image.open(DOT_FILE).convert(mode="RGBA")
             if num_events > 0:
-                events_width = (num_events * dot.size[0] +
+                events_width = (num_events * dot.width +
                                 (num_events - 1) * DOT_MARGIN)
                 for event_index in range(num_events):
-                    event_offset = (event_index * (dot.size[0] +
+                    event_offset = (event_index * (dot.width +
                                     DOT_MARGIN) - events_width // 2)
                     dot_xy = [x + event_offset,
-                              y + DOT_OFFSET - dot.size[0] // 2]
+                              y + DOT_OFFSET - dot.width // 2]
                     draw.bitmap(dot_xy, dot, event_color)
 
     return image

@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from flask import Flask
 from flask import Response
 from flask import send_file
@@ -102,3 +98,7 @@ def server_error(e):
     exception(message)
 
     return message, 500
+
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=8080, debug=True)

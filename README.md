@@ -16,11 +16,10 @@ To add user-specific data:
 
 To test and deploy the server:
 1. [Install the Google Cloud SDK](https://cloud.google.com/sdk/docs/).
-2. Run `cd server && virtualenv venv && . venv/bin/activate`.
-3. Run `pip install -r requirements_bundled.txt -r requirements.txt`.
-4. Run `pip install -t lib -r requirements.txt`.
-5. Run the server locally with `dev_appserver.py app.yaml`.
-6. Test the local server with:
+2. Run `cd server && python3 -m venv venv && . venv/bin/activate`.
+3. Run `pip install -r requirements.txt`.
+4. Run the server locally with `python main.py`.
+5. Test the local server with:
    - [/next](http://localhost:8080/next) for the time in milliseconds until the next schedule entry.
    - [/epd](http://localhost:8080/epd) for the currently scheduled 2-bit image used by the e-paper display.
    - [/png](http://localhost:8080/png) for a PNG version of the currently scheduled image for easier debugging.
@@ -28,7 +27,7 @@ To test and deploy the server:
    - [/city](http://localhost:8080/city) to bypass the schedule and get the city image directly.
    - [/commute](http://localhost:8080/commute) to bypass the schedule and get the commute image directly.
    - [/calendar](http://localhost:8080/calendar) to bypass the schedule and get the calendar image directly.
-7. Deploy the server with `gcloud app deploy`.
+6. Deploy the server with `gcloud app deploy`.
 
 ## Client
 

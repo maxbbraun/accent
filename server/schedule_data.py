@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from city import city_image
 from commute import commute_image
 from g_calendar import calendar_image

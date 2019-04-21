@@ -2,10 +2,6 @@
 # $ pip install absl-py
 # $ python error_image.py --input=./assets/error.gif > ../client/error_image.h
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl import app
 from absl import flags
 from PIL import Image
