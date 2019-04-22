@@ -8,7 +8,7 @@ from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
 
 # The directory containing static artwork images.
-IMAGES_DIR = "artwork"
+IMAGES_DIR = "assets/artwork"
 
 
 def artwork_image():
