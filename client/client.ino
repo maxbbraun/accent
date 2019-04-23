@@ -16,6 +16,9 @@ const long serial_speed = 115200;
 // The size in bytes of the streaming HTTP response and image buffers.
 const size_t buffer_size = 1024;
 
+// The time in milliseconds before timing out when reading HTTP data.
+const uint16_t read_timeout_ms = 30 * 1000;
+
 // The power domains to turn off for deep sleep.
 const esp_sleep_pd_domain_t power_domains[] = {
     ESP_PD_DOMAIN_RTC_PERIPH,
@@ -83,6 +86,9 @@ bool httpGet(HTTPClient* http, String url) {
     Serial.printf("Failed to connect to server: %s\n", url.c_str());
     return false;
   }
+
+  // Apply the read timeout after connecting.
+  http->setTimeout(read_timeout_ms);
 
   int status = http->GET();
   if (status <= 0) {
