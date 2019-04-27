@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import redirect
 from flask import Response
 from flask import send_file
 from io import BytesIO
@@ -13,6 +14,9 @@ from epd import bwr_bytes
 from g_calendar import calendar_image
 from schedule import scheduled_delay
 from schedule import scheduled_image
+
+# The URL of the Medium story about Accent.
+REDIRECT_URL = "https://medium.com/@maxbraun/meet-accent-352cfa95813a"
 
 app = Flask(__name__)
 
@@ -87,6 +91,13 @@ def next():
 
     milliseconds = scheduled_delay()
     return Response(str(milliseconds), mimetype="text/plain")
+
+
+@app.route("/")
+def root():
+    """Redirects to the Medium story about Accent."""
+
+    return redirect(REDIRECT_URL)
 
 
 @app.errorhandler(500)
