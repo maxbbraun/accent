@@ -1,19 +1,18 @@
 from flask import Flask
 from flask import redirect
-from flask import Response
 from flask import send_file
-from io import BytesIO
 from logging import exception
 from time import time
 
-from artwork import artwork_image
-from city import city_image
-from commute import commute_image
-from epd import bwr_image
-from epd import bwr_bytes
-from g_calendar import calendar_image
-from schedule import scheduled_delay
-from schedule import scheduled_image
+from artwork import Artwork
+from auth import user_auth
+from city import City
+from commute import Commute
+from google_calendar import GoogleCalendar
+from response import epd_response
+from response import png_response
+from response import text_response
+from schedule import Schedule
 
 # The URL of the Medium story about Accent.
 REDIRECT_URL = "https://medium.com/@maxbraun/meet-accent-352cfa95813a"
@@ -21,76 +20,74 @@ REDIRECT_URL = "https://medium.com/@maxbraun/meet-accent-352cfa95813a"
 app = Flask(__name__)
 
 
-def _send_png(image):
-    """Creates a PNG response from the specified image."""
-
-    # Encode the image to PNG bytes.
-    buffer = BytesIO()
-    image = bwr_image(image)
-    image.save(buffer, format="png")
-    buffer.seek(0)
-
-    return send_file(buffer, mimetype="image/png", cache_timeout=0)
-
-
 @app.route("/artwork")
-def artwork():
+@user_auth(png_response)
+def artwork(user=None):
     """Responds with a PNG version of the artwork image."""
 
-    image = artwork_image()
-    return _send_png(image)
+    artwork = Artwork(user)
+    image = artwork.image()
+    return png_response(image)
 
 
 @app.route("/city")
-def city():
+@user_auth(png_response)
+def city(user=None):
     """Responds with a PNG version of the city image."""
 
-    image = city_image()
-    return _send_png(image)
+    city = City(user)
+    image = city.image()
+    return png_response(image)
 
 
 @app.route("/commute")
-def commute():
+@user_auth(png_response)
+def commute(user=None):
     """Responds with a PNG version of the commute image."""
 
-    image = commute_image()
-    return _send_png(image)
+    commute = Commute(user)
+    image = commute.image()
+    return png_response(image)
 
 
 @app.route("/calendar")
-def calendar():
+@user_auth(png_response)
+def calendar(user=None):
     """Responds with a PNG version of the calendar image."""
 
-    image = calendar_image()
-    return _send_png(image)
+    calendar = GoogleCalendar(user)
+    image = calendar.image()
+    return png_response(image)
 
 
 @app.route("/png")
-def png():
+@user_auth(png_response)
+def png(user=None):
     """Responds with a PNG version of the scheduled image."""
 
-    image = scheduled_image()
-    return _send_png(image)
+    schedule = Schedule(user)
+    image = schedule.image()
+    return png_response(image)
 
 
 @app.route("/epd")
-def epd():
+@user_auth(epd_response)
+def epd(user=None):
     """Responds with an e-paper display version of the scheduled image."""
 
-    image = scheduled_image()
-    data = bwr_bytes(image)
-    buffer = BytesIO(data)
-
-    return send_file(buffer, mimetype="application/octet-stream",
-                     cache_timeout=0)
+    schedule = Schedule(user)
+    image = schedule.image()
+    return epd_response(image)
 
 
 @app.route("/next")
-def next():
+@user_auth()
+def next(user=None):
     """Responds with the milliseconds until the next image."""
 
-    milliseconds = scheduled_delay()
-    return Response(str(milliseconds), mimetype="text/plain")
+    schedule = Schedule(user)
+    milliseconds = schedule.delay()
+    return text_response(str(milliseconds))
 
 
 @app.route("/")
@@ -98,6 +95,13 @@ def root():
     """Redirects to the Medium story about Accent."""
 
     return redirect(REDIRECT_URL)
+
+
+@app.route("/hello/<key>")
+def hello(key):
+    """Starts the new user flow."""
+
+    return text_response("Not implemented yet")
 
 
 @app.errorhandler(500)

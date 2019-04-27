@@ -5,9 +5,7 @@ from logging import error
 from requests import get
 from urllib.parse import quote
 
-from user_data import DARK_SKY_API_KEY
-from user_data import HOME_ADDRESS
-from user_data import MAPS_API_KEY
+from firestore import Firestore
 
 # The endpoint of the Geocoding API.
 GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
@@ -16,80 +14,83 @@ GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 FORECAST_URL = "https://api.darksky.net/forecast/%s/%f,%f"
 
 
-@cached(cache=TTLCache(maxsize=1, ttl=3600))  # Cache for 1 hour.
-def _current_icon():
-    """Gets the current weather icon from the Dark Sky API."""
+class Weather:
+    """A wrapper around the Dark Sky API."""
 
-    # Look up the latitude and longitude of the weather address.
-    geocoding_url = GEOCODING_URL
-    geocoding_url += "?key=%s" % MAPS_API_KEY
-    geocoding_url += "&address=%s" % quote(HOME_ADDRESS)
-    geocoding = get(geocoding_url).json()
+    def __init__(self, user):
+        self.home = user.get("home")
+        firestore = Firestore()
+        self.google_maps_api_key = firestore.google_maps_api_key()
+        self.dark_sky_api_key = firestore.dark_sky_api_key()
 
-    if geocoding["status"] != "OK":
-        error(geocoding["error_message"])
-        return ""
+    @cached(cache=TTLCache(maxsize=1, ttl=300))  # Cache for 5 minutes.
+    def _current_icon(self):
+        """Gets the current weather icon from the Dark Sky API."""
 
-    result = geocoding["results"][0]  # Expect one result.
-    location = result["geometry"]["location"]
-    latitude = float(location["lat"])
-    longitude = float(location["lng"])
+        # Look up the latitude and longitude of the weather address.
+        geocoding_url = GEOCODING_URL
+        geocoding_url += "?key=%s" % self.google_maps_api_key
+        geocoding_url += "&address=%s" % quote(self.home)
+        geocoding = get(geocoding_url).json()
 
-    # Look up the weather forecast.
-    forecast_url = FORECAST_URL % (DARK_SKY_API_KEY, latitude, longitude)
-    forecast = get(forecast_url).json()
+        if geocoding["status"] != "OK":
+            error(geocoding["error_message"])
+            return ""
 
-    # Get the icon encoding the current weather.
-    icon = forecast["currently"]["icon"]
-    info("Weather: %s" % icon)
+        result = geocoding["results"][0]  # Expect one result.
+        location = result["geometry"]["location"]
+        latitude = float(location["lat"])
+        longitude = float(location["lng"])
 
-    return icon
+        # Look up the weather forecast.
+        forecast_url = FORECAST_URL % (self.dark_sky_api_key, latitude,
+                                       longitude)
+        forecast = get(forecast_url).json()
 
+        # Get the icon encoding the current weather.
+        icon = forecast["currently"]["icon"]
+        info("Weather: %s" % icon)
 
-def is_clear():
-    """Checks if the current weather is clear."""
+        return icon
 
-    icon = _current_icon()
-    return icon in ["clear-day", "clear-night"]
+    def is_clear(self):
+        """Checks if the current weather is clear."""
 
+        icon = self._current_icon()
+        return icon in ["clear-day", "clear-night"]
 
-def is_cloudy():
-    """Checks if the current weather is cloudy."""
+    def is_cloudy(self):
+        """Checks if the current weather is cloudy."""
 
-    icon = _current_icon()
-    return icon == "cloudy"
+        icon = self._current_icon()
+        return icon == "cloudy"
 
+    def is_partly_cloudy(self):
+        """Checks if the current weather is partly cloudy."""
 
-def is_partly_cloudy():
-    """Checks if the current weather is partly cloudy."""
+        icon = self._current_icon()
+        return icon in ["partly-cloudy-day", "partly-cloudy-night"]
 
-    icon = _current_icon()
-    return icon in ["partly-cloudy-day", "partly-cloudy-night"]
+    def is_rainy(self):
+        """Checks if the current weather is rainy."""
 
+        icon = self._current_icon()
+        return icon in ["rain", "sleet"]
 
-def is_rainy():
-    """Checks if the current weather is rainy."""
+    def is_windy(self):
+        """Checks if the current weather is windy."""
 
-    icon = _current_icon()
-    return icon in ["rain", "sleet"]
+        icon = self._current_icon()
+        return icon == "wind"
 
+    def is_snowy(self):
+        """Checks if the current weather is snowy."""
 
-def is_windy():
-    """Checks if the current weather is windy."""
+        icon = self._current_icon()
+        return icon == "snow"
 
-    icon = _current_icon()
-    return icon == "wind"
+    def is_foggy(self):
+        """Checks if the current weather is foggy."""
 
-
-def is_snowy():
-    """Checks if the current weather is snowy."""
-
-    icon = _current_icon()
-    return icon == "snow"
-
-
-def is_foggy():
-    """Checks if the current weather is foggy."""
-
-    icon = _current_icon()
-    return icon == "fog"
+        icon = self._current_icon()
+        return icon == "fog"

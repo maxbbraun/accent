@@ -5,69 +5,76 @@ from datetime import datetime
 from datetime import timedelta
 from logging import info
 
-from now import now
-from user_data import HOME_ADDRESS
-from user_data import MAPS_API_KEY
-from user_data import TIMEZONE
-
-# A reference to a calculator for sunrise and sunset times.
-ASTRAL = Astral(geocoder=GoogleGeocoder, api_key=MAPS_API_KEY)[HOME_ADDRESS]
+from firestore import Firestore
+from local_time import LocalTime
 
 
-def rewrite_cron(cron, after):
-    """Replaces references to sunrise and sunset in a cron expression."""
+class Sun:
+    """A wrapper around a calculator for sunrise and sunset times."""
 
-    # Skip if there is nothing to rewrite.
-    if "sunrise" not in cron and "sunset" not in cron:
-        return cron
+    def __init__(self, user):
+        google_maps_api_key = Firestore().google_maps_api_key()
+        home = user.get("home")
+        self.astral = Astral(geocoder=GoogleGeocoder,
+                             api_key=google_maps_api_key)[home]
+        self.local_time = LocalTime(user)
 
-    # Determine the first two days of the cron expression after the reference,
-    # which covers all candidate sunrises and sunsets.
-    yesterday = after - timedelta(days=1)
-    midnight_cron = cron.replace("sunrise", "0 0").replace("sunset", "0 0")
-    first_day = croniter(midnight_cron, yesterday).get_next(datetime)
-    second_day = croniter(midnight_cron, first_day).get_next(datetime)
+    def rewrite_cron(self, cron, after):
+        """Replaces references to sunrise and sunset in a cron expression."""
 
-    # Calculate the closest future sunrise time and replace the term in the
-    # cron expression with minutes and hours.
-    if "sunrise" in cron:
-        sunrises = map(lambda x: ASTRAL.sunrise(x).astimezone(TIMEZONE),
-                       [first_day, second_day])
-        next_sunrise = min(filter(lambda x: x >= after, sunrises))
-        sunrise_cron = cron.replace("sunrise", "%d %d" % (next_sunrise.minute,
-                                                          next_sunrise.hour))
-        info("Rewrote cron: (%s) -> (%s), after %s" % (
-             cron,
-             sunrise_cron,
-             after.strftime("%A %B %d %Y %H:%M:%S %Z")))
-        return sunrise_cron
+        # Skip if there is nothing to rewrite.
+        if "sunrise" not in cron and "sunset" not in cron:
+            return cron
 
-    # Calculate the closest future sunset time and replace the term in the cron
-    # expression with minutes and hours.
-    if "sunset" in cron:
-        sunsets = map(lambda x: ASTRAL.sunset(x).astimezone(TIMEZONE),
-                      [first_day, second_day])
-        next_sunset = min(filter(lambda x: x >= after, sunsets))
-        sunset_cron = cron.replace("sunset", "%d %d" % (next_sunset.minute,
-                                                        next_sunset.hour))
-        info("Rewrote cron: (%s) -> (%s), after %s" % (
-             cron,
-             sunset_cron,
-             after.strftime("%A %B %d %Y %H:%M:%S %Z")))
-        return sunset_cron
+        # Determine the first two days of the cron expression after the
+        # reference, which covers all candidate sunrises and sunsets.
+        yesterday = after - timedelta(days=1)
+        midnight_cron = cron.replace("sunrise", "0 0").replace("sunset", "0 0")
+        first_day = croniter(midnight_cron, yesterday).get_next(datetime)
+        second_day = croniter(midnight_cron, first_day).get_next(datetime)
 
+        zone = self.local_time.zone()
 
-def is_daylight():
-    """Calculates whether the sun is currently up."""
+        # Calculate the closest future sunrise time and replace the term in the
+        # cron expression with minutes and hours.
+        if "sunrise" in cron:
+            sunrises = map(lambda x: self.astral.sunrise(x).astimezone(zone),
+                           [first_day, second_day])
+            next_sunrise = min(filter(lambda x: x >= after, sunrises))
+            sunrise_cron = cron.replace("sunrise", "%d %d" % (
+                next_sunrise.minute, next_sunrise.hour))
+            info("Rewrote cron: (%s) -> (%s), after %s" % (
+                cron,
+                sunrise_cron,
+                after.strftime("%A %B %d %Y %H:%M:%S %Z")))
+            return sunrise_cron
 
-    # Find the sunrise and sunset times for today.
-    time = now()
-    sunrise = ASTRAL.sunrise(time).astimezone(TIMEZONE)
-    sunset = ASTRAL.sunset(time).astimezone(TIMEZONE)
+        # Calculate the closest future sunset time and replace the term in the
+        # cron expression with minutes and hours.
+        if "sunset" in cron:
+            sunsets = map(lambda x: self.astral.sunset(x).astimezone(zone),
+                          [first_day, second_day])
+            next_sunset = min(filter(lambda x: x >= after, sunsets))
+            sunset_cron = cron.replace("sunset", "%d %d" % (next_sunset.minute,
+                                                            next_sunset.hour))
+            info("Rewrote cron: (%s) -> (%s), after %s" % (
+                cron,
+                sunset_cron,
+                after.strftime("%A %B %d %Y %H:%M:%S %Z")))
+            return sunset_cron
 
-    is_daylight = time > sunrise and time < sunset
+    def is_daylight(self):
+        """Calculates whether the sun is currently up."""
 
-    info("Daylight: %s (%s)" % (is_daylight,
-                                time.strftime("%A %B %d %Y %H:%M:%S %Z")))
+        # Find the sunrise and sunset times for today.
+        time = self.local_time.now()
+        zone = self.local_time.zone()
+        sunrise = self.astral.sunrise(time).astimezone(zone)
+        sunset = self.astral.sunset(time).astimezone(zone)
 
-    return is_daylight
+        is_daylight = time > sunrise and time < sunset
+
+        info("Daylight: %s (%s)" % (is_daylight,
+                                    time.strftime("%A %B %d %Y %H:%M:%S %Z")))
+
+        return is_daylight

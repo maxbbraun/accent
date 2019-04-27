@@ -46,7 +46,7 @@ def draw_text(text, font_spec, text_color, xy=None, anchor=None,
         character_widths.append(character_width)
     text_width = sum(character_widths)
 
-    # If no xy is specified, calcuate based on the anchor.
+    # If no xy is specified, calculate based on the anchor.
     text_height = font_spec["height"]
     if xy:
         x = xy[0] - text_width // 2

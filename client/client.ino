@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
 #include <WiFi.h>
+#include <base64.h>
 #include "credentials.h"
 #include "display.h"
 #include "error_image.h"
@@ -89,6 +90,9 @@ bool httpGet(HTTPClient* http, String url) {
 
   // Apply the read timeout after connecting.
   http->setTimeout(read_timeout_ms);
+
+  // Authenticate the request.
+  addAuthHeader(http);
 
   int status = http->GET();
   if (status <= 0) {
@@ -193,4 +197,15 @@ void showErrorImage() {
   } while (error_image_ptr < error_image_end);
 
   updateDisplay();
+}
+
+// Adds a basic access authentication header to the HTTP request.
+void addAuthHeader(HTTPClient* http) {
+  // Use the Wifi MAC address as the unique client ID.
+  String client_id = WiFi.macAddress();
+  client_id.replace(":", "");  // Disallowed character
+
+  // Add the header with the Base64-encoded authorization (no username).
+  String authorization = base64::encode(":" + client_id);
+  http->addHeader("Authorization", "Basic " + authorization);
 }
