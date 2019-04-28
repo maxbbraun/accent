@@ -16,12 +16,12 @@ class Firestore:
             initialize_app(ApplicationDefault(), {
                 "projectId": environ["GOOGLE_CLOUD_PROJECT"],
             })
+        self.db = firestore_client()
 
     def _api_key(self, service):
         """Retrieves the API key for the specified service."""
 
-        db = firestore_client()
-        service = db.collection("api_keys").document(service).get()
+        service = self.db.collection("api_keys").document(service).get()
         if not service.exists:
             return None
 
@@ -40,9 +40,16 @@ class Firestore:
     def user(self, key):
         """Retrieves the user matching the specified key."""
 
-        db = firestore_client()
-        user = db.collection("users").document(key).get()
+        user = self.db.collection("users").document(key).get()
         if not user.exists:
             return None
 
         return user
+
+    def update_user(self, key, data):
+        """Replaces the data for the user matching the specified key."""
+
+        user = self.db.collection("users").document(key)
+        user.set(data)
+
+        return user.get()

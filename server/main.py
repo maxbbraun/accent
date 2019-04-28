@@ -1,5 +1,7 @@
 from flask import Flask
 from flask import redirect
+from flask import render_template
+from flask import request
 from flask import send_file
 from logging import exception
 from time import time
@@ -8,6 +10,7 @@ from artwork import Artwork
 from auth import user_auth
 from city import City
 from commute import Commute
+from firestore import Firestore
 from google_calendar import GoogleCalendar
 from response import epd_response
 from response import png_response
@@ -16,6 +19,9 @@ from schedule import Schedule
 
 # The URL of the Medium story about Accent.
 REDIRECT_URL = "https://medium.com/@maxbraun/meet-accent-352cfa95813a"
+
+# The template for editing user data.
+HELLO_TEMPLATE = "hello.html"
 
 app = Flask(__name__)
 
@@ -97,11 +103,43 @@ def root():
     return redirect(REDIRECT_URL)
 
 
-@app.route("/hello/<key>")
-def hello(key):
-    """Starts the new user flow."""
+@app.route("/hello/<key>", methods=["GET"])
+def hello_get(key):
+    """Responds with a form for editing user data."""
 
-    return text_response("Not implemented yet")
+    # Look up any existing user data.
+    firestore = Firestore()
+    user = firestore.user(key)
+
+    return render_template(HELLO_TEMPLATE, key=key, user=user)
+
+
+@app.route("/hello/<key>", methods=["POST"])
+def hello_post(key):
+    """Saves user data and responds with the updated form."""
+
+    form = request.form
+    firestore = Firestore()
+
+    # Build the schedule from the form data, dropping any empty entries.
+    list_form = form.to_dict(flat=False)
+    schedule_form = zip(list_form["schedule_name"],
+                        list_form["schedule_start"],
+                        list_form["schedule_image"])
+    schedule = [{"name": name, "start": start, "image": image}
+                for name, start, image in schedule_form
+                if name and start and image]
+
+    # Update the existing user data or create a new one.
+    user = firestore.update_user(key, {
+        "time_zone": form["time_zone"],
+        "home": form["home"],
+        "work": form["work"],
+        "travel_mode": form["travel_mode"],
+        "schedule": schedule
+    })
+
+    return render_template(HELLO_TEMPLATE, key=key, user=user)
 
 
 @app.errorhandler(500)
