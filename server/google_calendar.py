@@ -7,29 +7,18 @@ from datetime import timedelta
 from dateutil.parser import parse
 from googleapiclient import discovery
 from googleapiclient.http import build_http
-from logging import error
 from logging import warning
-from oauth2client.file import Storage
+from logging import error
+from oauth2client.client import HttpAccessTokenRefreshError
 from PIL import Image
 from PIL.ImageDraw import Draw
 
 from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
+from firestore import GoogleCalendarStorage
 from graphics import draw_text
 from graphics import SUBVARIO_CONDENSED_MEDIUM
 from local_time import LocalTime
-
-# The file containing Google Calendar API authentication secrets.
-CLIENT_SECRETS_FILE = "g_calendar_secrets.json"
-
-# The file containing Google Calendar API authentication credentials.
-CREDENTIALS_STORAGE_FILE = "g_calendar_credentials.json"
-
-# The error shown for missing authentication credentials.
-CREDENTIALS_ERROR = (
-    "Update g_calendar_secrets.json and g_calendar_credentials.json by followi"
-    "ng these instructions: https://colab.research.google.com/drive/1mcgu_8cxx"
-    "b-MMDKICr8oy9kFPSFPYlZ7#sandboxMode=true&scrollTo=ThqaE4cyA4R1")
 
 # The name of the Google Calendar API.
 API_NAME = "calendar"
@@ -80,8 +69,9 @@ MAX_EVENTS = 3
 class GoogleCalendar:
     """A monthly calendar backed by the Google Calendar API."""
 
-    def __init__(self, user):
+    def __init__(self, key, user):
         self.local_time = LocalTime(user)
+        self.storage = GoogleCalendarStorage(key)
 
     def _days_range(self, start, end):
         """Returns a list of days of the month between two datetimes."""
@@ -95,24 +85,12 @@ class GoogleCalendar:
     def _event_counts(self, time):
         """Retrieves a daily count of events using the Google Calendar API."""
 
-        event_counts = Counter()
-
-        # Read the credentials from file or use the auth flow to create it.
-        storage = Storage(CREDENTIALS_STORAGE_FILE)
-        credentials = storage.get()
-        if not credentials or credentials.invalid:
-            error(CREDENTIALS_ERROR)
-            return event_counts
-
         # Create an authorized connection to the API.
-        http = build_http()
-        if credentials.access_token_expired:
-            try:
-                credentials.refresh(http)
-                storage.put(credentials)
-            except IOError as e:
-                warning("Failed to save credentials: %s", e)
-        authed_http = credentials.authorize(http=http)
+        credentials = self.storage.get()
+        if not credentials:
+            error("No valid Google Calendar credentials.")
+            return Counter()
+        authed_http = credentials.authorize(http=build_http())
         service = discovery.build(API_NAME, API_VERSION, http=authed_http,
                                   cache_discovery=False)
 
@@ -122,6 +100,7 @@ class GoogleCalendar:
         _, last_day = monthrange(time.year, time.month)
         last_date = first_date.replace(day=last_day)
         page_token = None
+        event_counts = Counter()
         while True:
             # Request this month's events.
             request = service.events().list(calendarId=CALENDAR_ID,
@@ -129,7 +108,11 @@ class GoogleCalendar:
                                             timeMax=last_date.isoformat(),
                                             singleEvents=True,
                                             pageToken=page_token)
-            response = request.execute()
+            try:
+                response = request.execute()
+            except HttpAccessTokenRefreshError as e:
+                warning("Google Calendar request failed: %s" % e)
+                return Counter()
 
             # Iterate over the events from the current page.
             for event in response["items"]:

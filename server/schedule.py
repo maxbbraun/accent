@@ -30,14 +30,14 @@ class Schedule:
              are "artwork", "city", "commute", and "calendar".
     """
 
-    def __init__(self, user):
+    def __init__(self, key, user):
         self.local_time = LocalTime(user)
         self.sun = Sun(user)
         self.schedule = user.get("schedule")
         self.artwork = Artwork(user)
         self.city = City(user)
         self.commute = Commute(user)
-        self.calendar = GoogleCalendar(user)
+        self.calendar = GoogleCalendar(key, user)
 
     def _next(self, cron, after):
         """Finds the next time matching the cron expression."""

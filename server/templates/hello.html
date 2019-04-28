@@ -12,12 +12,11 @@
                 padding: 12pt;
             }
 
-            input {
+            input, select {
                 font-family: 'Roboto', sans-serif;
                 font-size: 12pt;
                 padding: 4pt;
                 margin-bottom: 12pt;
-                margin-right: 12pt;
                 background-color: white;
             }
 
@@ -26,7 +25,7 @@
                 font-weight: 400;
             }
 
-            input[type=submit] {
+            input[type=submit], input[type=button] {
                 border: 2pt solid black;
                 font-weight: 700;
                 width: 100pt;
@@ -34,47 +33,72 @@
 
             label {
                 font-weight: 700;
+                margin: 4pt;
             }
         </style>
     </head>
     <body>
         <form method="post" action="{{ url_for('hello_post', key=key) }}">
-            <label for="time_zone"><a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">Time zone</a>:</label>
-            {% set time_zone = user.get('time_zone') if user and 'time_zone' in user._data else '' %}
-            <input type="text" name="time_zone" size="30" placeholder="America/Los_Angeles" value="{{ time_zone }}"><br />
+            <label for="time_zone">Time zone:</label>
+            {% set time_zone = user.get('time_zone') if user and 'time_zone' in user._data else 'America/Los_Angeles' %}
+            <select name="time_zone">
+            {% for list_time_zone in time_zones %}
+                <option value="{{ list_time_zone }}"{% if time_zone == list_time_zone %} selected{% endif %}>{{ list_time_zone }}</option>
+            {% endfor %}
+            </select><br />
             <label for="home">Home:</label>
             {% set home = user.get('home') if user and 'home' in user._data else '' %}
             <input type="text" name="home" size="50" placeholder="San Francisco" value="{{ home }}"><br />
             <label for="work">Work:</label>
             {% set work = user.get('work') if user and 'work' in user._data else '' %}
             <input type="text" name="work" size="50" placeholder="Mountain View" value="{{ work }}"><br />
-            <label for="travel_mode"><a href="https://developers.google.com/maps/documentation/directions/intro#TravelModes" target="_blank">Travel mode</a>:</label>
-            {% set travel_mode = user.get('travel_mode') if user and 'travel_mode' in user._data else '' %}
-            <input type="text" name="travel_mode" size="20" placeholder="driving" value="{{ travel_mode }}"><br />
+            <label for="travel_mode">Travel mode:</label>
+            {% set travel_mode = user.get('travel_mode') if user and 'travel_mode' in user._data else 'driving' %}
+            <select name="travel_mode">
+                <option value="driving"{% if travel_mode == 'driving' %} selected{% endif %}>driving</option>
+                <option value="walking"{% if travel_mode == 'walking' %} selected{% endif %}>walking</option>
+                <option value="bicycling"{% if travel_mode == 'bicycling' %} selected{% endif %}>bicycling</option>
+                <option value="transit"{% if travel_mode == 'transit' %} selected{% endif %}>transit</option>
+            </select><br />
+            <i>Schedule start times use the <a href="https://en.wikipedia.org/wiki/Cron#CRON_expression" target="_blank">cron expression</a> format, plus "sunrise" or "sunset" in place of hours and minutes.</i><br /><br />
             {% set schedule_name_placeholder = 'City Sunrise' %}
             {% set schedule_start_placeholder = 'sunrise * * *' %}
-            {% set schedule_image_placeholder = 'city' %}
-            {% set schedule_image_link = 'https://github.com/maxbbraun/accent/blob/master/server/schedule.py#L30' %}
             {% if user and 'schedule' in user._data %}
                 {% for entry in user.get('schedule') %}
-                    Schedule #{{ loop.index }} &ndash;
+                    Schedule #{{ loop.index }}
                     <label for="schedule_name">Name:</label>
                     <input type="text" name="schedule_name" size="30" placeholder="{{ schedule_name_placeholder }}" value="{{ entry['name'] }}">
                     <label for="schedule_start">Start:</label>
                     <input type="text" name="schedule_start" size="20" placeholder="{{ schedule_start_placeholder }}" value="{{ entry['start'] }}">
-                    <label for="schedule_image"><a href="{{ schedule_image_link }}" target="_blank">Image</a>:</label>
-                    <input type="text" name="schedule_image" size="20" placeholder="{{ schedule_image_placeholder }}" value="{{ entry['image'] }}"><br />
+                    <label for="schedule_image">Image:</label>
+                    <select name="schedule_image">
+                        <option value="artwork"{% if entry['image'] == 'artwork' %} selected{% endif %}>artwork</option>
+                        <option value="city"{% if entry['image'] == 'city' %} selected{% endif %}>city</option>
+                        <option value="commute"{% if entry['image'] == 'commute' %} selected{% endif %}>commute</option>
+                        <option value="calendar"{% if entry['image'] == 'calendar' %} selected{% endif %}>calendar</option>
+                    </select><br />
                 {% endfor %}
             {% endif %}
             {% set next_index = user.get('schedule') | length + 1 if user and 'schedule' in user._data else 1 %}
-            Schedule #{{ next_index }} &ndash;
+            Schedule #{{ next_index }}
             <label for="schedule_name">Name:</label>
             <input type="text" name="schedule_name" size="30" placeholder="{{ schedule_name_placeholder }}">
             <label for="schedule_start">Start:</label>
             <input type="text" name="schedule_start" size="20" placeholder="{{ schedule_start_placeholder }}">
-            <label for="schedule_image"><a href="{{ schedule_image_link }}" target="_blank">Image</a>:</label>
-            <input type="text" name="schedule_image" size="20" placeholder="{{ schedule_image_placeholder }}"><br />
-            <input type="submit" />
-        </form>
+            <label for="schedule_image">Image:</label>
+            <select name="schedule_image">
+                <option value="artwork">artwork</option>
+                <option value="city" selected>city</option>
+                <option value="commute">commute</option>
+                <option value="calendar">calendar</option>
+            </select><br />
+            <input type="submit" value="Save" />
+        </form><br />
+        <label for="calendar_connected">Google Calendar:</label>
+        {% if calendar_connected %}
+        <input type="button" name="calendar_disconnect" onclick="window.location.href = '{{ calendar_disconnect_url | safe }}'" value="Disconnect" />
+        {% else %}
+        <input type="button" name="calendar_connect" onclick="window.location.href = '{{ calendar_connect_url | safe }}'" value="Connect" />
+        {% endif %}
     </body>
 </html>
