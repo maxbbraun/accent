@@ -27,11 +27,20 @@ ACCOUNT_ACCESS_URL = "https://myaccount.google.com/permissions"
 # The regular expression a user key has to match.
 KEY_PATTERN = re_compile("^[a-zA-Z0-9]+$")
 
+# The time in milliseconds to return in an unauthorized next request.
+NEXT_RETRY_DELAY_MILLIS = 5 * 60 * 1000  # 5 minutes
+
 
 def _forbidden_response():
     """Creates a simple forbidden status response."""
 
     return Response(status=403)
+
+
+def next_retry_response():
+    """Creates a response for a next request with a fixed retry time."""
+
+    return text_response(str(NEXT_RETRY_DELAY_MILLIS))
 
 
 def settings_url(key):
@@ -80,7 +89,7 @@ def validate_key(func):
     return wrapper
 
 
-def user_auth(image_func=None):
+def user_auth(image_response=None, bad_response=_forbidden_response):
     """A decorator for Flask route functions to enforce user authentication."""
 
     firestore = Firestore()
@@ -96,22 +105,22 @@ def user_auth(image_func=None):
                 # Otherwise, expect a basic access authentication header.
                 authorization = request.authorization
                 if not authorization:
-                    return _forbidden_response()
+                    return bad_response()
                 key = authorization["password"]
 
             # Disallow malformed keys.
             if not _valid_key(key):
-                return _forbidden_response()
+                return bad_response()
 
             # Look up the user from the key.
             user = firestore.user(key)
             if not user:
-                if image_func:
+                if image_response:
                     # For image requests, start the new user flow.
-                    return _settings_response(key, image_func)
+                    return _settings_response(key, image_response)
                 else:
                     # Otherwise, return a forbidden response.
-                    return _forbidden_response()
+                    return bad_response()
 
             # Inject the key and user into the function arguments.
             kwargs["key"] = key

@@ -14,6 +14,7 @@ from artwork import Artwork
 from auth import ACCOUNT_ACCESS_URL
 from auth import google_calendar_step1
 from auth import google_calendar_step2
+from auth import next_retry_response
 from auth import settings_url
 from auth import user_auth
 from auth import validate_key
@@ -38,7 +39,7 @@ app = Flask(__name__)
 
 
 @app.route("/artwork")
-@user_auth(png_response)
+@user_auth(image_response=png_response)
 def artwork(key=None, user=None):
     """Responds with a PNG version of the artwork image."""
 
@@ -48,7 +49,7 @@ def artwork(key=None, user=None):
 
 
 @app.route("/city")
-@user_auth(png_response)
+@user_auth(image_response=png_response)
 def city(key=None, user=None):
     """Responds with a PNG version of the city image."""
 
@@ -58,7 +59,7 @@ def city(key=None, user=None):
 
 
 @app.route("/commute")
-@user_auth(png_response)
+@user_auth(image_response=png_response)
 def commute(key=None, user=None):
     """Responds with a PNG version of the commute image."""
 
@@ -68,7 +69,7 @@ def commute(key=None, user=None):
 
 
 @app.route("/calendar")
-@user_auth(png_response)
+@user_auth(image_response=png_response)
 def calendar(key=None, user=None):
     """Responds with a PNG version of the calendar image."""
 
@@ -78,7 +79,7 @@ def calendar(key=None, user=None):
 
 
 @app.route("/png")
-@user_auth(png_response)
+@user_auth(image_response=png_response)
 def png(key=None, user=None):
     """Responds with a PNG version of the scheduled image."""
 
@@ -88,7 +89,7 @@ def png(key=None, user=None):
 
 
 @app.route("/epd")
-@user_auth(epd_response)
+@user_auth(image_response=epd_response)
 def epd(key=None, user=None):
     """Responds with an e-paper display version of the scheduled image."""
 
@@ -98,7 +99,7 @@ def epd(key=None, user=None):
 
 
 @app.route("/next")
-@user_auth()
+@user_auth(bad_response=next_retry_response)
 def next(key=None, user=None):
     """Responds with the milliseconds until the next image."""
 
