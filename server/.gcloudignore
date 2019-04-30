@@ -8,5 +8,6 @@
 __pycache__/
 /setup.cfg
 
-# Local tools
+# Client only
 client_image.py
+assets/client/
