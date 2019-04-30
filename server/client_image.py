@@ -5,7 +5,7 @@
 from absl import app
 from absl import flags
 from ntpath import basename
-from ntpath import splitext
+from os import extsep
 from PIL import Image
 from six import iterbytes
 
@@ -17,6 +17,9 @@ flags.DEFINE_string("input", "assets/client/error.gif",
 
 # The string format of the output file path.
 OUTPUT_PATH_FORMAT = "../client/%s_image.h"
+
+# The string format of the header include guard.
+INCLUDE_GUARD_FORMAT = "%s_%s"
 
 # The string format of the variable name.
 VARIABLE_NAME_FORMAT = "%s_image"
@@ -36,9 +39,10 @@ BYTES_PER_LINE = (COLUMNS - len(LINE_FORMAT % "")) // len(BYTE_FORMAT % 0)
 
 def main(_):
     source_filename = basename(FLAGS.input)
-    base_name = splitext(source_filename)[0]
+    base_name = source_filename.split(extsep)[0]
     output_path = OUTPUT_PATH_FORMAT % base_name
-    include_guard = basename(output_path).replace(".", "_")
+    include_guard = INCLUDE_GUARD_FORMAT % tuple(basename(output_path).split(
+        extsep))
     variable_name = VARIABLE_NAME_FORMAT % base_name
     script_filename = basename(__file__)
 
