@@ -1,8 +1,7 @@
 #ifndef error_image_h
 #define error_image_h
 
-// A 2-bit image to show when an error occurs.
-// Based on this graphic: https://db.eboy.com/spritebox/hi9BihdXY4TjkeHrT
+// Generated from "error.gif" using "client_image.py".
 const char error_image[] =
     "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
     "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"

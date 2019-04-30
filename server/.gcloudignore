@@ -9,4 +9,4 @@ __pycache__/
 /setup.cfg
 
 # Local tools
-error_image.py
+client_image.py
