@@ -25,7 +25,7 @@ GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.readonly"
 ACCOUNT_ACCESS_URL = "https://myaccount.google.com/permissions"
 
 # The regular expression a user key has to match.
-KEY_PATTERN = re_compile("^[a-zA-Z0-9]+$")
+KEY_PATTERN = re_compile("^[a-zA-Z0-9]{12}$")
 
 # The time in milliseconds to return in an unauthorized next request.
 NEXT_RETRY_DELAY_MILLIS = 5 * 60 * 1000  # 5 minutes
