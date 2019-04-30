@@ -22,7 +22,7 @@ OUTPUT_PATH_FORMAT = "../client/%s_image.h"
 INCLUDE_GUARD_FORMAT = "%s_%s"
 
 # The string format of the variable name.
-VARIABLE_NAME_FORMAT = "%s_image"
+VARIABLE_NAME_FORMAT = "k%sImage"
 
 # The number of columns in the file.
 COLUMNS = 80
@@ -43,7 +43,7 @@ def main(_):
     output_path = OUTPUT_PATH_FORMAT % base_name
     include_guard = INCLUDE_GUARD_FORMAT % tuple(basename(output_path).split(
         extsep))
-    variable_name = VARIABLE_NAME_FORMAT % base_name
+    variable_name = VARIABLE_NAME_FORMAT % base_name.title()
     script_filename = basename(__file__)
 
     with open(output_path, "w") as output:

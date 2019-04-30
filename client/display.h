@@ -3,6 +3,9 @@
 
 #include <Arduino.h>
 
+// The length in bytes per chunk when sending a static image.
+const size_t kStaticImageChunkLength = 1024;
+
 // SPI pins.
 #define PIN_SPI_SCK 13
 #define PIN_SPI_DIN 14
@@ -167,6 +170,24 @@ void updateDisplay() {
   sendCommand(0x02);  // POWER_OFF
   waitForIdle();
   sendCommand1(0x07, 0xA5);  // DEEP_SLEEP
+}
+
+// Shows a static image.
+void showStaticImage(const char* image, unsigned long length) {
+  Serial.println("Showing static image");
+
+  initDisplay();
+
+  const char* image_ptr = image;
+  const char* image_end = image_ptr + length - 1 /* null terminator */;
+  do {
+    size_t chunk_length = min(kStaticImageChunkLength,
+                              static_cast<size_t>(image_end - image_ptr));
+    loadImage(image_ptr, chunk_length);
+    image_ptr += chunk_length;
+  } while (image_ptr < image_end);
+
+  updateDisplay();
 }
 
 #endif  // display_h
