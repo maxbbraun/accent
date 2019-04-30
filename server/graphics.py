@@ -46,13 +46,19 @@ def draw_text(text, font_spec, text_color, xy=None, anchor=None,
         character_widths.append(character_width)
     text_width = sum(character_widths)
 
-    # If no xy is specified, calculate based on the anchor.
+    # If any xy is specified, use it.
     text_height = font_spec["height"]
     if xy:
         x = xy[0] - text_width // 2
         y = xy[1] - text_height // 2
-    elif anchor == "center":
+
+    # If any anchor is specified, adjust the xy.
+    if anchor == "center":
         x = image.width // 2 - text_width // 2
+        y = image.height // 2 - text_height // 2
+    elif anchor == "center_x":
+        x = image.width // 2 - text_width // 2
+    elif anchor == "center_y":
         y = image.height // 2 - text_height // 2
     elif anchor == "bottom_right":
         x = image.width - box_padding - border_width - text_width
