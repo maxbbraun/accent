@@ -30,6 +30,15 @@ KEY_PATTERN = re_compile("^[a-zA-Z0-9]{12}$")
 # The time in milliseconds to return in an unauthorized next request.
 NEXT_RETRY_DELAY_MILLIS = 5 * 60 * 1000  # 5 minutes
 
+# The image file for the computer in the settings image.
+COMPUTER_FILE = "assets/computer.gif"
+
+# The position of the computer in the settings image.
+COMPUTER_XY = (296, 145)
+
+# The position of the link text in the settings image.
+LINK_TEXT_XY = (0, 228)
+
 
 def _forbidden_response():
     """Creates a simple forbidden status response."""
@@ -58,14 +67,17 @@ def verify_scope(scope):
 def _settings_response(key, image_func):
     """Creates an image response to start the new user flow."""
 
-    # Draw the image with the link text.
+    # Draw the image with the link text and a computer.
     image = Image.new(mode="RGB", size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
                       color=BACKGROUND_COLOR)
     draw_text(settings_url(key),
               font_spec=SUBVARIO_CONDENSED_MEDIUM,
               text_color=TEXT_COLOR,
-              anchor="center",
+              xy=LINK_TEXT_XY,
+              anchor="center_x",
               image=image)
+    computer = Image.open(COMPUTER_FILE).convert(mode="RGBA")
+    image.paste(computer, box=COMPUTER_XY, mask=computer)
 
     return image_func(image)
 
