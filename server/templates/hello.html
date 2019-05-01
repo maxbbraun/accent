@@ -36,6 +36,13 @@
                 margin: 4pt;
             }
         </style>
+        <script type="text/javascript">
+            function previewSelection(scheduleImageId) {
+                const select = document.getElementById(scheduleImageId);
+                const option = select.options[select.selectedIndex];
+                window.open('/' + option.value + '?key={{ key }}', '_blank');
+            }
+        </script>
     </head>
     <body>
         <form method="post" action="{{ url_for('hello_post', key=key) }}">
@@ -71,12 +78,14 @@
                     <label for="schedule_start">Start:</label>
                     <input type="text" name="schedule_start" size="20" placeholder="{{ schedule_start_placeholder }}" value="{{ entry['start'] }}">
                     <label for="schedule_image">Image:</label>
-                    <select name="schedule_image">
+                    {% set schedule_image_id = 'schedule_image_' ~ loop.index %}
+                    <select name="schedule_image" id="{{ schedule_image_id }}">
                         <option value="artwork"{% if entry['image'] == 'artwork' %} selected{% endif %}>artwork</option>
                         <option value="city"{% if entry['image'] == 'city' %} selected{% endif %}>city</option>
                         <option value="commute"{% if entry['image'] == 'commute' %} selected{% endif %}>commute</option>
                         <option value="calendar"{% if entry['image'] == 'calendar' %} selected{% endif %}>calendar</option>
-                    </select><br />
+                    </select> &nbsp;
+                    <input type="button" name="preview" onclick="previewSelection('{{ schedule_image_id }}')" value="Preview" /><br />
                 {% endfor %}
             {% endif %}
             {% set next_index = user.get('schedule') | length + 1 if user and 'schedule' in user._data else 1 %}
@@ -86,19 +95,21 @@
             <label for="schedule_start">Start:</label>
             <input type="text" name="schedule_start" size="20" placeholder="{{ schedule_start_placeholder }}">
             <label for="schedule_image">Image:</label>
-            <select name="schedule_image">
+            {% set schedule_image_id = 'schedule_image_' ~ next_index %}
+            <select name="schedule_image" id="{{ schedule_image_id }}">
                 <option value="artwork">artwork</option>
                 <option value="city" selected>city</option>
                 <option value="commute">commute</option>
                 <option value="calendar">calendar</option>
-            </select><br />
+            </select> &nbsp;
+            <input type="button" name="preview" onclick="previewSelection('{{ schedule_image_id }}')" value="Preview" /><br />
             <input type="submit" value="Save" />
         </form><br />
         <label for="calendar_connected">Google Calendar:</label>
         {% if calendar_connected %}
-        <input type="button" name="calendar_disconnect" onclick="window.location.href = '{{ calendar_disconnect_url | safe }}'" value="Disconnect" />
+        <input type="button" name="calendar_disconnect" onclick="window.open('{{ calendar_disconnect_url | safe }}', '_blank')" value="Disconnect" />
         {% else %}
-        <input type="button" name="calendar_connect" onclick="window.location.href = '{{ calendar_connect_url | safe }}'" value="Connect" />
+        <input type="button" name="calendar_connect" onclick="window.open('{{ calendar_connect_url | safe }}', '_self')" value="Connect" />
         {% endif %}
     </body>
 </html>
