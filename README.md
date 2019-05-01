@@ -30,7 +30,7 @@ To test and deploy the server:
    - [/hello/<USER_KEY>](http://localhost:8080/hello/<USER_KEY>) for the settings UI to edit user-specific data.
    - [/next?key=<USER_KEY>](http://localhost:8080/next?key=<USER_KEY>) for the time in milliseconds until the next schedule entry.
    - [/epd?key=<USER_KEY>](http://localhost:8080/epd?key=<USER_KEY>) for the currently scheduled 2-bit image used by the e-paper display.
-   - [/png?key=<USER_KEY>](http://localhost:8080/png?key=<USER_KEY>) for a PNG version of the currently scheduled image for easier debugging.
+   - [/gif?key=<USER_KEY>](http://localhost:8080/gif?key=<USER_KEY>) for a GIF version of the currently scheduled image for testing.
    - [/artwork?key=<USER_KEY>](http://localhost:8080/artwork?key=<USER_KEY>) to bypass the schedule and get the artwork image directly.
    - [/city?key=<USER_KEY>](http://localhost:8080/city?key=<USER_KEY>) to bypass the schedule and get the city image directly.
    - [/commute?key=<USER_KEY>](http://localhost:8080/commute?key=<USER_KEY>) to bypass the schedule and get the commute image directly.

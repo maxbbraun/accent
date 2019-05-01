@@ -25,7 +25,7 @@ from firestore import Firestore
 from firestore import GoogleCalendarStorage
 from google_calendar import GoogleCalendar
 from response import epd_response
-from response import png_response
+from response import gif_response
 from response import text_response
 from schedule import Schedule
 
@@ -39,53 +39,53 @@ app = Flask(__name__)
 
 
 @app.route("/artwork")
-@user_auth(image_response=png_response)
+@user_auth(image_response=gif_response)
 def artwork(key=None, user=None):
-    """Responds with a PNG version of the artwork image."""
+    """Responds with a GIF version of the artwork image."""
 
     artwork = Artwork(user)
     image = artwork.image()
-    return png_response(image)
+    return gif_response(image)
 
 
 @app.route("/city")
-@user_auth(image_response=png_response)
+@user_auth(image_response=gif_response)
 def city(key=None, user=None):
-    """Responds with a PNG version of the city image."""
+    """Responds with a GIF version of the city image."""
 
     city = City(user)
     image = city.image()
-    return png_response(image)
+    return gif_response(image)
 
 
 @app.route("/commute")
-@user_auth(image_response=png_response)
+@user_auth(image_response=gif_response)
 def commute(key=None, user=None):
-    """Responds with a PNG version of the commute image."""
+    """Responds with a GIF version of the commute image."""
 
     commute = Commute(user)
     image = commute.image()
-    return png_response(image)
+    return gif_response(image)
 
 
 @app.route("/calendar")
-@user_auth(image_response=png_response)
+@user_auth(image_response=gif_response)
 def calendar(key=None, user=None):
-    """Responds with a PNG version of the calendar image."""
+    """Responds with a GIF version of the calendar image."""
 
     calendar = GoogleCalendar(key, user)
     image = calendar.image()
-    return png_response(image)
+    return gif_response(image)
 
 
-@app.route("/png")
-@user_auth(image_response=png_response)
-def png(key=None, user=None):
-    """Responds with a PNG version of the scheduled image."""
+@app.route("/gif")
+@user_auth(image_response=gif_response)
+def gif(key=None, user=None):
+    """Responds with a GIF version of the scheduled image."""
 
     schedule = Schedule(key, user)
     image = schedule.image()
-    return png_response(image)
+    return gif_response(image)
 
 
 @app.route("/epd")

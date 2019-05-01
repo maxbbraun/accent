@@ -6,15 +6,15 @@ from epd import bwr_bytes
 from epd import bwr_image
 
 
-def png_response(image):
-    """Creates a Flask PNG response from the specified image."""
+def gif_response(image):
+    """Creates a Flask GIF response from the specified image."""
 
     buffer = BytesIO()
     image = bwr_image(image)
-    image.save(buffer, format="png")
+    image.save(buffer, format="gif")
     buffer.seek(0)
 
-    return send_file(buffer, mimetype="image/png", cache_timeout=0)
+    return send_file(buffer, mimetype="image/gif", cache_timeout=0)
 
 
 def epd_response(image):
