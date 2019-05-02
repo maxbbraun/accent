@@ -1,8 +1,8 @@
 #include <Arduino.h>
-#include "display.h"
-#include "error_image.h"
-#include "sleep.h"
-#include "wifi.h"
+#include "Display.h"
+#include "ErrorImage.h"
+#include "Network.h"
+#include "Power.h"
 
 // Display: https://www.waveshare.com/wiki/7.5inch_e-Paper_HAT_(B)
 // Board: https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board
@@ -19,7 +19,12 @@ const String kServerBaseUrl = "https://accent.ink/";
 const size_t kStreamBufferSize = 1024;
 
 // The time in milliseconds to wait before restarting after an error.
-uint64_t kRestartDelayMs = 60 * 60 * 1000;
+uint64_t kRestartDelayMs = 60 * 60 * 1000;  // 1 hour
+
+// Helper library instances.
+Display display;
+Network network;
+Power power;
 
 void setup() {
   // Workaround for a bug where sometimes waking up from deep sleep fails.
@@ -29,12 +34,12 @@ void setup() {
   Serial.begin(kSerialSpeed);
 
   // Connect to the Wifi access point.
-  connectWifi();
+  network.connectWifi();
 
   // Show the latest image.
-  initDisplay();
+  display.initialize();
   if (downloadImage()) {
-    updateDisplay();
+    display.update();
   }
 
   // Go to sleep until the next refresh.
@@ -43,10 +48,10 @@ void setup() {
 
 void loop() {
   // The setup() function only returns if there was an error.
-  showStaticImage(kErrorImage, sizeof(kErrorImage));
+  display.showStatic(kErrorImage, sizeof(kErrorImage));
 
   Serial.println("Restarting after error");
-  deepSleep(kRestartDelayMs);
+  power.deepSleep(kRestartDelayMs);
 }
 
 // Streams the image from the server and sends it to the display in chunks.
@@ -55,7 +60,7 @@ bool downloadImage() {
   HTTPClient http;
 
   // Request the current image from the server.
-  if (!httpGet(&http, kServerBaseUrl + "epd")) {
+  if (!network.httpGet(&http, kServerBaseUrl + "epd")) {
     return false;
   }
 
@@ -78,7 +83,7 @@ bool downloadImage() {
     Serial.printf("Read %d bytes (%lu total)\n", count, total_count);
 
     // Send the buffer to the display.
-    loadImage(buffer, count);
+    display.load(buffer, count);
   } while (stream->available() > 0);
 
   Serial.println("Download complete");
@@ -92,7 +97,7 @@ void scheduleSleep() {
   HTTPClient http;
 
   // Request the next wake time from the server.
-  if (!httpGet(&http, kServerBaseUrl + "next")) {
+  if (!network.httpGet(&http, kServerBaseUrl + "next")) {
     return;
   }
 
@@ -100,6 +105,6 @@ void scheduleSleep() {
   String delay_ms_str = http.getString();
   http.end();
   Serial.printf("Sleep server response: %s\n", delay_ms_str.c_str());
-  uint64_t delay_ms = strtoull(delay_ms_str.c_str(), NULL, 10);
-  deepSleep(delay_ms);
+  uint64_t delay_ms = strtoull(delay_ms_str.c_str(), nullptr, 10);
+  power.deepSleep(delay_ms);
 }

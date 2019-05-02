@@ -1,5 +1,5 @@
-#ifndef error_image_h
-#define error_image_h
+#ifndef ERROR_IMAGE_H
+#define ERROR_IMAGE_H
 
 // Generated from "error.gif" using "client_image.py".
 const char kErrorImage[] =
@@ -3418,4 +3418,4 @@ const char kErrorImage[] =
     "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
     "\xff\xff\xff\xff\xff\xff";
 
-#endif  // error_image_h
+#endif  // ERROR_IMAGE_H

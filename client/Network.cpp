@@ -1,7 +1,5 @@
-#ifndef wifi_h
-#define wifi_h
+#include "Network.h"
 
-#include <HTTPClient.h>
 #include <WiFi.h>
 #include <base64.h>
 
@@ -40,8 +38,7 @@ const char* kWifiPassword = "PASSWORD";
 // The time in milliseconds before timing out when reading HTTP data.
 const uint16_t kReadTimeoutMs = 30 * 1000;
 
-// Connects to the Wifi access point.
-void connectWifi() {
+void Network::connectWifi() {
   if (WiFi.isConnected()) {
     Serial.println("Already connected");
     return;
@@ -61,19 +58,7 @@ void connectWifi() {
                 WiFi.localIP().toString().c_str());
 }
 
-// Adds a basic access authentication header to the HTTP request.
-void addAuthHeader(HTTPClient* http) {
-  // Use the Wifi MAC address as the unique client ID.
-  String client_id = WiFi.macAddress();
-  client_id.replace(":", "");  // Disallowed character
-
-  // Add the header with the Base64-encoded authorization (no username).
-  String authorization = base64::encode(":" + client_id);
-  http->addHeader("Authorization", "Basic " + authorization);
-}
-
-// Opens a HTTP GET connection with the specified URL.
-bool httpGet(HTTPClient* http, String url) {
+bool Network::httpGet(HTTPClient* http, String url) {
   Serial.printf("Requesting URL: %s\n", url.c_str());
 
   if (!http->begin(url, kRootCertificate)) {
@@ -103,4 +88,12 @@ bool httpGet(HTTPClient* http, String url) {
   return true;
 }
 
-#endif  // wifi_h
+void Network::addAuthHeader(HTTPClient* http) {
+  // Use the Wifi MAC address as the unique client ID.
+  String client_id = WiFi.macAddress();
+  client_id.replace(":", "");  // Disallowed character
+
+  // Add the header with the Base64-encoded authorization (no username).
+  String authorization = base64::encode(":" + client_id);
+  http->addHeader("Authorization", "Basic " + authorization);
+}
