@@ -27,10 +27,6 @@ Network network;
 Power power;
 
 void setup() {
-  // Workaround for a bug where sometimes waking up from deep sleep fails.
-  // https://www.hackster.io/nickthegreek82/esp32-deep-sleep-tutorial-4398a7
-  delay(500);
-
   Serial.begin(kSerialSpeed);
 
   // Connect to the Wifi access point.
