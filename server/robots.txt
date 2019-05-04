@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /hello/*
+Disallow: /artwork
+Disallow: /city
+Disallow: /commute
+Disallow: /calendar
+Disallow: /gif
+Disallow: /epd
+Disallow: /next
+Disallow: /oauth

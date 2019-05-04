@@ -43,6 +43,7 @@
                 window.open('/' + option.value + '?key={{ key }}', '_blank');
             }
         </script>
+        <meta name="robots" content="noindex, nofollow" />
     </head>
     <body>
         <form method="post" action="{{ url_for('hello_post', key=key) }}">
