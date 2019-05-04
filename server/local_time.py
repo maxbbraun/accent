@@ -7,7 +7,7 @@ class LocalTime:
     """A wrapper around the current time in the user's time zone."""
 
     def __init__(self, user):
-        self.timezone = timezone(user.get("time_zone"))
+        self.timezone = timezone(user.get('time_zone'))
 
     def now(self):
         """Calculates the current localized date and time."""

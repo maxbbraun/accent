@@ -23,34 +23,34 @@ class Firestore:
         # Only initialize Firebase once.
         if not len(firebase_apps):
             initialize_app(ApplicationDefault(), {
-                "projectId": environ["GOOGLE_CLOUD_PROJECT"],
+                'projectId': environ['GOOGLE_CLOUD_PROJECT'],
             })
         self.db = firestore_client()
 
     def _api_key(self, service):
         """Retrieves the API key for the specified service."""
 
-        service = self.db.collection("api_keys").document(service).get()
+        service = self.db.collection('api_keys').document(service).get()
         if not service.exists:
             return None
 
-        return service.get("api_key")
+        return service.get('api_key')
 
     def google_maps_api_key(self):
         """Retrieves the Google Maps API key."""
 
-        return self._api_key("google_maps")
+        return self._api_key('google_maps')
 
     def dark_sky_api_key(self):
         """Retrieves the Dark Sky API key."""
 
-        return self._api_key("dark_sky")
+        return self._api_key('dark_sky')
 
     def google_calendar_secrets(self):
         """Loads the Google Calendar API secrets from the database."""
 
-        clients = self.db.collection("oauth_clients")
-        secrets = clients.document("google_calendar").get()
+        clients = self.db.collection('oauth_clients')
+        secrets = clients.document('google_calendar').get()
 
         return secrets.to_dict()
 
@@ -64,9 +64,9 @@ class Firestore:
 
         # Load the credentials from storage.
         try:
-            json = user.get("google_calendar_credentials")
+            json = user.get('google_calendar_credentials')
         except KeyError:
-            warning("Failed to load Google Calendar credentials.")
+            warning('Failed to load Google Calendar credentials.')
             return None
 
         # Use the valid credentials.
@@ -77,14 +77,14 @@ class Firestore:
         # Handle invalidation and expiration.
         if credentials and credentials.access_token_expired:
             try:
-                info("Refreshing Google Calendar credentials.")
+                info('Refreshing Google Calendar credentials.')
                 credentials.refresh(build_http())
                 return credentials
             except HttpAccessTokenRefreshError as e:
-                warning("Google Calendar refresh failed: %s" % e)
+                warning('Google Calendar refresh failed: %s' % e)
 
         # Credentials are missing or refresh failed.
-        warning("Deleting Google Calendar credentials.")
+        warning('Deleting Google Calendar credentials.')
         self.delete_google_calendar_credentials(key)
         return None
 
@@ -92,19 +92,19 @@ class Firestore:
         """Updates the users's Google Calendar credentials."""
 
         self.update_user(key, {
-            "google_calendar_credentials": credentials.to_json()})
+            'google_calendar_credentials': credentials.to_json()})
 
     def delete_google_calendar_credentials(self, key):
         """Deletes the users's Google Calendar credentials."""
 
-        self.update_user(key, {"google_calendar_credentials": DELETE_FIELD})
+        self.update_user(key, {'google_calendar_credentials': DELETE_FIELD})
 
     def user(self, key):
         """Retrieves the user matching the specified key."""
 
-        user = self.db.collection("users").document(key).get()
+        user = self.db.collection('users').document(key).get()
         if not user.exists:
-            error("User not found.")
+            error('User not found.')
             return None
 
         return user
@@ -112,15 +112,15 @@ class Firestore:
     def set_user(self, key, data):
         """Sets the data for the user matching the specified key."""
 
-        user = self.db.collection("users").document(key)
+        user = self.db.collection('users').document(key)
         user.set(data)
 
     def update_user(self, key, fields):
         """Updates the fields for the user matching the specified key."""
 
-        user = self.db.collection("users").document(key)
+        user = self.db.collection('users').document(key)
         if not user.get().exists:
-            error("User not found for update.")
+            error('User not found for update.')
             return
 
         user.update(fields)

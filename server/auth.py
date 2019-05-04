@@ -19,19 +19,19 @@ BACKGROUND_COLOR = (255, 0, 0)
 TEXT_COLOR = (255, 255, 255)
 
 # The scope to request for the Google Calendar API.
-GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.readonly"
+GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly'
 
 # The URL where Google Calendar access can be revoked.
-ACCOUNT_ACCESS_URL = "https://myaccount.google.com/permissions"
+ACCOUNT_ACCESS_URL = 'https://myaccount.google.com/permissions'
 
 # The regular expression a user key has to match.
-KEY_PATTERN = re_compile("^[a-zA-Z0-9]{12}$")
+KEY_PATTERN = re_compile('^[a-zA-Z0-9]{12}$')
 
 # The time in milliseconds to return in an unauthorized next request.
 NEXT_RETRY_DELAY_MILLIS = 5 * 60 * 1000  # 5 minutes
 
 # The image file for the computer in the settings image.
-COMPUTER_FILE = "assets/computer.gif"
+COMPUTER_FILE = 'assets/computer.gif'
 
 # The position of the computer in the settings image.
 COMPUTER_XY = (296, 145)
@@ -55,7 +55,7 @@ def next_retry_response():
 def settings_url(key):
     """Creates the URL for user data settings."""
 
-    return "https://%s/hello/%s" % (request.host, key)
+    return 'https://%s/hello/%s' % (request.host, key)
 
 
 def verify_scope(scope):
@@ -68,15 +68,15 @@ def _settings_response(key, image_func):
     """Creates an image response to start the new user flow."""
 
     # Draw the image with the link text and a computer.
-    image = Image.new(mode="RGB", size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
+    image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
                       color=BACKGROUND_COLOR)
     draw_text(settings_url(key),
               font_spec=SUBVARIO_CONDENSED_MEDIUM,
               text_color=TEXT_COLOR,
               xy=LINK_TEXT_XY,
-              anchor="center_x",
+              anchor='center_x',
               image=image)
-    computer = Image.open(COMPUTER_FILE).convert(mode="RGBA")
+    computer = Image.open(COMPUTER_FILE).convert(mode='RGBA')
     image.paste(computer, box=COMPUTER_XY, mask=computer)
 
     return image_func(image)
@@ -93,7 +93,7 @@ def validate_key(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if not _valid_key(kwargs["key"]):
+        if not _valid_key(kwargs['key']):
             return _forbidden_response()
 
         return func(*args, **kwargs)
@@ -112,13 +112,13 @@ def user_auth(image_response=None, bad_response=_forbidden_response):
         def wrapper(*args, **kwargs):
             try:
                 # Look for a key debug request argument first.
-                key = request.args["key"]
+                key = request.args['key']
             except KeyError:
                 # Otherwise, expect a basic access authentication header.
                 authorization = request.authorization
                 if not authorization:
                     return bad_response()
-                key = authorization["password"]
+                key = authorization['password']
 
             # Disallow malformed keys.
             if not _valid_key(key):
@@ -135,8 +135,8 @@ def user_auth(image_response=None, bad_response=_forbidden_response):
                     return bad_response()
 
             # Inject the key and user into the function arguments.
-            kwargs["key"] = key
-            kwargs["user"] = user
+            kwargs['key'] = key
+            kwargs['user'] = user
             return func(*args, **kwargs)
 
         return wrapper
@@ -147,15 +147,15 @@ def user_auth(image_response=None, bad_response=_forbidden_response):
 def _oauth_redirect_url():
     """Creates the URL handling OAuth redirects."""
 
-    return "http://%s/oauth" % request.host
+    return 'http://%s/oauth' % request.host
 
 
 def _google_calendar_flow(key):
     """Creates the OAuth flow."""
 
     secrets = Firestore().google_calendar_secrets()
-    return OAuth2WebServerFlow(client_id=secrets["client_id"],
-                               client_secret=secrets["client_secret"],
+    return OAuth2WebServerFlow(client_id=secrets['client_id'],
+                               client_secret=secrets['client_secret'],
                                scope=GOOGLE_CALENDAR_SCOPE,
                                state=key,
                                redirect_uri=_oauth_redirect_url())

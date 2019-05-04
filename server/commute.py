@@ -14,10 +14,10 @@ from graphics import SUBVARIO_CONDENSED_MEDIUM
 from local_time import LocalTime
 
 # The endpoint of the Static Map API.
-STATIC_MAP_URL = "https://maps.googleapis.com/maps/api/staticmap"
+STATIC_MAP_URL = 'https://maps.googleapis.com/maps/api/staticmap'
 
 # The endpoint of the Directions API.
-DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
+DIRECTIONS_URL = 'https://maps.googleapis.com/maps/api/directions/json'
 
 # The color of the directions text.
 DIRECTIONS_TEXT_COLOR = (255, 255, 255)
@@ -52,38 +52,38 @@ class Commute:
 
     def __init__(self, user):
         self.local_time = LocalTime(user)
-        self.home = user.get("home")
-        self.work = user.get("work")
-        self.travel_mode = user.get("travel_mode")
+        self.home = user.get('home')
+        self.work = user.get('work')
+        self.travel_mode = user.get('travel_mode')
         self.google_maps_api_key = Firestore().google_maps_api_key()
 
     def _route_url(self, timestamp):
         """Constructs the URL for the Directions API request."""
 
         url = DIRECTIONS_URL
-        url += "?key=%s" % self.google_maps_api_key
-        url += "&origin=%s" % quote(self.home)
-        url += "&destination=%s" % quote(self.work)
-        url += "&mode=%s" % self.travel_mode
-        url += "&departure_time=%d" % timestamp
+        url += '?key=%s' % self.google_maps_api_key
+        url += '&origin=%s' % quote(self.home)
+        url += '&destination=%s' % quote(self.work)
+        url += '&mode=%s' % self.travel_mode
+        url += '&departure_time=%d' % timestamp
         return url
 
     def _static_map_url(self, polyline, width, height):
         """Constructs the URL for the Static Map API request."""
 
         url = STATIC_MAP_URL
-        url += "?key=%s" % self.google_maps_api_key
-        url += "&size=%dx%d" % (width, height)
-        url += "&maptype=roadmap"
-        url += "&style=feature:administrative|visibility:off"
-        url += "&style=feature:poi|visibility:off"
-        url += "&style=feature:all|element:labels|visibility:off"
-        url += "&style=feature:landscape|color:0xffffff"
-        url += "&style=feature:road|color:0x000000"
-        url += "&style=feature:transit|color:0xffffff"
-        url += "&style=feature:transit.line|color:0x000000"
-        url += "&style=feature:water|color:0x000000"
-        url += "&path=color:0xff0000ff|weight:%d|enc:%s" % (PATH_WEIGHT,
+        url += '?key=%s' % self.google_maps_api_key
+        url += '&size=%dx%d' % (width, height)
+        url += '&maptype=roadmap'
+        url += '&style=feature:administrative|visibility:off'
+        url += '&style=feature:poi|visibility:off'
+        url += '&style=feature:all|element:labels|visibility:off'
+        url += '&style=feature:landscape|color:0xffffff'
+        url += '&style=feature:road|color:0x000000'
+        url += '&style=feature:transit|color:0xffffff'
+        url += '&style=feature:transit.line|color:0x000000'
+        url += '&style=feature:water|color:0x000000'
+        url += '&path=color:0xff0000ff|weight:%d|enc:%s' % (PATH_WEIGHT,
                                                             quote(polyline))
         return url
 
@@ -99,40 +99,40 @@ class Commute:
         directions = get(directions_url).json()
 
         # Extract the route polyline, duration, and description.
-        route = directions["routes"][0]  # Expect one route.
-        polyline = route["overview_polyline"]["points"]
-        summary = route["summary"]
-        leg = route["legs"][0]  # Expect one leg.
+        route = directions['routes'][0]  # Expect one route.
+        polyline = route['overview_polyline']['points']
+        summary = route['summary']
+        leg = route['legs'][0]  # Expect one leg.
         try:
-            duration = leg["duration_in_traffic"]["text"]
+            duration = leg['duration_in_traffic']['text']
         except KeyError:
-            duration = leg["duration"]["text"]
+            duration = leg['duration']['text']
 
         # Get the static map as an image.
         image_url = self._static_map_url(polyline, DISPLAY_WIDTH,
                                          DISPLAY_HEIGHT)
         image_response = get(image_url).content
-        image = Image.open(BytesIO(image_response)).convert("RGB")
+        image = Image.open(BytesIO(image_response)).convert('RGB')
 
         # Draw the map copyright notice.
-        copyright_text = u"Map data \xa9%d Google" % time.year
+        copyright_text = u'Map data \xa9%d Google' % time.year
         draw_text(copyright_text,
                   font_spec=SCREENSTAR_SMALL_REGULAR,
                   text_color=COPYRIGHT_TEXT_COLOR,
-                  anchor="bottom_right",
+                  anchor='bottom_right',
                   box_color=COPYRIGHT_BOX_COLOR,
                   box_padding=COPYRIGHT_BOX_PADDING,
                   image=image)
 
         # Draw the directions text inside a centered box.
         if summary:
-            directions_text = "%s via %s" % (duration, summary)
+            directions_text = '%s via %s' % (duration, summary)
         else:
             directions_text = duration
         draw_text(directions_text,
                   font_spec=SUBVARIO_CONDENSED_MEDIUM,
                   text_color=DIRECTIONS_TEXT_COLOR,
-                  anchor="center",
+                  anchor='center',
                   box_color=DIRECTIONS_BOX_COLOR,
                   box_padding=DIRECTIONS_BOX_PADDING,
                   border_color=DIRECTIONS_BORDER_COLOR,

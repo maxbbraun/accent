@@ -21,13 +21,13 @@ from graphics import SUBVARIO_CONDENSED_MEDIUM
 from local_time import LocalTime
 
 # The name of the Google Calendar API.
-API_NAME = "calendar"
+API_NAME = 'calendar'
 
 # The Google Calendar API version.
-API_VERSION = "v3"
+API_VERSION = 'v3'
 
 # The ID of the calendar to show.
-CALENDAR_ID = "primary"
+CALENDAR_ID = 'primary'
 
 # The number of days in a week.
 DAYS_IN_WEEK = 7
@@ -45,10 +45,10 @@ NUMBER_COLOR = (0, 0, 0)
 TODAY_COLOR = (255, 255, 255)
 
 # The squircle image file.
-SQUIRCLE_FILE = "assets/squircle.gif"
+SQUIRCLE_FILE = 'assets/squircle.gif'
 
 # The dot image file.
-DOT_FILE = "assets/dot.gif"
+DOT_FILE = 'assets/dot.gif'
 
 # The offset used to vertically center the numbers in the squircle.
 NUMBER_Y_OFFSET = 1
@@ -88,7 +88,7 @@ class GoogleCalendar:
         # Create an authorized connection to the API.
         credentials = self.storage.get()
         if not credentials:
-            error("No valid Google Calendar credentials.")
+            error('No valid Google Calendar credentials.')
             return Counter()
         authed_http = credentials.authorize(http=build_http())
         service = discovery.build(API_NAME, API_VERSION, http=authed_http,
@@ -111,15 +111,15 @@ class GoogleCalendar:
             try:
                 response = request.execute()
             except HttpAccessTokenRefreshError as e:
-                warning("Google Calendar request failed: %s" % e)
+                warning('Google Calendar request failed: %s' % e)
                 return Counter()
 
             # Iterate over the events from the current page.
-            for event in response["items"]:
+            for event in response['items']:
                 try:
                     # Count regular events.
-                    start = parse(event["start"]["dateTime"])
-                    end = parse(event["end"]["dateTime"])
+                    start = parse(event['start']['dateTime'])
+                    end = parse(event['end']['dateTime'])
                     for day in self._days_range(start, end):
                         event_counts[day] += 1
                 except KeyError:
@@ -127,16 +127,16 @@ class GoogleCalendar:
 
                 try:
                     # Count all-day events.
-                    start = datetime.strptime(event["start"]["date"],
-                                              "%Y-%m-%d")
-                    end = datetime.strptime(event["end"]["date"], "%Y-%m-%d")
+                    start = datetime.strptime(event['start']['date'],
+                                              '%Y-%m-%d')
+                    end = datetime.strptime(event['end']['date'], '%Y-%m-%d')
                     for day in self._days_range(start, end):
                         event_counts[day] += 1
                 except KeyError:
                     pass
 
             # Move to the next page or stop.
-            page_token = response.get("nextPageToken")
+            page_token = response.get('nextPageToken')
             if not page_token:
                 break
 
@@ -152,7 +152,7 @@ class GoogleCalendar:
         event_counts = self._event_counts(time)
 
         # Create a blank image.
-        image = Image.new(mode="RGB", size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
+        image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
                           color=BACKGROUND_COLOR)
         draw = Draw(image)
 
@@ -182,7 +182,7 @@ class GoogleCalendar:
 
                 # Mark the current day with a squircle.
                 if day == time.day:
-                    squircle = Image.open(SQUIRCLE_FILE).convert(mode="RGBA")
+                    squircle = Image.open(SQUIRCLE_FILE).convert(mode='RGBA')
                     squircle_xy = (x - squircle.width // 2,
                                    y - squircle.height // 2)
                     draw.bitmap(squircle_xy, squircle, HIGHLIGHT_COLOR)
@@ -199,7 +199,7 @@ class GoogleCalendar:
 
                 # Draw a dot for each event.
                 num_events = min(MAX_EVENTS, event_counts[day])
-                dot = Image.open(DOT_FILE).convert(mode="RGBA")
+                dot = Image.open(DOT_FILE).convert(mode='RGBA')
                 if num_events > 0:
                     events_width = (num_events * dot.width +
                                     (num_events - 1) * DOT_MARGIN)

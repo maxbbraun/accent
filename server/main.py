@@ -30,15 +30,15 @@ from response import text_response
 from schedule import Schedule
 
 # The URL of the Medium story about Accent.
-INFO_URL = "https://medium.com/@maxbraun/meet-accent-352cfa95813a"
+INFO_URL = 'https://medium.com/@maxbraun/meet-accent-352cfa95813a'
 
 # The template for editing user data.
-HELLO_TEMPLATE = "hello.html"
+HELLO_TEMPLATE = 'hello.html'
 
 app = Flask(__name__)
 
 
-@app.route("/artwork")
+@app.route('/artwork')
 @user_auth(image_response=gif_response)
 def artwork(key=None, user=None):
     """Responds with a GIF version of the artwork image."""
@@ -48,7 +48,7 @@ def artwork(key=None, user=None):
     return gif_response(image)
 
 
-@app.route("/city")
+@app.route('/city')
 @user_auth(image_response=gif_response)
 def city(key=None, user=None):
     """Responds with a GIF version of the city image."""
@@ -58,7 +58,7 @@ def city(key=None, user=None):
     return gif_response(image)
 
 
-@app.route("/commute")
+@app.route('/commute')
 @user_auth(image_response=gif_response)
 def commute(key=None, user=None):
     """Responds with a GIF version of the commute image."""
@@ -68,7 +68,7 @@ def commute(key=None, user=None):
     return gif_response(image)
 
 
-@app.route("/calendar")
+@app.route('/calendar')
 @user_auth(image_response=gif_response)
 def calendar(key=None, user=None):
     """Responds with a GIF version of the calendar image."""
@@ -78,7 +78,7 @@ def calendar(key=None, user=None):
     return gif_response(image)
 
 
-@app.route("/gif")
+@app.route('/gif')
 @user_auth(image_response=gif_response)
 def gif(key=None, user=None):
     """Responds with a GIF version of the scheduled image."""
@@ -88,7 +88,7 @@ def gif(key=None, user=None):
     return gif_response(image)
 
 
-@app.route("/epd")
+@app.route('/epd')
 @user_auth(image_response=epd_response)
 def epd(key=None, user=None):
     """Responds with an e-paper display version of the scheduled image."""
@@ -98,7 +98,7 @@ def epd(key=None, user=None):
     return epd_response(image)
 
 
-@app.route("/next")
+@app.route('/next')
 @user_auth(bad_response=next_retry_response)
 def next(key=None, user=None):
     """Responds with the milliseconds until the next image."""
@@ -108,14 +108,14 @@ def next(key=None, user=None):
     return text_response(str(milliseconds))
 
 
-@app.route("/")
+@app.route('/')
 def root():
     """Redirects to the Medium story about Accent."""
 
     return redirect(INFO_URL)
 
 
-@app.route("/hello/<key>", methods=["GET"])
+@app.route('/hello/<key>', methods=['GET'])
 @validate_key
 def hello_get(key):
     """Responds with a form for editing user data."""
@@ -139,7 +139,7 @@ def hello_get(key):
                            time_zones=common_timezones)
 
 
-@app.route("/hello/<key>", methods=["POST"])
+@app.route('/hello/<key>', methods=['POST'])
 @validate_key
 def hello_post(key):
     """Saves user data and responds with the updated form."""
@@ -150,23 +150,23 @@ def hello_post(key):
 
     # Build the schedule from the form data, dropping any empty entries.
     list_form = form.to_dict(flat=False)
-    schedule_form = zip(list_form["schedule_name"],
-                        list_form["schedule_start"],
-                        list_form["schedule_image"])
-    schedule = [{"name": name, "start": start, "image": image}
+    schedule_form = zip(list_form['schedule_name'],
+                        list_form['schedule_start'],
+                        list_form['schedule_image'])
+    schedule = [{'name': name, 'start': start, 'image': image}
                 for name, start, image in schedule_form
                 if name and start and image]
 
     # Update the existing user data or create a new one.
     firestore.set_user(key, {
-        "time_zone": form["time_zone"],
-        "home": form["home"],
-        "work": form["work"],
-        "travel_mode": form["travel_mode"],
-        "schedule": schedule})
+        'time_zone': form['time_zone'],
+        'home': form['home'],
+        'work': form['work'],
+        'travel_mode': form['travel_mode'],
+        'schedule': schedule})
     if calendar_credentials:
         firestore.update_user(key, {
-            "google_calendar_credentials": calendar_credentials.to_json()})
+            'google_calendar_credentials': calendar_credentials.to_json()})
     user = firestore.user(key)
 
     calendar_connected = calendar_credentials is not None
@@ -177,28 +177,28 @@ def hello_post(key):
                            time_zones=common_timezones)
 
 
-@app.route("/oauth")
+@app.route('/oauth')
 def oauth():
     """Handles any OAuth flow redirects."""
 
     # Always redirect back to the settings page.
-    key = request.args.get("state")
+    key = request.args.get('state')
     settings = redirect(settings_url(key))
 
     # Handle any errors, notable the user declining.
-    oauth_error = request.args.get("error")
+    oauth_error = request.args.get('error')
     if oauth_error:
-        error("OAuth error: %s" % oauth_error)
+        error('OAuth error: %s' % oauth_error)
         return settings
 
     # Verify the the scope is as expected.
-    scope = request.args.get("scope")
+    scope = request.args.get('scope')
     if not verify_scope(scope):
-        error("Unknown OAuth scope: %s" % scope)
+        error('Unknown OAuth scope: %s' % scope)
         return settings
 
     # Exchange and save the OAuth credentials.
-    code = request.args.get("code")
+    code = request.args.get('code')
     credentials = google_calendar_step2(key, code)
     credentials.set_store(GoogleCalendarStorage(key))
     credentials.refresh(build_http())
@@ -211,11 +211,11 @@ def server_error(e):
     """Logs the stack trace for server errors."""
 
     timestamp = int(time())
-    message = "Internal Server Error @ %d" % timestamp
+    message = 'Internal Server Error @ %d' % timestamp
     exception(message)
 
     return message, 500
 
 
-if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8080, debug=True)
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8080, debug=True)

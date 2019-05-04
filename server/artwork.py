@@ -9,10 +9,10 @@ from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
 
 # The directory containing static artwork images.
-IMAGES_DIR = "assets/artwork"
+IMAGES_DIR = 'assets/artwork'
 
 # The file extension of all artwork image files.
-IMAGE_EXTENSION = "gif"
+IMAGE_EXTENSION = 'gif'
 
 
 class Artwork:
@@ -25,11 +25,11 @@ class Artwork:
         """Generates an artwork image."""
 
         # Load a random image.
-        paths = glob(path_join(IMAGES_DIR, "*.%s" % IMAGE_EXTENSION))
+        paths = glob(path_join(IMAGES_DIR, '*.%s' % IMAGE_EXTENSION))
         filename = choice(paths)
-        info("Using artwork file: %s" % filename)
+        info('Using artwork file: %s' % filename)
         image = Image.open(filename)
-        image = image.convert("RGB")
+        image = image.convert('RGB')
 
         # Crop the image to a random display-sized area.
         x = randint(0, max(0, image.width - DISPLAY_WIDTH))

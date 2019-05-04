@@ -3,24 +3,24 @@ from PIL.ImageDraw import Draw
 
 # The FF SubVario Condensed Medium pixel font.
 SUBVARIO_CONDENSED_MEDIUM = {
-    "file": "assets/SubVario-Condensed-Medium.otf",
-    "size": 24,
-    "height": 20,
-    "y_offset": 1,
-    "width_overrides": {
-        " ": 5,
-        "1": 8
+    'file': 'assets/SubVario-Condensed-Medium.otf',
+    'size': 24,
+    'height': 20,
+    'y_offset': 1,
+    'width_overrides': {
+        ' ': 5,
+        '1': 8
     }
 }
 
 # The FF Screenstar Small Regular pixel font.
 SCREENSTAR_SMALL_REGULAR = {
-    "file": "assets/Screenstar-Small-Regular.otf",
-    "size": 12,
-    "height": 10,
-    "y_offset": 4,
-    "width_overrides": {
-        " ": 3
+    'file': 'assets/Screenstar-Small-Regular.otf',
+    'size': 12,
+    'height': 10,
+    'y_offset': 4,
+    'width_overrides': {
+        ' ': 3
     }
 }
 
@@ -31,14 +31,14 @@ def draw_text(text, font_spec, text_color, xy=None, anchor=None,
     """Draws centered text on an image, optionally in a box."""
 
     draw = Draw(image)
-    text_size = font_spec["size"]
-    font = ImageFont.truetype(font_spec["file"], size=text_size)
+    text_size = font_spec['size']
+    font = ImageFont.truetype(font_spec['file'], size=text_size)
 
     # Measure the width of each character.
     character_widths = []
     for character in text:
         # Override the measured width, if specified.
-        width_overrides = font_spec["width_overrides"]
+        width_overrides = font_spec['width_overrides']
         if character in width_overrides.keys():
             character_width = width_overrides[character]
         else:
@@ -47,20 +47,20 @@ def draw_text(text, font_spec, text_color, xy=None, anchor=None,
     text_width = sum(character_widths)
 
     # If any xy is specified, use it.
-    text_height = font_spec["height"]
+    text_height = font_spec['height']
     if xy:
         x = xy[0] - text_width // 2
         y = xy[1] - text_height // 2
 
     # If any anchor is specified, adjust the xy.
-    if anchor == "center":
+    if anchor == 'center':
         x = image.width // 2 - text_width // 2
         y = image.height // 2 - text_height // 2
-    elif anchor == "center_x":
+    elif anchor == 'center_x':
         x = image.width // 2 - text_width // 2
-    elif anchor == "center_y":
+    elif anchor == 'center_y':
         y = image.height // 2 - text_height // 2
-    elif anchor == "bottom_right":
+    elif anchor == 'bottom_right':
         x = image.width - box_padding - border_width - text_width
         y = image.height - box_padding - border_width - text_height
 
@@ -79,7 +79,7 @@ def draw_text(text, font_spec, text_color, xy=None, anchor=None,
         draw.rectangle(box_xy, box_color)
 
     # Draw the text character by character.
-    y -= font_spec["y_offset"]
+    y -= font_spec['y_offset']
     for index in range(len(text)):
         character = text[index]
         draw.text((x, y), character, text_color, font)

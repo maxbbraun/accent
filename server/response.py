@@ -11,10 +11,10 @@ def gif_response(image):
 
     buffer = BytesIO()
     image = bwr_image(image)
-    image.save(buffer, format="gif")
+    image.save(buffer, format='gif')
     buffer.seek(0)
 
-    return send_file(buffer, mimetype="image/gif", cache_timeout=0)
+    return send_file(buffer, mimetype='image/gif', cache_timeout=0)
 
 
 def epd_response(image):
@@ -23,11 +23,11 @@ def epd_response(image):
     data = bwr_bytes(image)
     buffer = BytesIO(data)
 
-    return send_file(buffer, mimetype="application/octet-stream",
+    return send_file(buffer, mimetype='application/octet-stream',
                      cache_timeout=0)
 
 
 def text_response(text):
     """Creates a Flask text response."""
 
-    return Response(text, mimetype="text/plain")
+    return Response(text, mimetype='text/plain')

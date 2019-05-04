@@ -21,19 +21,19 @@ class Schedule:
     time and when to wake up from sleep for the next request.
 
     The schedule is a list of maps, each containing:
-     "name": A human-readable name for this entry.
-    "start": A cron expression for the start time of this entry. (The end time
+     'name': A human-readable name for this entry.
+    'start': A cron expression for the start time of this entry. (The end time
              is the start time of the next closest entry in time.) The cron
-             expression syntax additionally supports the keywords "sunrise" and
-             "sunset" instead of hours and minutes, e.g. "sunrise * * *".
-    "image": The kind of image to show when this entry is active. Valid kinds
-             are "artwork", "city", "commute", and "calendar".
+             expression syntax additionally supports the keywords 'sunrise' and
+             'sunset' instead of hours and minutes, e.g. 'sunrise * * *'.
+    'image': The kind of image to show when this entry is active. Valid kinds
+             are 'artwork', 'city', 'commute', and 'calendar'.
     """
 
     def __init__(self, key, user):
         self.local_time = LocalTime(user)
         self.sun = Sun(user)
-        self.schedule = user.get("schedule")
+        self.schedule = user.get('schedule')
         self.artwork = Artwork(user)
         self.city = City(user)
         self.commute = Commute(user)
@@ -48,19 +48,19 @@ class Schedule:
     def _image(self, kind):
         """Creates an image based on the kind."""
 
-        if kind == "artwork":
+        if kind == 'artwork':
             return self.artwork.image()
 
-        if kind == "city":
+        if kind == 'city':
             return self.city.image()
 
-        if kind == "commute":
+        if kind == 'commute':
             return self.commute.image()
 
-        if kind == "calendar":
+        if kind == 'calendar':
             return self.calendar.image()
 
-        error("Unknown image kind: %s" % kind)
+        error('Unknown image kind: %s' % kind)
         return None
 
     def image(self):
@@ -70,7 +70,7 @@ class Schedule:
         time = self.local_time.now()
         today = time.replace(hour=0, minute=0, second=0, microsecond=0)
         while True:
-            entries = [(self._next(entry["start"], today), entry)
+            entries = [(self._next(entry['start'], today), entry)
                        for entry in self.schedule]
             past_entries = list(filter(lambda x: x[0] <= time, entries))
 
@@ -84,11 +84,11 @@ class Schedule:
             today -= timedelta(days=1)
 
         # Generate the image from the current schedule entry.
-        info("Using image from schedule entry: %s (%s, %s)" % (
-             latest_entry["name"],
-             latest_entry["start"],
-             latest_datetime.strftime("%A %B %d %Y %H:%M:%S %Z")))
-        image = self._image(latest_entry["image"])
+        info('Using image from schedule entry: %s (%s, %s)' % (
+             latest_entry['name'],
+             latest_entry['start'],
+             latest_datetime.strftime('%A %B %d %Y %H:%M:%S %Z')))
+        image = self._image(latest_entry['image'])
 
         return image
 
@@ -97,7 +97,7 @@ class Schedule:
 
         # Find the next schedule entry by parsing the cron expressions.
         time = self.local_time.now()
-        entries = [(self._next(entry["start"], time), entry)
+        entries = [(self._next(entry['start'], time), entry)
                    for entry in self.schedule]
         next_datetime, next_entry = min(entries, key=lambda x: x[0])
 
@@ -105,10 +105,10 @@ class Schedule:
         seconds = (next_datetime - time).total_seconds()
         seconds += DELAY_BUFFER_S
         milliseconds = int(seconds * 1000)
-        info("Using time from schedule entry: %s (%s, %s, in %d ms)" % (
-             next_entry["name"],
-             next_entry["start"],
-             next_datetime.strftime("%A %B %d %Y %H:%M:%S %Z"),
+        info('Using time from schedule entry: %s (%s, %s, in %d ms)' % (
+             next_entry['name'],
+             next_entry['start'],
+             next_datetime.strftime('%A %B %d %Y %H:%M:%S %Z'),
              milliseconds))
 
         return milliseconds
