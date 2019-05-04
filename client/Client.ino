@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include "Display.h"
-#include "ErrorImage.h"
 #include "Network.h"
 #include "Power.h"
 
@@ -12,8 +11,17 @@
 // The baud rate for the serial connection.
 const long kSerialSpeed = 115200;
 
+// The GPIO pin used to reset Wifi settings.
+const uint8_t kWifiResetPin = 23;
+
 // The base URL for server requests.
-const String kServerBaseUrl = "https://accent.ink/";
+const String kBaseUrl = "https://accent.ink";
+
+// The URL for the next wake time endpoint.
+const String kNextEndpoint = kBaseUrl + "/next";
+
+// The URL for the e-paper display image endpoint.
+const String kEpdEndpoint = kBaseUrl + "/epd";
 
 // The size in bytes of the streaming HTTP response and image buffers.
 const size_t kStreamBufferSize = 1024;
@@ -29,13 +37,24 @@ Power power;
 void setup() {
   Serial.begin(kSerialSpeed);
 
-  // Connect to the Wifi access point.
-  network.connectWifi();
+  // Check if the Wifi reset pin has been connected to GND.
+  pinMode(kWifiResetPin, INPUT_PULLUP);
+  delay(1);  // Wait for pull-up to become active.
+  if (digitalRead(kWifiResetPin) == LOW) {
+    network.ResetWifi();
+  }
+
+  // Connect to Wifi or start the setup flow.
+  if (!network.ConnectWifi()) {
+    display.ShowWifiSetup();
+    network.StartWifiSetupServer();
+    return;
+  }
 
   // Show the latest image.
-  display.initialize();
+  display.Initialize();
   if (downloadImage()) {
-    display.update();
+    display.Update();
   }
 
   // Go to sleep until the next refresh.
@@ -43,11 +62,15 @@ void setup() {
 }
 
 void loop() {
-  // The setup() function only returns if there was an error.
-  display.showStatic(kErrorImage, sizeof(kErrorImage));
+  if (network.HandleWifiSetupServer()) {
+    // Continue to loop.
+    return;
+  }
 
+  // Falling through means there was an error.
   Serial.println("Restarting after error");
-  power.deepSleep(kRestartDelayMs);
+  display.ShowError();
+  power.DeepSleep(kRestartDelayMs);
 }
 
 // Streams the image from the server and sends it to the display in chunks.
@@ -56,7 +79,7 @@ bool downloadImage() {
   HTTPClient http;
 
   // Request the current image from the server.
-  if (!network.httpGet(&http, kServerBaseUrl + "epd")) {
+  if (!network.HttpGet(&http, kEpdEndpoint)) {
     return false;
   }
 
@@ -79,7 +102,7 @@ bool downloadImage() {
     Serial.printf("Read %d bytes (%lu total)\n", count, total_count);
 
     // Send the buffer to the display.
-    display.load(buffer, count);
+    display.Load(buffer, count);
   } while (stream->available() > 0);
 
   Serial.println("Download complete");
@@ -93,7 +116,7 @@ void scheduleSleep() {
   HTTPClient http;
 
   // Request the next wake time from the server.
-  if (!network.httpGet(&http, kServerBaseUrl + "next")) {
+  if (!network.HttpGet(&http, kNextEndpoint)) {
     return;
   }
 
@@ -102,5 +125,5 @@ void scheduleSleep() {
   http.end();
   Serial.printf("Sleep server response: %s\n", delay_ms_str.c_str());
   uint64_t delay_ms = strtoull(delay_ms_str.c_str(), nullptr, 10);
-  power.deepSleep(delay_ms);
+  power.DeepSleep(delay_ms);
 }

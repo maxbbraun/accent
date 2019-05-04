@@ -7,11 +7,14 @@
 class Power {
  public:
   // Starts a deep sleep for a fixed time in milliseconds.
-  void deepSleep(uint64_t delay_ms);
+  void DeepSleep(uint64_t delay_ms);
+
+  // Restarts immediately.
+  void Restart();
 
  private:
   // Sets all power domain configs to off.
-  void applyConfigs();
+  void ApplyConfigs();
 };
 
 #endif  // POWER_H
