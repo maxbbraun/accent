@@ -56,7 +56,7 @@ const String kShowWifiFormUrl = "/go";
 const String kSaveWifiFormUrl = "/save";
 
 // The time in milliseconds when a connection attempt times out.
-const uint32_t kConnectTimeoutMs = 10 * 1000;
+const uint32_t kConnectTimeoutMs = 30 * 1000;
 
 // The time in milliseconds between each connection check.
 const uint32_t kConnectTimeoutStepMs = 500;
