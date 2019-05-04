@@ -32,6 +32,9 @@ from schedule import Schedule
 # The URL of the Medium story about Accent.
 INFO_URL = 'https://medium.com/@maxbraun/meet-accent-352cfa95813a'
 
+# The URL of the Medium story explaining how to set up Accent.
+SETUP_URL = 'https://medium.com/@maxbraun/setting-up-accent-b71a07c33ca9'
+
 # The template for editing user data.
 HELLO_TEMPLATE = 'hello.html'
 
@@ -113,6 +116,13 @@ def root():
     """Redirects to the Medium story about Accent."""
 
     return redirect(INFO_URL)
+
+
+@app.route('/setup')
+def setup():
+    """Redirects to the Medium story explaining how to set up Accent."""
+
+    return redirect(SETUP_URL)
 
 
 @app.route('/hello/<key>', methods=['GET'])

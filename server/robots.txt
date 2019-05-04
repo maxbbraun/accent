@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /setup
 Disallow: /hello/*
 Disallow: /artwork
 Disallow: /city
