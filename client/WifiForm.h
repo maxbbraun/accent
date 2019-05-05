@@ -8,7 +8,7 @@ const String kWifiForm =
     "<!DOCTYPE html>\n"
     "<html>\n"
     "    <head>\n"
-    "        <title>Accent Settings</title>\n"
+    "        <title>Accent Wifi Setup</title>\n"
     "        <style>\n"
     "            body {\n"
     "                background-color: white;\n"
