@@ -906,7 +906,9 @@ class City:
             path = path_join(ASSETS_DIR, layer['file'])
             bitmap = Image.open(path).convert('RGBA')
             image.paste(bitmap, (x, y), bitmap)
-            drawn_files.append(path)
+
+            # Remember the drawn file for the else condition.
+            drawn_files.append(layer['file'])
 
     def image(self):
         """Generates the current city image."""
