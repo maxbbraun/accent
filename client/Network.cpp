@@ -230,11 +230,11 @@ void Network::SaveWifiForm() {
 void Network::SendNotFound() { wifi_setup_server_->send(404 /* Not Found */); }
 
 void Network::AddAuthHeader(HTTPClient* http) {
-  // Use the Wifi MAC address as the unique client ID.
-  String client_id = WiFi.macAddress();
-  client_id.replace(":", "");  // Disallowed character
+  // Use the Wifi MAC address as the unique user key.
+  String user_key = WiFi.macAddress();
+  user_key.replace(":", "");  // Disallowed character
 
   // Add the header with the Base64-encoded authorization (no username).
-  String authorization = base64::encode(":" + client_id);
+  String authorization = base64::encode(":" + user_key);
   http->addHeader("Authorization", "Basic " + authorization);
 }
