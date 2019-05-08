@@ -104,7 +104,7 @@ class Firestore:
 
         user = self.db.collection('users').document(key).get()
         if not user.exists:
-            error('User not found.')
+            warning('User not found.')
             return None
 
         return user
