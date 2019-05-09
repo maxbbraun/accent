@@ -53,9 +53,10 @@ void setup() {
 
   // Show the latest image.
   display.Initialize();
-  if (downloadImage()) {
-    display.Update();
+  if (!downloadImage()) {
+    return;
   }
+  display.Update();
 
   // Go to sleep until the next refresh.
   scheduleSleep();
