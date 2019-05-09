@@ -188,16 +188,16 @@ bool Network::HandleWifiSetupServer() {
 
 void Network::ShowWifiForm() {
   if (wifi_setup_server_->method() != HTTP_GET) {
-    wifi_setup_server_->send(400 /* Bad Request */);
+    wifi_setup_server_->send(HTTP_CODE_BAD_REQUEST);
     return;
   }
 
-  wifi_setup_server_->send(200, "text/html", kWifiForm);
+  wifi_setup_server_->send(HTTP_CODE_OK, "text/html", kWifiForm);
 }
 
 void Network::SaveWifiForm() {
   if (wifi_setup_server_->method() != HTTP_POST) {
-    wifi_setup_server_->send(400 /* Bad Request */);
+    wifi_setup_server_->send(HTTP_CODE_BAD_REQUEST);
     return;
   }
 
@@ -227,7 +227,7 @@ void Network::SaveWifiForm() {
   power_.Restart();
 }
 
-void Network::SendNotFound() { wifi_setup_server_->send(404 /* Not Found */); }
+void Network::SendNotFound() { wifi_setup_server_->send(HTTP_CODE_NOT_FOUND); }
 
 void Network::AddAuthHeader(HTTPClient* http) {
   // Use the Wifi MAC address as the unique user key.
