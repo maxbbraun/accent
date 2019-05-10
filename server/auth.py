@@ -1,5 +1,6 @@
 from flask import Response
 from flask import request
+from flask import url_for
 from functools import wraps
 from oauth2client.client import OAuth2WebServerFlow
 from PIL import Image
@@ -52,10 +53,16 @@ def next_retry_response():
     return text_response(str(NEXT_RETRY_DELAY_MILLIS))
 
 
+def _oauth_url():
+    """Creates the URL handling OAuth redirects."""
+
+    return url_for('oauth', _external=True)
+
+
 def settings_url(key):
     """Creates the URL for user data settings."""
 
-    return 'https://%s/hello/%s' % (request.host, key)
+    return url_for('hello_get', key=key, _external=True)
 
 
 def verify_scope(scope):
@@ -144,12 +151,6 @@ def user_auth(image_response=None, bad_response=_forbidden_response):
     return decorator
 
 
-def _oauth_redirect_url():
-    """Creates the URL handling OAuth redirects."""
-
-    return 'http://%s/oauth' % request.host
-
-
 def _google_calendar_flow(key):
     """Creates the OAuth flow."""
 
@@ -158,7 +159,7 @@ def _google_calendar_flow(key):
                                client_secret=secrets['client_secret'],
                                scope=GOOGLE_CALENDAR_SCOPE,
                                state=key,
-                               redirect_uri=_oauth_redirect_url())
+                               redirect_uri=_oauth_url())
 
 
 def google_calendar_step1(key):
