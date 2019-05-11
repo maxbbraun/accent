@@ -4,6 +4,7 @@ from random import random
 
 from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
+from image_content import ImageContent
 from local_time import LocalTime
 from sun import Sun
 from weather import Weather
@@ -12,7 +13,7 @@ from weather import Weather
 ASSETS_DIR = 'assets/city'
 
 
-class City:
+class City(ImageContent):
     """A dynamic city scene that changes with the weather and other factors."""
 
     def __init__(self, geocoder):

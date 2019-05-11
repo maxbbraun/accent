@@ -3,7 +3,7 @@ from pytz import timezone
 from pytz import utc
 
 
-class LocalTime:
+class LocalTime(object):
     """A wrapper around the current time in the user's time zone."""
 
     def now(self, user):

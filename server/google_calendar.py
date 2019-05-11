@@ -18,6 +18,7 @@ from epd import DISPLAY_HEIGHT
 from firestore import GoogleCalendarStorage
 from graphics import draw_text
 from graphics import SUBVARIO_CONDENSED_MEDIUM
+from image_content import ImageContent
 from local_time import LocalTime
 
 # The name of the Google Calendar API.
@@ -66,7 +67,7 @@ HIGHLIGHT_COLOR = (255, 0, 0)
 MAX_EVENTS = 3
 
 
-class GoogleCalendar:
+class GoogleCalendar(ImageContent):
     """A monthly calendar backed by the Google Calendar API."""
 
     def __init__(self):

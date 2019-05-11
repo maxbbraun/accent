@@ -5,6 +5,7 @@ from PIL import Image
 from random import choice
 from random import randint
 
+from image_content import ImageContent
 from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
 
@@ -15,7 +16,7 @@ IMAGES_DIR = 'assets/artwork'
 IMAGE_EXTENSION = 'gif'
 
 
-class Artwork:
+class Artwork(ImageContent):
     """A collection of randomly selected image artwork."""
 
     def image(self, _):

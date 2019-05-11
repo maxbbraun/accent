@@ -15,7 +15,7 @@ MAX_CACHE_SIZE = 100
 CACHE_TTL_S = 60 * 60  # 1 hour
 
 
-class Weather:
+class Weather(object):
     """A wrapper around the Dark Sky API with a cache."""
 
     def __init__(self, geocoder):

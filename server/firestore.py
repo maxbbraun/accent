@@ -14,7 +14,7 @@ from os import environ
 from threading import Lock
 
 
-class Firestore:
+class Firestore(object):
     """A wrapper around the Cloud Firestore database."""
 
     def __init__(self):

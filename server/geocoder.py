@@ -23,7 +23,7 @@ class Geocoder(GoogleGeocoder):
         return GoogleGeocoder.__getitem__(self, key)
 
 
-class GeocoderWrapper():
+class GeocoderWrapper(object):
     """A class to wrap a Geocoder instance and feed it to astral.Astral."""
 
     def __init__(self, wrapped):

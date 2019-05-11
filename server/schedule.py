@@ -8,6 +8,7 @@ from artwork import Artwork
 from google_calendar import GoogleCalendar
 from city import City
 from commute import Commute
+from image_content import ImageContent
 from local_time import LocalTime
 from sun import Sun
 
@@ -16,7 +17,7 @@ from sun import Sun
 DELAY_BUFFER_S = 15 * 60
 
 
-class Schedule:
+class Schedule(ImageContent):
     """A database-backed schedule determining which images to show at request
     time and when to wake up from sleep for the next request.
 
@@ -48,19 +49,18 @@ class Schedule:
         """Creates an image based on the kind."""
 
         if kind == 'artwork':
-            return self.artwork.image(user)
+            content = self.artwork
+        elif kind == 'city':
+            content = self.city
+        elif kind == 'commute':
+            content = self.commute
+        elif kind == 'calendar':
+            content = self.calendar
+        else:
+            error('Unknown image kind: %s' % kind)
+            return None
 
-        if kind == 'city':
-            return self.city.image(user)
-
-        if kind == 'commute':
-            return self.commute.image(user)
-
-        if kind == 'calendar':
-            return self.calendar.image(user)
-
-        error('Unknown image kind: %s' % kind)
-        return None
+        return content.image(user)
 
     def image(self, user):
         """Generates the current image based on the schedule."""

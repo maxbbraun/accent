@@ -12,6 +12,7 @@ from firestore import Firestore
 from graphics import draw_text
 from graphics import SCREENSTAR_SMALL_REGULAR
 from graphics import SUBVARIO_CONDENSED_MEDIUM
+from image_content import ImageContent
 from local_time import LocalTime
 
 # The endpoint of the Static Map API.
@@ -48,7 +49,7 @@ COPYRIGHT_BOX_COLOR = (255, 255, 255)
 COPYRIGHT_BOX_PADDING = 2
 
 
-class Commute:
+class Commute(ImageContent):
     """The commute route on a map."""
 
     def __init__(self):

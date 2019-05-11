@@ -8,7 +8,7 @@ from geocoder import GeocoderWrapper
 from local_time import LocalTime
 
 
-class Sun:
+class Sun(object):
     """A wrapper around a calculator for sunrise and sunset times."""
 
     def __init__(self, geocoder):
