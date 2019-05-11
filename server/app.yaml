@@ -7,3 +7,7 @@ handlers:
   mime_type: text/plain
   static_files: robots.txt
   upload: robots\.txt
+- url: /.*
+  secure: always
+  redirect_http_response_code: 301
+  script: auto
