@@ -1,4 +1,5 @@
 from time import mktime
+from logging import error
 from PIL import Image
 from pytz import utc
 from requests import get
@@ -50,21 +51,18 @@ COPYRIGHT_BOX_PADDING = 2
 class Commute:
     """The commute route on a map."""
 
-    def __init__(self, user):
-        self.local_time = LocalTime(user)
-        self.home = user.get('home')
-        self.work = user.get('work')
-        self.travel_mode = user.get('travel_mode')
+    def __init__(self):
+        self.local_time = LocalTime()
         self.google_maps_api_key = Firestore().google_maps_api_key()
 
-    def _route_url(self, timestamp):
+    def _route_url(self, timestamp, home, work, travel_mode):
         """Constructs the URL for the Directions API request."""
 
         url = DIRECTIONS_URL
         url += '?key=%s' % self.google_maps_api_key
-        url += '&origin=%s' % quote(self.home)
-        url += '&destination=%s' % quote(self.work)
-        url += '&mode=%s' % self.travel_mode
+        url += '&origin=%s' % quote(home)
+        url += '&destination=%s' % quote(work)
+        url += '&mode=%s' % travel_mode
         url += '&departure_time=%d' % timestamp
         return url
 
@@ -87,15 +85,22 @@ class Commute:
                                                             quote(polyline))
         return url
 
-    def image(self):
+    def image(self, user):
         """Generates the current commute image."""
 
         # Use the current time for live traffic.
-        time = self.local_time.now()
+        time = self.local_time.now(user)
         timestamp = int(mktime(time.astimezone(utc).timetuple()))
 
         # Get the directions from home to work.
-        directions_url = self._route_url(timestamp)
+        try:
+            home = user.get('home')
+            work = user.get('work')
+            travel_mode = user.get('travel_mode')
+        except KeyError as e:
+            error('Failed to get directions data: %s' % e)
+            return None
+        directions_url = self._route_url(timestamp, home, work, travel_mode)
         directions = get(directions_url).json()
 
         # Extract the route polyline, duration, and description.

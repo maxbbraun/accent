@@ -23,6 +23,7 @@ from city import City
 from commute import Commute
 from firestore import Firestore
 from firestore import GoogleCalendarStorage
+from geocoder import Geocoder
 from google_calendar import GoogleCalendar
 from response import epd_response
 from response import gif_response
@@ -41,46 +42,53 @@ CODE_URL = 'https://github.com/maxbbraun/accent'
 # The template for editing user data.
 HELLO_TEMPLATE = 'hello.html'
 
+# A geocoder instance with a shared cache.
+geocoder = Geocoder()
+
+# Helper library instances.
+artwork = Artwork()
+calendar = GoogleCalendar()
+city = City(geocoder)
+commute = Commute()
+schedule = Schedule(geocoder)
+
+# The Flask app handling requests.
 app = Flask(__name__)
 
 
 @app.route('/artwork')
 @user_auth(image_response=gif_response)
-def artwork(key=None, user=None):
+def artwork_gif(key=None, user=None):
     """Responds with a GIF version of the artwork image."""
 
-    artwork = Artwork(user)
-    image = artwork.image()
+    image = artwork.image(user)
     return gif_response(image)
 
 
 @app.route('/city')
 @user_auth(image_response=gif_response)
-def city(key=None, user=None):
+def city_gif(key=None, user=None):
     """Responds with a GIF version of the city image."""
 
-    city = City(user)
-    image = city.image()
+    image = city.image(user)
     return gif_response(image)
 
 
 @app.route('/commute')
 @user_auth(image_response=gif_response)
-def commute(key=None, user=None):
+def commute_gif(key=None, user=None):
     """Responds with a GIF version of the commute image."""
 
-    commute = Commute(user)
-    image = commute.image()
+    image = commute.image(user)
     return gif_response(image)
 
 
 @app.route('/calendar')
 @user_auth(image_response=gif_response)
-def calendar(key=None, user=None):
+def calendar_gif(key=None, user=None):
     """Responds with a GIF version of the calendar image."""
 
-    calendar = GoogleCalendar(key, user)
-    image = calendar.image()
+    image = calendar.image(user)
     return gif_response(image)
 
 
@@ -89,8 +97,7 @@ def calendar(key=None, user=None):
 def gif(key=None, user=None):
     """Responds with a GIF version of the scheduled image."""
 
-    schedule = Schedule(key, user)
-    image = schedule.image()
+    image = schedule.image(user)
     return gif_response(image)
 
 
@@ -99,8 +106,7 @@ def gif(key=None, user=None):
 def epd(key=None, user=None):
     """Responds with an e-paper display version of the scheduled image."""
 
-    schedule = Schedule(key, user)
-    image = schedule.image()
+    image = schedule.image(user)
     return epd_response(image)
 
 
@@ -109,8 +115,7 @@ def epd(key=None, user=None):
 def next(key=None, user=None):
     """Responds with the milliseconds until the next image."""
 
-    schedule = Schedule(key, user)
-    milliseconds = schedule.delay()
+    milliseconds = schedule.delay(user)
     return text_response(str(milliseconds))
 
 
@@ -141,7 +146,6 @@ def hello_get(key):
     """Responds with a form for editing user data."""
 
     # Look up any existing user data.
-    firestore = Firestore()
     calendar_credentials = GoogleCalendarStorage(key).get()
 
     # Force a Google Calendar credentials refresh to get the latest status.
@@ -152,7 +156,7 @@ def hello_get(key):
             calendar_credentials = None
 
     calendar_connected = calendar_credentials is not None
-    return render_template(HELLO_TEMPLATE, key=key, user=firestore.user(key),
+    return render_template(HELLO_TEMPLATE, key=key, user=Firestore().user(key),
                            calendar_connected=calendar_connected,
                            calendar_connect_url=google_calendar_step1(key),
                            calendar_disconnect_url=ACCOUNT_ACCESS_URL,
@@ -164,11 +168,8 @@ def hello_get(key):
 def hello_post(key):
     """Saves user data and responds with the updated form."""
 
-    form = request.form
-    firestore = Firestore()
-    calendar_credentials = GoogleCalendarStorage(key).get()
-
     # Build the schedule from the form data, dropping any empty entries.
+    form = request.form
     list_form = form.to_dict(flat=False)
     schedule_form = zip(list_form['schedule_name'],
                         list_form['schedule_start'],
@@ -178,19 +179,20 @@ def hello_post(key):
                 if name and start and image]
 
     # Update the existing user data or create a new one.
+    firestore = Firestore()
     firestore.set_user(key, {
         'time_zone': form['time_zone'],
         'home': form['home'],
         'work': form['work'],
         'travel_mode': form['travel_mode'],
         'schedule': schedule})
+    calendar_credentials = GoogleCalendarStorage(key).get()
     if calendar_credentials:
         firestore.update_user(key, {
             'google_calendar_credentials': calendar_credentials.to_json()})
-    user = firestore.user(key)
 
     calendar_connected = calendar_credentials is not None
-    return render_template(HELLO_TEMPLATE, key=key, user=user,
+    return render_template(HELLO_TEMPLATE, key=key, user=firestore.user(key),
                            calendar_connected=calendar_connected,
                            calendar_connect_url=google_calendar_step1(key),
                            calendar_disconnect_url=ACCOUNT_ACCESS_URL,

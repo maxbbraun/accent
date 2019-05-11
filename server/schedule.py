@@ -30,48 +30,47 @@ class Schedule:
              are 'artwork', 'city', 'commute', and 'calendar'.
     """
 
-    def __init__(self, key, user):
-        self.local_time = LocalTime(user)
-        self.sun = Sun(user)
-        self.schedule = user.get('schedule')
-        self.artwork = Artwork(user)
-        self.city = City(user)
-        self.commute = Commute(user)
-        self.calendar = GoogleCalendar(key, user)
+    def __init__(self, geocoder):
+        self.local_time = LocalTime()
+        self.sun = Sun(geocoder)
+        self.artwork = Artwork()
+        self.city = City(geocoder)
+        self.commute = Commute()
+        self.calendar = GoogleCalendar()
 
-    def _next(self, cron, after):
+    def _next(self, cron, after, user):
         """Finds the next time matching the cron expression."""
 
-        cron = self.sun.rewrite_cron(cron, after)
+        cron = self.sun.rewrite_cron(cron, after, user)
         return croniter(cron, after).get_next(datetime)
 
-    def _image(self, kind):
+    def _image(self, kind, user):
         """Creates an image based on the kind."""
 
         if kind == 'artwork':
-            return self.artwork.image()
+            return self.artwork.image(user)
 
         if kind == 'city':
-            return self.city.image()
+            return self.city.image(user)
 
         if kind == 'commute':
-            return self.commute.image()
+            return self.commute.image(user)
 
         if kind == 'calendar':
-            return self.calendar.image()
+            return self.calendar.image(user)
 
         error('Unknown image kind: %s' % kind)
         return None
 
-    def image(self):
+    def image(self, user):
         """Generates the current image based on the schedule."""
 
         # Find the current schedule entry by parsing the cron expressions.
-        time = self.local_time.now()
+        time = self.local_time.now(user)
         today = time.replace(hour=0, minute=0, second=0, microsecond=0)
         while True:
-            entries = [(self._next(entry['start'], today), entry)
-                       for entry in self.schedule]
+            entries = [(self._next(entry['start'], today, user), entry)
+                       for entry in user.get('schedule')]
             past_entries = list(filter(lambda x: x[0] <= time, entries))
 
             # Use the most recent past entry.
@@ -88,17 +87,17 @@ class Schedule:
              latest_entry['name'],
              latest_entry['start'],
              latest_datetime.strftime('%A %B %d %Y %H:%M:%S %Z')))
-        image = self._image(latest_entry['image'])
+        image = self._image(latest_entry['image'], user)
 
         return image
 
-    def delay(self):
+    def delay(self, user):
         """Calculates the delay in milliseconds to the next schedule entry."""
 
         # Find the next schedule entry by parsing the cron expressions.
-        time = self.local_time.now()
-        entries = [(self._next(entry['start'], time), entry)
-                   for entry in self.schedule]
+        time = self.local_time.now(user)
+        entries = [(self._next(entry['start'], time, user), entry)
+                   for entry in user.get('schedule')]
         next_datetime, next_entry = min(entries, key=lambda x: x[0])
 
         # Calculate the delay in milliseconds.

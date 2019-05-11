@@ -1,5 +1,3 @@
-from cachetools import cached
-from cachetools import TTLCache
 from firebase_admin import _apps as firebase_apps
 from firebase_admin import initialize_app
 from firebase_admin.credentials import ApplicationDefault
@@ -100,25 +98,29 @@ class Firestore:
         self.update_user(key, {'google_calendar_credentials': DELETE_FIELD})
 
     def user(self, key):
-        """Retrieves the user matching the specified key."""
+        """Retrieves the user snapshot matching the specified key."""
 
-        user = self.db.collection('users').document(key).get()
+        user = self._user_reference(key).get()
         if not user.exists:
             warning('User not found.')
             return None
 
         return user
 
+    def _user_reference(self, key):
+        """Retrieves the user reference matching the specified key."""
+
+        return self.db.collection('users').document(key)
+
     def set_user(self, key, data):
         """Sets the data for the user matching the specified key."""
 
-        user = self.db.collection('users').document(key)
-        user.set(data)
+        self._user_reference(key).set(data)
 
     def update_user(self, key, fields):
         """Updates the fields for the user matching the specified key."""
 
-        user = self.db.collection('users').document(key)
+        user = self._user_reference(key)
         if not user.get().exists:
             error('User not found for update.')
             return

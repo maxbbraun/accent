@@ -18,10 +18,7 @@ IMAGE_EXTENSION = 'gif'
 class Artwork:
     """A collection of randomly selected image artwork."""
 
-    def __init__(self, user):
-        pass
-
-    def image(self):
+    def image(self, _):
         """Generates an artwork image."""
 
         # Load a random image.

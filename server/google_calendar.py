@@ -69,9 +69,8 @@ MAX_EVENTS = 3
 class GoogleCalendar:
     """A monthly calendar backed by the Google Calendar API."""
 
-    def __init__(self, key, user):
-        self.local_time = LocalTime(user)
-        self.storage = GoogleCalendarStorage(key)
+    def __init__(self):
+        self.local_time = LocalTime()
 
     def _days_range(self, start, end):
         """Returns a list of days of the month between two datetimes."""
@@ -82,11 +81,12 @@ class GoogleCalendar:
 
         return range(start.day, end.day + 1)
 
-    def _event_counts(self, time):
+    def _event_counts(self, time, user):
         """Retrieves a daily count of events using the Google Calendar API."""
 
         # Create an authorized connection to the API.
-        credentials = self.storage.get()
+        storage = GoogleCalendarStorage(user.id)
+        credentials = storage.get()
         if not credentials:
             error('No valid Google Calendar credentials.')
             return Counter()
@@ -142,14 +142,14 @@ class GoogleCalendar:
 
         return event_counts
 
-    def image(self):
+    def image(self, user):
         """Generates an image with a calendar view."""
 
         # Show a calendar relative to the current date.
-        time = self.local_time.now()
+        time = self.local_time.now(user)
 
         # Get the number of events per day from the API.
-        event_counts = self._event_counts(time)
+        event_counts = self._event_counts(time, user)
 
         # Create a blank image.
         image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),

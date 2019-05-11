@@ -1,4 +1,3 @@
-from flask import Response
 from flask import request
 from flask import url_for
 from functools import wraps
@@ -11,6 +10,7 @@ from epd import DISPLAY_HEIGHT
 from firestore import Firestore
 from graphics import draw_text
 from graphics import SUBVARIO_CONDENSED_MEDIUM
+from response import forbidden_response
 from response import text_response
 
 # The color of the new user image background.
@@ -39,12 +39,6 @@ COMPUTER_XY = (296, 145)
 
 # The position of the link text in the settings image.
 LINK_TEXT_XY = (0, 228)
-
-
-def _forbidden_response():
-    """Creates a simple forbidden status response."""
-
-    return Response(status=403)
 
 
 def next_retry_response():
@@ -101,14 +95,14 @@ def validate_key(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not _valid_key(kwargs['key']):
-            return _forbidden_response()
+            return forbidden_response()
 
         return func(*args, **kwargs)
 
     return wrapper
 
 
-def user_auth(image_response=None, bad_response=_forbidden_response):
+def user_auth(image_response=None, bad_response=forbidden_response):
     """A decorator for Flask route functions to enforce user authentication."""
 
     firestore = Firestore()

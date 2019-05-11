@@ -15,25 +15,30 @@ ASSETS_DIR = 'assets/city'
 class City:
     """A dynamic city scene that changes with the weather and other factors."""
 
-    def __init__(self, user):
-        self.local_time = LocalTime(user)
-        self.sun = Sun(user)
-        self.weather = Weather(user)
+    def __init__(self, geocoder):
+        self.local_time = LocalTime()
+        self.sun = Sun(geocoder)
+        self.weather = Weather(geocoder)
 
-    def _modulo_3_0(self):
+    def _day_of_year(self, user):
+        """Returns the current day of the year in the users's time zone."""
+
+        return self.local_time.now(user).timetuple().tm_yday
+
+    def _modulo_3_0(self, user):
         """Returns True if the current day of the year modulo 3 is 0."""
 
-        return self.local_time.now().timetuple().tm_yday % 3 == 0
+        return self._day_of_year(user) % 3 == 0
 
-    def _modulo_3_1(self):
+    def _modulo_3_1(self, user):
         """Returns True if the current day of the year modulo 3 is 1."""
 
-        return self.local_time.now().timetuple().tm_yday % 3 == 1
+        return self._day_of_year(user) % 3 == 1
 
-    def _modulo_3_2(self):
+    def _modulo_3_2(self, user):
         """Returns True if the current day of the year modulo 3 is 2."""
 
-        return self.local_time.now().timetuple().tm_yday % 3 == 2
+        return self._day_of_year(user) % 3 == 2
 
     def _layers(self):
         """The list of layers making up the city scene. Each layer is a
@@ -839,7 +844,7 @@ class City:
             ]
         }]
 
-    def _draw_layers(self, image, layers):
+    def _draw_layers(self, image, layers, user):
         """Draws a list of layers onto an image."""
 
         # Keep track of drawn layers.
@@ -849,28 +854,28 @@ class City:
         for layer in layers:
             try:
                 # Simple condition has to be true.
-                if not layer['condition']():
+                if not layer['condition'](user):
                     continue
             except KeyError:
                 pass
 
             try:
                 # Negated condition has to be false.
-                if layer['not_condition']():
+                if layer['not_condition'](user):
                     continue
             except KeyError:
                 pass
 
             try:
                 # All and-conditions have to be true.
-                if not all([c() for c in layer['and_condition']]):
+                if not all([c(user) for c in layer['and_condition']]):
                     continue
             except KeyError:
                 pass
 
             try:
                 # One or-condition has to be true.
-                if not any([c() for c in layer['or_condition']]):
+                if not any([c(user) for c in layer['or_condition']]):
                     continue
             except KeyError:
                 pass
@@ -891,7 +896,7 @@ class City:
 
             # Recursively draw groups of layers.
             try:
-                self._draw_layers(image, layer['layers'])
+                self._draw_layers(image, layer['layers'], user)
                 continue  # Don't try to draw layer groups.
             except KeyError:
                 pass
@@ -910,10 +915,10 @@ class City:
             # Remember the drawn file for the else condition.
             drawn_files.append(layer['file'])
 
-    def image(self):
+    def image(self, user):
         """Generates the current city image."""
 
         image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT))
-        self._draw_layers(image, self._layers())
+        self._draw_layers(image, self._layers(), user)
 
         return image

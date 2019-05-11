@@ -31,3 +31,9 @@ def text_response(text):
     """Creates a Flask text response."""
 
     return Response(text, mimetype='text/plain')
+
+
+def forbidden_response():
+    """Creates a simple forbidden status response."""
+
+    return Response(status=403)
