@@ -1,6 +1,4 @@
-from numpy import argmin
 from numpy import array
-from numpy import sum as np_sum
 from numpy import packbits
 from numpy import uint8
 from PIL import Image

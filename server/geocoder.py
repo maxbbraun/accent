@@ -1,7 +1,6 @@
 from astral import GoogleGeocoder
 from cachetools import cached
 from cachetools import TTLCache
-from operator import attrgetter
 
 from firestore import Firestore
 
