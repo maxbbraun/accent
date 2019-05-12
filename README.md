@@ -21,7 +21,7 @@ To populate the cross-user data after [setting up](https://firebase.google.com/d
 3. Obtain an [OAuth client ID](https://console.developers.google.com/apis/credentials) for the [Google Calendar API](https://developers.google.com/calendar/quickstart/python) with scope `https://www.googleapis.com/auth/calendar.readonly`.
 
 To test and deploy the server:
-1. Install the [Google Cloud SDK](https://cloud.google.com/sdk/docs/) and [create a project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
+1. Install the [Google Cloud SDK](https://cloud.google.com/sdk/docs/), [create a project](https://cloud.google.com/resource-manager/docs/creating-managing-projects), and [authenticate with a service account](https://cloud.google.com/docs/authentication/getting-started).
 2. Run `cd server && python3 -m venv venv && . venv/bin/activate`.
 3. Run `pip install -r requirements.txt`.
 4. Run the server locally with `export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project) && python main.py`.
