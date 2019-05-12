@@ -52,8 +52,8 @@ COPYRIGHT_BOX_PADDING = 2
 class Commute(ImageContent):
     """The commute route on a map."""
 
-    def __init__(self):
-        self.local_time = LocalTime()
+    def __init__(self, geocoder):
+        self.local_time = LocalTime(geocoder)
         self.google_maps_api_key = Firestore().google_maps_api_key()
 
     def _route_url(self, timestamp, home, work, travel_mode):

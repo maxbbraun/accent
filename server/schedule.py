@@ -32,12 +32,12 @@ class Schedule(ImageContent):
     """
 
     def __init__(self, geocoder):
-        self.local_time = LocalTime()
+        self.local_time = LocalTime(geocoder)
         self.sun = Sun(geocoder)
         self.artwork = Artwork()
         self.city = City(geocoder)
-        self.commute = Commute()
-        self.calendar = GoogleCalendar()
+        self.commute = Commute(geocoder)
+        self.calendar = GoogleCalendar(geocoder)
 
     def _next(self, cron, after, user):
         """Finds the next time matching the cron expression."""

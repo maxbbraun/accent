@@ -1,10 +1,13 @@
 from datetime import datetime
+from logging import error
 from pytz import timezone
 from pytz import utc
 
-
 class LocalTime(object):
     """A wrapper around the current time in the user's time zone."""
+
+    def __init__(self, geocoder):
+        self.geocoder = geocoder
 
     def now(self, user):
         """Calculates the current localized date and time."""
@@ -15,6 +18,12 @@ class LocalTime(object):
         return now
 
     def zone(self, user):
-        """Gives the user's time zone."""
+        """Returns the time zone at the user's home address."""
 
-        return timezone(user.get('time_zone'))
+        try:
+            home = user.get('home')
+            location = self.geocoder[home]
+            return timezone(location.timezone)
+        except KeyError as e:
+            error('Failed to get time zone: %s' % e)
+            return utc

@@ -47,13 +47,6 @@
     </head>
     <body>
         <form method="post" action="{{ url_for('hello_post', key=key) }}">
-            <label for="time_zone">Time zone:</label>
-            {% set time_zone = user.get('time_zone') if user and 'time_zone' in user._data else 'America/Los_Angeles' %}
-            <select name="time_zone">
-            {% for list_time_zone in time_zones %}
-                <option value="{{ list_time_zone }}"{% if time_zone == list_time_zone %} selected{% endif %}>{{ list_time_zone }}</option>
-            {% endfor %}
-            </select><br />
             <label for="home">Home:</label>
             {% set home = user.get('home') if user and 'home' in user._data else '' %}
             <input type="text" name="home" size="50" placeholder="San Francisco" value="{{ home }}"><br />

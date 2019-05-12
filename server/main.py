@@ -6,7 +6,6 @@ from googleapiclient.http import build_http
 from logging import error
 from logging import exception
 from oauth2client.client import HttpAccessTokenRefreshError
-from pytz import common_timezones
 from time import time
 
 from artwork import Artwork
@@ -46,9 +45,9 @@ geocoder = Geocoder()
 
 # Helper library instances.
 artwork = Artwork()
-calendar = GoogleCalendar()
+calendar = GoogleCalendar(geocoder)
 city = City(geocoder)
-commute = Commute()
+commute = Commute(geocoder)
 schedule = Schedule(geocoder)
 
 # The Flask app handling requests.
@@ -158,8 +157,7 @@ def hello_get(key):
     return render_template(HELLO_TEMPLATE, key=key, user=Firestore().user(key),
                            calendar_connected=calendar_connected,
                            calendar_connect_url=google_calendar_step1(key),
-                           calendar_disconnect_url=ACCOUNT_ACCESS_URL,
-                           time_zones=common_timezones)
+                           calendar_disconnect_url=ACCOUNT_ACCESS_URL)
 
 
 @app.route('/hello/<key>', methods=['POST'])
@@ -180,7 +178,6 @@ def hello_post(key):
     # Update the existing user data or create a new one.
     firestore = Firestore()
     firestore.set_user(key, {
-        'time_zone': form['time_zone'],
         'home': form['home'],
         'work': form['work'],
         'travel_mode': form['travel_mode'],
@@ -194,8 +191,7 @@ def hello_post(key):
     return render_template(HELLO_TEMPLATE, key=key, user=firestore.user(key),
                            calendar_connected=calendar_connected,
                            calendar_connect_url=google_calendar_step1(key),
-                           calendar_disconnect_url=ACCOUNT_ACCESS_URL,
-                           time_zones=common_timezones)
+                           calendar_disconnect_url=ACCOUNT_ACCESS_URL)
 
 
 @app.route('/oauth')

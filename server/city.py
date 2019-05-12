@@ -17,7 +17,7 @@ class City(ImageContent):
     """A dynamic city scene that changes with the weather and other factors."""
 
     def __init__(self, geocoder):
-        self.local_time = LocalTime()
+        self.local_time = LocalTime(geocoder)
         self.sun = Sun(geocoder)
         self.weather = Weather(geocoder)
 

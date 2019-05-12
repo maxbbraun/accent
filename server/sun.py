@@ -13,7 +13,7 @@ class Sun(object):
 
     def __init__(self, geocoder):
         self.astral = Astral(geocoder=GeocoderWrapper, wrapped=geocoder)
-        self.local_time = LocalTime()
+        self.local_time = LocalTime(geocoder)
 
     def _sunrise(self, time, user):
         """Calculates the sunrise time at the user's home address."""
