@@ -3,6 +3,7 @@ from logging import error
 from pytz import timezone
 from pytz import utc
 
+
 class LocalTime(object):
     """A wrapper around the current time in the user's time zone."""
 
