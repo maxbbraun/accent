@@ -41,10 +41,11 @@ To test and deploy the server:
 The Accent client uses the [Arduino toolchain](https://www.arduino.cc/en/Main/Software) for the [Waveshare ESP32 board](https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board).
 
 To push the client code to the board:
-1. Add your Wifi SSID and the password to [`wifi.h`](client/wifi.h#L35).
-2. Add your server base URL to [`client.ino`](client/client.ino#L16).
-3. Use the board information in [`client.ino`](client/client.ino#L7) to set up the environment.
-4. Verify and upload the sketch.
+1. Add your server base URL to [`Client.ino`](client/Client.ino#L18).
+2. Use the board information in [`Client.ino`](client/Client.ino#L7) to set up the environment.
+3. Verify and upload the sketch.
+
+Finally, follow the [on-screen instructions](https://accent.ink/setup) to connect the client to a Wifi access point.
 
 ## Frame
 
