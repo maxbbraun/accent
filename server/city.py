@@ -4,7 +4,9 @@ from random import random
 
 from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
-from image_content import ImageContent
+from content import ContentError
+from content import ImageContent
+from firestore import DataError
 from local_time import LocalTime
 from sun import Sun
 from weather import Weather
@@ -920,6 +922,8 @@ class City(ImageContent):
         """Generates the current city image."""
 
         image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT))
-        self._draw_layers(image, self._layers(), user)
-
-        return image
+        try:
+            self._draw_layers(image, self._layers(), user)
+            return image
+        except DataError as e:
+            raise ContentError(e)

@@ -8,7 +8,9 @@ from artwork import Artwork
 from google_calendar import GoogleCalendar
 from city import City
 from commute import Commute
-from image_content import ImageContent
+from content import ContentError
+from content import ImageContent
+from firestore import DataError
 from local_time import LocalTime
 from sun import Sun
 
@@ -42,7 +44,11 @@ class Schedule(ImageContent):
     def _next(self, cron, after, user):
         """Finds the next time matching the cron expression."""
 
-        cron = self.sun.rewrite_cron(cron, after, user)
+        try:
+            cron = self.sun.rewrite_cron(cron, after, user)
+        except DataError as e:
+            raise ContentError(e)
+
         return croniter(cron, after).get_next(datetime)
 
     def _image(self, kind, user):
@@ -66,11 +72,16 @@ class Schedule(ImageContent):
         """Generates the current image based on the schedule."""
 
         # Find the current schedule entry by parsing the cron expressions.
-        time = self.local_time.now(user)
+        try:
+            time = self.local_time.now(user)
+        except DataError as e:
+            raise ContentError(e)
         today = time.replace(hour=0, minute=0, second=0, microsecond=0)
         while True:
             entries = [(self._next(entry['start'], today, user), entry)
                        for entry in user.get('schedule')]
+            if not entries:
+                raise ContentError('Empty schedule')
             past_entries = list(filter(lambda x: x[0] <= time, entries))
 
             # Use the most recent past entry.
@@ -95,9 +106,14 @@ class Schedule(ImageContent):
         """Calculates the delay in milliseconds to the next schedule entry."""
 
         # Find the next schedule entry by parsing the cron expressions.
-        time = self.local_time.now(user)
+        try:
+            time = self.local_time.now(user)
+        except DataError as e:
+            raise ContentError(e)
         entries = [(self._next(entry['start'], time, user), entry)
                    for entry in user.get('schedule')]
+        if not entries:
+            raise ContentError('Empty schedule')
         next_datetime, next_entry = min(entries, key=lambda x: x[0])
 
         # Calculate the delay in milliseconds.

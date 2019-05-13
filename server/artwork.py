@@ -5,7 +5,7 @@ from PIL import Image
 from random import choice
 from random import randint
 
-from image_content import ImageContent
+from content import ImageContent
 from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
 

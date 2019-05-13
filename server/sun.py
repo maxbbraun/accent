@@ -1,9 +1,11 @@
 from astral import Astral
+from astral import AstralError
 from croniter import croniter
 from datetime import datetime
 from datetime import timedelta
 from logging import info
 
+from firestore import DataError
 from geocoder import GeocoderWrapper
 from local_time import LocalTime
 
@@ -14,18 +16,6 @@ class Sun(object):
     def __init__(self, geocoder):
         self.astral = Astral(geocoder=GeocoderWrapper, wrapped=geocoder)
         self.local_time = LocalTime(geocoder)
-
-    def _sunrise(self, time, user):
-        """Calculates the sunrise time at the user's home address."""
-
-        home = user.get('home')
-        return self.astral[home].sunrise(time)
-
-    def _sunset(self, time, user):
-        """Calculates the sunset time at the user's home address."""
-
-        home = user.get('home')
-        return self.astral[home].sunset(time)
 
     def rewrite_cron(self, cron, after, user):
         """Replaces references to sunrise and sunset in a cron expression."""
@@ -42,11 +32,15 @@ class Sun(object):
         second_day = croniter(midnight_cron, first_day).get_next(datetime)
 
         zone = self.local_time.zone(user)
+        try:
+            home = self.astral[user.get('home')]
+        except (AstralError, KeyError) as e:
+            raise DataError(e)
 
         # Calculate the closest future sunrise time and replace the term in the
         # cron expression with minutes and hours.
         if 'sunrise' in cron:
-            sunrises = map(lambda x: self._sunrise(x, user).astimezone(zone),
+            sunrises = map(lambda x: home.sunrise(x).astimezone(zone),
                            [first_day, second_day])
             next_sunrise = min(filter(lambda x: x >= after, sunrises))
             sunrise_cron = cron.replace('sunrise', '%d %d' % (
@@ -60,7 +54,7 @@ class Sun(object):
         # Calculate the closest future sunset time and replace the term in the
         # cron expression with minutes and hours.
         if 'sunset' in cron:
-            sunsets = map(lambda x: self._sunset(x, user).astimezone(zone),
+            sunsets = map(lambda x: home.sunset(x).astimezone(zone),
                           [first_day, second_day])
             next_sunset = min(filter(lambda x: x >= after, sunsets))
             sunset_cron = cron.replace('sunset', '%d %d' % (next_sunset.minute,
@@ -77,8 +71,12 @@ class Sun(object):
         # Find the sunrise and sunset times for today.
         time = self.local_time.now(user)
         zone = self.local_time.zone(user)
-        sunrise = self._sunrise(time, user).astimezone(zone)
-        sunset = self._sunset(time, user).astimezone(zone)
+        try:
+            home = self.astral[user.get('home')]
+        except (AstralError, KeyError) as e:
+            raise DataError(e)
+        sunrise = home.sunrise(time).astimezone(zone)
+        sunset = home.sunset(time).astimezone(zone)
 
         is_daylight = time > sunrise and time < sunset
 

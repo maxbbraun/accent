@@ -2,22 +2,12 @@ from flask import request
 from flask import url_for
 from functools import wraps
 from oauth2client.client import OAuth2WebServerFlow
-from PIL import Image
 from re import compile as re_compile
 
-from epd import DISPLAY_WIDTH
-from epd import DISPLAY_HEIGHT
 from firestore import Firestore
-from graphics import draw_text
-from graphics import SUBVARIO_CONDENSED_MEDIUM
 from response import forbidden_response
+from response import settings_response
 from response import text_response
-
-# The color of the new user image background.
-BACKGROUND_COLOR = (255, 0, 0)
-
-# The color used for the new user image text.
-TEXT_COLOR = (255, 255, 255)
 
 # The scope to request for the Google Calendar API.
 GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly'
@@ -30,15 +20,6 @@ KEY_PATTERN = re_compile('^[a-zA-Z0-9]{12}$')
 
 # The time in milliseconds to return in an unauthorized next request.
 NEXT_RETRY_DELAY_MILLIS = 5 * 60 * 1000  # 5 minutes
-
-# The image file for the computer in the settings image.
-COMPUTER_FILE = 'assets/computer.gif'
-
-# The position of the computer in the settings image.
-COMPUTER_XY = (296, 145)
-
-# The position of the link text in the settings image.
-LINK_TEXT_XY = (0, 228)
 
 
 def next_retry_response():
@@ -53,34 +34,10 @@ def _oauth_url():
     return url_for('oauth', _external=True)
 
 
-def settings_url(key):
-    """Creates the URL for user data settings."""
-
-    return url_for('hello_get', key=key, _external=True)
-
-
 def verify_scope(scope):
     """Checks if the provided scope is an expected one."""
 
     return scope in [GOOGLE_CALENDAR_SCOPE]
-
-
-def _settings_response(key, image_func):
-    """Creates an image response to start the new user flow."""
-
-    # Draw the image with the link text and a computer.
-    image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
-                      color=BACKGROUND_COLOR)
-    draw_text(settings_url(key),
-              font_spec=SUBVARIO_CONDENSED_MEDIUM,
-              text_color=TEXT_COLOR,
-              xy=LINK_TEXT_XY,
-              anchor='center_x',
-              image=image)
-    computer = Image.open(COMPUTER_FILE).convert(mode='RGBA')
-    image.paste(computer, box=COMPUTER_XY, mask=computer)
-
-    return image_func(image)
 
 
 def _valid_key(key):
@@ -130,7 +87,7 @@ def user_auth(image_response=None, bad_response=forbidden_response):
             if not user:
                 if image_response:
                     # For image requests, start the new user flow.
-                    return _settings_response(key, image_response)
+                    return settings_response(key, image_response)
                 else:
                     # Otherwise, return a forbidden response.
                     return bad_response()

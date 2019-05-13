@@ -1,18 +1,19 @@
 from time import mktime
-from logging import error
 from PIL import Image
 from pytz import utc
 from requests import get
 from io import BytesIO
 from urllib.parse import quote
 
+from content import ContentError
 from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
+from firestore import DataError
 from firestore import Firestore
 from graphics import draw_text
 from graphics import SCREENSTAR_SMALL_REGULAR
 from graphics import SUBVARIO_CONDENSED_MEDIUM
-from image_content import ImageContent
+from content import ImageContent
 from local_time import LocalTime
 
 # The endpoint of the Static Map API.
@@ -59,12 +60,22 @@ class Commute(ImageContent):
     def _route_url(self, timestamp, home, work, travel_mode):
         """Constructs the URL for the Directions API request."""
 
+        if not home:
+            raise ContentError('Missing home address')
+
+        if not work:
+            raise ContentError('Missing work address')
+
+        if not travel_mode:
+            raise ContentError('Missing travel mode')
+
         url = DIRECTIONS_URL
         url += '?key=%s' % self.google_maps_api_key
         url += '&origin=%s' % quote(home)
         url += '&destination=%s' % quote(work)
         url += '&mode=%s' % travel_mode
         url += '&departure_time=%d' % timestamp
+
         return url
 
     def _static_map_url(self, polyline, width, height):
@@ -84,13 +95,17 @@ class Commute(ImageContent):
         url += '&style=feature:water|color:0x000000'
         url += '&path=color:0xff0000ff|weight:%d|enc:%s' % (PATH_WEIGHT,
                                                             quote(polyline))
+
         return url
 
     def image(self, user):
         """Generates the current commute image."""
 
         # Use the current time for live traffic.
-        time = self.local_time.now(user)
+        try:
+            time = self.local_time.now(user)
+        except DataError as e:
+            raise ContentError(e)
         timestamp = int(mktime(time.astimezone(utc).timetuple()))
 
         # Get the directions from home to work.
@@ -99,20 +114,22 @@ class Commute(ImageContent):
             work = user.get('work')
             travel_mode = user.get('travel_mode')
         except KeyError as e:
-            error('Failed to get directions data: %s' % e)
-            return None
+            raise ContentError(e)
         directions_url = self._route_url(timestamp, home, work, travel_mode)
         directions = get(directions_url).json()
 
         # Extract the route polyline, duration, and description.
-        route = directions['routes'][0]  # Expect one route.
-        polyline = route['overview_polyline']['points']
-        summary = route['summary']
-        leg = route['legs'][0]  # Expect one leg.
         try:
-            duration = leg['duration_in_traffic']['text']
-        except KeyError:
-            duration = leg['duration']['text']
+            route = directions['routes'][0]  # Expect one route.
+            polyline = route['overview_polyline']['points']
+            summary = route['summary']
+            leg = route['legs'][0]  # Expect one leg.
+            try:
+                duration = leg['duration_in_traffic']['text']
+            except KeyError:
+                duration = leg['duration']['text']
+        except (IndexError, KeyError) as e:
+            raise ContentError(e)
 
         # Get the static map as an image.
         image_url = self._static_map_url(polyline, DISPLAY_WIDTH,

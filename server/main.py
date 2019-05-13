@@ -13,18 +13,20 @@ from auth import ACCOUNT_ACCESS_URL
 from auth import google_calendar_step1
 from auth import google_calendar_step2
 from auth import next_retry_response
-from auth import settings_url
 from auth import user_auth
 from auth import validate_key
 from auth import verify_scope
 from city import City
 from commute import Commute
+from content import ContentError
 from firestore import Firestore
 from firestore import GoogleCalendarStorage
 from geocoder import Geocoder
 from google_calendar import GoogleCalendar
+from response import content_response
 from response import epd_response
 from response import gif_response
+from response import settings_url
 from response import text_response
 from schedule import Schedule
 
@@ -59,8 +61,7 @@ app = Flask(__name__)
 def artwork_gif(key=None, user=None):
     """Responds with a GIF version of the artwork image."""
 
-    image = artwork.image(user)
-    return gif_response(image)
+    return content_response(artwork, gif_response, user)
 
 
 @app.route('/city')
@@ -68,8 +69,7 @@ def artwork_gif(key=None, user=None):
 def city_gif(key=None, user=None):
     """Responds with a GIF version of the city image."""
 
-    image = city.image(user)
-    return gif_response(image)
+    return content_response(city, gif_response, user)
 
 
 @app.route('/commute')
@@ -77,8 +77,7 @@ def city_gif(key=None, user=None):
 def commute_gif(key=None, user=None):
     """Responds with a GIF version of the commute image."""
 
-    image = commute.image(user)
-    return gif_response(image)
+    return content_response(commute, gif_response, user)
 
 
 @app.route('/calendar')
@@ -86,8 +85,7 @@ def commute_gif(key=None, user=None):
 def calendar_gif(key=None, user=None):
     """Responds with a GIF version of the calendar image."""
 
-    image = calendar.image(user)
-    return gif_response(image)
+    return content_response(calendar, gif_response, user)
 
 
 @app.route('/gif')
@@ -95,8 +93,7 @@ def calendar_gif(key=None, user=None):
 def gif(key=None, user=None):
     """Responds with a GIF version of the scheduled image."""
 
-    image = schedule.image(user)
-    return gif_response(image)
+    return content_response(schedule, gif_response, user)
 
 
 @app.route('/epd')
@@ -104,8 +101,7 @@ def gif(key=None, user=None):
 def epd(key=None, user=None):
     """Responds with an e-paper display version of the scheduled image."""
 
-    image = schedule.image(user)
-    return epd_response(image)
+    return content_response(schedule, epd_response, user)
 
 
 @app.route('/next')
@@ -113,8 +109,12 @@ def epd(key=None, user=None):
 def next(key=None, user=None):
     """Responds with the milliseconds until the next image."""
 
-    milliseconds = schedule.delay(user)
-    return text_response(str(milliseconds))
+    try:
+        milliseconds = schedule.delay(user)
+        return text_response(str(milliseconds))
+    except ContentError as e:
+        exception('Failed to create next content: %s' % e)
+        return next_retry_response()
 
 
 @app.route('/')

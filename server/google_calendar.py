@@ -15,10 +15,12 @@ from PIL.ImageDraw import Draw
 
 from epd import DISPLAY_WIDTH
 from epd import DISPLAY_HEIGHT
+from firestore import DataError
 from firestore import GoogleCalendarStorage
 from graphics import draw_text
 from graphics import SUBVARIO_CONDENSED_MEDIUM
-from image_content import ImageContent
+from content import ContentError
+from content import ImageContent
 from local_time import LocalTime
 
 # The name of the Google Calendar API.
@@ -147,7 +149,10 @@ class GoogleCalendar(ImageContent):
         """Generates an image with a calendar view."""
 
         # Show a calendar relative to the current date.
-        time = self.local_time.now(user)
+        try:
+            time = self.local_time.now(user)
+        except DataError as e:
+            raise ContentError(e)
 
         # Get the number of events per day from the API.
         event_counts = self._event_counts(time, user)

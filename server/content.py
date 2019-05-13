@@ -6,3 +6,9 @@ class ImageContent(object):
 
         # Implemented in subclass.
         pass
+
+
+class ContentError(Exception):
+    """An error indicating issues generating content."""
+
+    pass

@@ -30,7 +30,7 @@ class Firestore(object):
 
         api_key = self.db.collection('api_keys').document(service).get()
         if not api_key.exists:
-            return None
+            raise DataError('Missing API key for: %s' % service)
 
         return api_key.get('api_key')
 
@@ -49,6 +49,8 @@ class Firestore(object):
 
         clients = self.db.collection('oauth_clients')
         secrets = clients.document('google_calendar').get()
+        if not secrets.exists:
+            raise DataError('Missing Google Calendar secrets')
 
         return secrets.to_dict()
 
@@ -155,3 +157,9 @@ class GoogleCalendarStorage(Storage):
         """Deletes credentials from Firestore."""
 
         self.firestore.delete_google_calendar_credentials(self.key)
+
+
+class DataError(Exception):
+    """An error indicating issues retrieving data."""
+
+    pass

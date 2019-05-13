@@ -1,8 +1,12 @@
+from astral import AstralError
 from cachetools import cached
 from cachetools import TTLCache
+from json.decoder import JSONDecodeError
 from logging import info
 from requests import get
+from requests import RequestException
 
+from firestore import DataError
 from firestore import Firestore
 
 # The endpoint of the Forecast API.
@@ -26,17 +30,16 @@ class Weather(object):
         """Gets the current weather icon for the user's home address."""
 
         location = self._home_location(user)
-        icon = self._request_icon(location)
-
-        return icon
+        return self._request_icon(location)
 
     def _home_location(self, user):
         """Gets the location of the user's home address."""
 
-        home = user.get('home')
-        location = self.geocoder[home]
-
-        return location
+        try:
+            home = user.get('home')
+            return self.geocoder[home]
+        except (AstralError, KeyError) as e:
+            raise DataError(e)
 
     @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
     def _request_icon(self, location):
@@ -46,7 +49,10 @@ class Weather(object):
         forecast_url = FORECAST_URL % (self.dark_sky_api_key,
                                        location.latitude,
                                        location.longitude)
-        forecast = get(forecast_url).json()
+        try:
+            forecast = get(forecast_url).json()
+        except (RequestException, JSONDecodeError) as e:
+            raise DataError(e)
 
         # Get the icon encoding the current weather.
         icon = forecast['currently']['icon']
