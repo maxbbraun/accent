@@ -49,7 +49,10 @@ class Schedule(ImageContent):
         except DataError as e:
             raise ContentError(e)
 
-        return croniter(cron, after).get_next(datetime)
+        try:
+            return croniter(cron, after).get_next(datetime)
+        except ValueError as e:
+            raise ContentError(e)
 
     def _image(self, kind, user):
         """Creates an image based on the kind."""

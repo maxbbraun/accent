@@ -28,8 +28,11 @@ class Sun(object):
         # reference, which covers all candidate sunrises and sunsets.
         yesterday = after - timedelta(days=1)
         midnight_cron = cron.replace('sunrise', '0 0').replace('sunset', '0 0')
-        first_day = croniter(midnight_cron, yesterday).get_next(datetime)
-        second_day = croniter(midnight_cron, first_day).get_next(datetime)
+        try:
+            first_day = croniter(midnight_cron, yesterday).get_next(datetime)
+            second_day = croniter(midnight_cron, first_day).get_next(datetime)
+        except ValueError as e:
+            raise DataError(e)
 
         zone = self.local_time.zone(user)
         try:
