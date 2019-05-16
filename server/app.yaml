@@ -3,6 +3,10 @@ runtime: python37
 instance_class: F4
 
 handlers:
+- url: /favicon\.ico
+  mime_type: image/x-icon
+  static_files: favicon.ico
+  upload: favicon\.ico
 - url: /robots\.txt
   mime_type: text/plain
   static_files: robots.txt
