@@ -8,7 +8,7 @@ from firestore import Firestore
 MAX_CACHE_SIZE = 100
 
 # The time to live in seconds for cached locations.
-CACHE_TTL_S = 60 * 60  # 1 hour
+CACHE_TTL_S = 24 * 60 * 60  # 1 day
 
 
 class Geocoder(GoogleGeocoder):
