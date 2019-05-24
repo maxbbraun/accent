@@ -11,6 +11,10 @@ handlers:
   mime_type: text/plain
   static_files: robots.txt
   upload: robots\.txt
+- url: /marker\.png
+  mime_type: image/png
+  static_files: assets/marker.png
+  upload: assets/marker\.png
 - url: /.*
   secure: always
   redirect_http_response_code: 301

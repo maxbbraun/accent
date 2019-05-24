@@ -78,6 +78,7 @@
                         <option value="city"{% if entry['image'] == 'city' %} selected{% endif %}>city</option>
                         <option value="commute"{% if entry['image'] == 'commute' %} selected{% endif %}>commute</option>
                         <option value="calendar"{% if entry['image'] == 'calendar' %} selected{% endif %}>calendar</option>
+                        <option value="everyone"{% if entry['image'] == 'everyone' %} selected{% endif %}>everyone</option>
                     </select> &nbsp;
                     <input type="button" name="preview" onclick="previewSelection('{{ schedule_image_id }}')" value="Preview" /><br />
                 {% endfor %}
@@ -95,6 +96,7 @@
                 <option value="city" selected>city</option>
                 <option value="commute">commute</option>
                 <option value="calendar">calendar</option>
+                <option value="everyone">everyone</option>
             </select> &nbsp;
             <input type="button" name="preview" onclick="previewSelection('{{ schedule_image_id }}')" value="Preview" /><br />
             <input type="submit" value="Save" />

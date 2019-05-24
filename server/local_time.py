@@ -12,11 +12,15 @@ class LocalTime(object):
     def __init__(self, geocoder):
         self.geocoder = geocoder
 
+    def utc_now(self):
+        """Calculates the current UTC date and time."""
+
+        return utc.localize(datetime.utcnow())
+
     def now(self, user):
         """Calculates the current localized date and time."""
 
-        utc_time = utc.localize(datetime.utcnow())
-        now = utc_time.astimezone(self.zone(user))
+        now = self.utc_now().astimezone(self.zone(user))
 
         return now
 

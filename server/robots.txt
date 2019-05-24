@@ -1,12 +1,15 @@
 User-agent: *
 Allow: /
 Allow: /code
+Allow: /favicon.ico
+Disallow: /marker.png
 Disallow: /setup
 Disallow: /hello/*
 Disallow: /artwork
 Disallow: /city
 Disallow: /commute
 Disallow: /calendar
+Disallow: /everyone
 Disallow: /gif
 Disallow: /epd
 Disallow: /next

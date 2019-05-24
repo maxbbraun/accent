@@ -10,6 +10,7 @@ from city import City
 from commute import Commute
 from content import ContentError
 from content import ImageContent
+from everyone import Everyone
 from firestore import DataError
 from local_time import LocalTime
 from sun import Sun
@@ -30,7 +31,7 @@ class Schedule(ImageContent):
              expression syntax additionally supports the keywords 'sunrise' and
              'sunset' instead of hours and minutes, e.g. 'sunrise * * *'.
     'image': The kind of image to show when this entry is active. Valid kinds
-             are 'artwork', 'city', 'commute', and 'calendar'.
+             are 'artwork', 'city', 'commute', 'calendar', and 'everyone'.
     """
 
     def __init__(self, geocoder):
@@ -40,6 +41,7 @@ class Schedule(ImageContent):
         self.city = City(geocoder)
         self.commute = Commute(geocoder)
         self.calendar = GoogleCalendar(geocoder)
+        self.everyone = Everyone(geocoder)
 
     def _next(self, cron, after, user):
         """Finds the next time matching the cron expression."""
@@ -65,6 +67,8 @@ class Schedule(ImageContent):
             content = self.commute
         elif kind == 'calendar':
             content = self.calendar
+        elif kind == 'everyone':
+            content = self.everyone
         else:
             error('Unknown image kind: %s' % kind)
             return None

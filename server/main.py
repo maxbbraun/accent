@@ -89,6 +89,7 @@ from auth import verify_scope
 from city import City
 from commute import Commute
 from content import ContentError
+from everyone import Everyone
 from firestore import Firestore
 from firestore import GoogleCalendarStorage
 from geocoder import Geocoder
@@ -120,6 +121,7 @@ artwork = Artwork()
 calendar = GoogleCalendar(geocoder)
 city = City(geocoder)
 commute = Commute(geocoder)
+everyone = Everyone(geocoder)
 schedule = Schedule(geocoder)
 
 # The Flask app handling requests.
@@ -156,6 +158,14 @@ def calendar_gif(key=None, user=None):
     """Responds with a GIF version of the calendar image."""
 
     return content_response(calendar, gif_response, user)
+
+
+@app.route('/everyone')
+@user_auth(image_response=gif_response)
+def everyone_gif(key=None, user=None):
+    """Responds with a GIF version of the everyone image."""
+
+    return content_response(everyone, gif_response, user)
 
 
 @app.route('/gif')

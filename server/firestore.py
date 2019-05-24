@@ -109,6 +109,11 @@ class Firestore(object):
 
         return user
 
+    def users(self):
+        """Returns an iterator over all users."""
+
+        return self.db.collection('users').stream()
+
     def _user_reference(self, key):
         """Retrieves the user reference matching the specified key."""
 
