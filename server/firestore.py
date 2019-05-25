@@ -122,7 +122,8 @@ class Firestore(object):
     def set_user(self, key, data):
         """Sets the data for the user matching the specified key."""
 
-        self._user_reference(key).set(data)
+        # Use merge to only overwrite the specified data.
+        self._user_reference(key).set(data, merge=True)
 
     def update_user(self, key, fields):
         """Updates the fields for the user matching the specified key."""

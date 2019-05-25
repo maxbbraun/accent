@@ -1,10 +1,14 @@
 from flask import request
 from flask import url_for
 from functools import wraps
+from googleapiclient.http import build_http
+from logging import error
+from oauth2client.client import HttpAccessTokenRefreshError
 from oauth2client.client import OAuth2WebServerFlow
 from re import compile as re_compile
 
 from firestore import Firestore
+from firestore import GoogleCalendarStorage
 from response import forbidden_response
 from response import settings_response
 from response import text_response
@@ -32,12 +36,6 @@ def _oauth_url():
     """Creates the URL handling OAuth redirects."""
 
     return url_for('oauth', _external=True)
-
-
-def verify_scope(scope):
-    """Checks if the provided scope is an expected one."""
-
-    return scope in [GOOGLE_CALENDAR_SCOPE]
 
 
 def _valid_key(key):
@@ -121,8 +119,25 @@ def google_calendar_step1(key):
     return flow.step1_get_authorize_url(state=key)
 
 
-def google_calendar_step2(key, code):
+def _google_calendar_step2(key, code):
     """Creates the URL for the second OAuth step."""
 
     flow = _google_calendar_flow(key)
     return flow.step2_exchange(code=code)
+
+
+def oauth_step2(key, scope, code):
+    """Exchanges and saves the OAuth credentials."""
+
+    # Use scope-specific token exchange and storage steps.
+    if scope == GOOGLE_CALENDAR_SCOPE:
+        credentials = _google_calendar_step2(key, code)
+        storage = GoogleCalendarStorage(key)
+        credentials.set_store(storage)
+        try:
+            credentials.refresh(build_http())
+        except HttpAccessTokenRefreshError as e:
+            storage.delete()
+            error('Token refresh error: %s' % e)
+    else:
+        error('Unknown OAuth scope: %s' % scope)

@@ -81,11 +81,10 @@ from time import time
 from artwork import Artwork
 from auth import ACCOUNT_ACCESS_URL
 from auth import google_calendar_step1
-from auth import google_calendar_step2
 from auth import next_retry_response
+from auth import oauth_step2
 from auth import user_auth
 from auth import validate_key
-from auth import verify_scope
 from city import City
 from commute import Commute
 from content import ContentError
@@ -224,13 +223,16 @@ def hello_get(key):
     """Responds with a form for editing user data."""
 
     # Look up any existing user data.
-    calendar_credentials = GoogleCalendarStorage(key).get()
+    calendar_storage = GoogleCalendarStorage(key)
+    calendar_credentials = calendar_storage.get()
 
     # Force a Google Calendar credentials refresh to get the latest status.
     if calendar_credentials:
         try:
             calendar_credentials.refresh(build_http())
-        except HttpAccessTokenRefreshError:
+        except HttpAccessTokenRefreshError as e:
+            error('Calendar token refresh error: %s' % e)
+            calendar_storage.delete()
             calendar_credentials = None
 
     calendar_connected = calendar_credentials is not None
@@ -262,16 +264,9 @@ def hello_post(key):
         'work': form['work'],
         'travel_mode': form['travel_mode'],
         'schedule': schedule})
-    calendar_credentials = GoogleCalendarStorage(key).get()
-    if calendar_credentials:
-        firestore.update_user(key, {
-            'google_calendar_credentials': calendar_credentials.to_json()})
 
-    calendar_connected = calendar_credentials is not None
-    return render_template(HELLO_TEMPLATE, key=key, user=firestore.user(key),
-                           calendar_connected=calendar_connected,
-                           calendar_connect_url=google_calendar_step1(key),
-                           calendar_disconnect_url=ACCOUNT_ACCESS_URL)
+    # Redirect back to the GET version.
+    return redirect(settings_url(key))
 
 
 @app.route('/oauth')
@@ -282,23 +277,16 @@ def oauth():
     key = request.args.get('state')
     settings = redirect(settings_url(key))
 
-    # Handle any errors, notable the user declining.
+    # Handle any errors, notably the user declining.
     oauth_error = request.args.get('error')
     if oauth_error:
         error('OAuth error: %s' % oauth_error)
         return settings
 
-    # Verify the the scope is as expected.
+    # Continue the flow based on the scope.
     scope = request.args.get('scope')
-    if not verify_scope(scope):
-        error('Unknown OAuth scope: %s' % scope)
-        return settings
-
-    # Exchange and save the OAuth credentials.
     code = request.args.get('code')
-    credentials = google_calendar_step2(key, code)
-    credentials.set_store(GoogleCalendarStorage(key))
-    credentials.refresh(build_http())
+    oauth_step2(key, scope, code)
 
     return settings
 
