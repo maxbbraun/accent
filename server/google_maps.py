@@ -1,7 +1,10 @@
 from cachetools import cached
 from cachetools import TTLCache
+from google.cloud import vision_v1 as vision
 from io import BytesIO
+from logging import warning
 from PIL import Image
+from re import compile as re_compile
 from requests import get
 from requests.exceptions import RequestException
 from time import mktime
@@ -21,8 +24,11 @@ STATIC_MAP_URL = 'https://maps.googleapis.com/maps/api/staticmap'
 # The endpoint of the Directions API.
 DIRECTIONS_URL = 'https://maps.googleapis.com/maps/api/directions/json'
 
-# The map copyright text. The parameter is the current year.
+# The default map copyright text. The parameter is the current year.
 COPYRIGHT_TEXT = 'Map data \xa9%d Google'
+
+# The regular expression pattern identifying the copyright text.
+COPYRIGHT_PATTERN = re_compile(r'^.*(Map data.*)$')
 
 # The color of the copyright text.
 COPYRIGHT_TEXT_COLOR = (0, 0, 0)
@@ -49,6 +55,7 @@ class GoogleMaps(object):
     def __init__(self, geocoder):
         self.google_maps_api_key = Firestore().google_maps_api_key()
         self.local_time = LocalTime(geocoder)
+        self.vision_client = vision.ImageAnnotatorClient()
 
     def _static_map_url(self, polyline=None, markers=None, marker_icon=None):
         """Constructs the URL for the Static Map API request."""
@@ -80,6 +87,25 @@ class GoogleMaps(object):
 
         return url
 
+    def _extract_copyright_text(self, image_data):
+        """Uses OCR to extract the copyright text from the map."""
+
+        # Make a request to the Vision API.
+        request_image = vision.types.Image(content=image_data.getvalue())
+        response = self.vision_client.document_text_detection(
+            image=request_image)
+
+        # Parse all recognized text for the copyright.
+        lines = response.full_text_annotation.text.splitlines()
+        for line in lines:
+            matches = COPYRIGHT_PATTERN.match(line)
+            if matches:
+                return matches.group(1)
+
+        warning('Falling back to default copyright text.')
+        time = self.local_time.utc_now()
+        return COPYRIGHT_TEXT % time.year
+
     @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
     def map_image(self, polyline=None, markers=None, marker_icon=None):
         """Creates a map image with optional route or markers."""
@@ -92,11 +118,12 @@ class GoogleMaps(object):
             image_response = get(image_url).content
         except RequestException as e:
             raise DataError(e)
-        image = Image.open(BytesIO(image_response)).convert('RGB')
+        image_data = BytesIO(image_response)
+        image = Image.open(image_data).convert('RGB')
 
-        # Draw the map copyright notice.
-        time = self.local_time.utc_now()
-        draw_text(COPYRIGHT_TEXT % time.year,
+        # Replace the copyright text with a more readable pixel font.
+        copyright_text = self._extract_copyright_text(image_data)
+        draw_text(copyright_text,
                   font_spec=SCREENSTAR_SMALL_REGULAR,
                   text_color=COPYRIGHT_TEXT_COLOR,
                   anchor='bottom_right',
