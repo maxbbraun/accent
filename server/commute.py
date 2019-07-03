@@ -35,7 +35,15 @@ class Commute(ImageContent):
         # Extract the directions data.
         try:
             directions = self.google_maps.directions(user)
-            route = directions['routes'][0]  # Expect one route.
+            status = directions['status']
+            if status != 'OK':
+                try:
+                    error_message = directions['error_message']
+                    raise DataError(error_message)
+                except KeyError:
+                    raise DataError(status)
+            routes = directions['routes']
+            route = routes[0]
             polyline = route['overview_polyline']['points']
             summary = route['summary']
             leg = route['legs'][0]  # Expect one leg.
