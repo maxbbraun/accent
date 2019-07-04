@@ -1,6 +1,6 @@
 from cachetools import cached
 from cachetools import TTLCache
-from google.cloud import vision_v1 as vision
+from google.cloud import vision
 from io import BytesIO
 from logging import warning
 from PIL import Image
