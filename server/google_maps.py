@@ -7,7 +7,6 @@ from PIL import Image
 from re import compile as re_compile
 from requests import get
 from requests.exceptions import RequestException
-from time import mktime
 from urllib.parse import quote
 
 from epd import DISPLAY_WIDTH
@@ -133,7 +132,7 @@ class GoogleMaps(object):
 
         return image
 
-    def _route_url(self, timestamp, home, work, travel_mode):
+    def _route_url(self, home, work, travel_mode):
         """Constructs the URL for the Directions API request."""
 
         if not home:
@@ -150,16 +149,12 @@ class GoogleMaps(object):
         url += '&origin=%s' % quote(home)
         url += '&destination=%s' % quote(work)
         url += '&mode=%s' % travel_mode
-        url += '&departure_time=%d' % timestamp
+        url += '&departure_time=now'
 
         return url
 
     def directions(self, user):
         """Gets the directions from the user's home to work."""
-
-        # Use the current time for live traffic.
-        time = self.local_time.utc_now()
-        timestamp = int(mktime(time.timetuple()))
 
         # Get the user's addresses.
         try:
@@ -170,7 +165,7 @@ class GoogleMaps(object):
             raise DataError(e)
 
         # Make the Directions API request.
-        directions_url = self._route_url(timestamp, home, work, travel_mode)
+        directions_url = self._route_url(home, work, travel_mode)
         directions = get(directions_url).json()
 
         return directions
