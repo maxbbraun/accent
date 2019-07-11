@@ -56,25 +56,34 @@ class GoogleMaps(object):
         self.local_time = LocalTime(geocoder)
         self.vision_client = vision.ImageAnnotatorClient()
 
-    def _static_map_url(self, polyline=None, markers=None, marker_icon=None):
+    def _static_map_url(self, polyline=None, markers=None, marker_icon=None,
+                        hide_map=False):
         """Constructs the URL for the Static Map API request."""
 
         url = STATIC_MAP_URL
         url += '?key=%s' % self.google_maps_api_key
         url += '&size=%dx%d' % (DISPLAY_WIDTH, DISPLAY_HEIGHT)
         url += '&maptype=roadmap'
-        url += '&style=feature:administrative|visibility:off'
-        url += '&style=feature:poi|visibility:off'
-        url += '&style=feature:all|element:labels|visibility:off'
-        url += '&style=feature:landscape|color:0xffffff'
-        url += '&style=feature:road|color:0x000000'
-        url += '&style=feature:transit|color:0xffffff'
-        url += '&style=feature:transit.line|color:0x000000'
-        url += '&style=feature:water|color:0x000000'
+
+        if hide_map:
+            url += '&style=all|visibility:off'
+        else:
+            url += '&style=feature:administrative|visibility:off'
+            url += '&style=feature:poi|visibility:off'
+            url += '&style=feature:all|element:labels|visibility:off'
+            url += '&style=feature:landscape|color:0xffffff'
+            url += '&style=feature:road|color:0x000000'
+            url += '&style=feature:transit|color:0xffffff'
+            url += '&style=feature:transit.line|color:0x000000'
+            url += '&style=feature:water|color:0x000000'
 
         if polyline:
-            url += '&path=color:0xff0000ff|weight:%d|enc:%s' % (
-                PATH_WEIGHT, quote(polyline))
+            if hide_map:
+                path_color = '0x00000000'
+            else:
+                path_color = '0xff0000ff'
+            url += '&path=color:%s|weight:%d|enc:%s' % (
+                path_color, PATH_WEIGHT, quote(polyline))
 
         if markers:
             # Use the specified marker icon or a default style.
@@ -86,8 +95,29 @@ class GoogleMaps(object):
 
         return url
 
-    def _extract_copyright_text(self, image_data):
+    def _download_map(self, polyline=None, markers=None, marker_icon=None,
+                      hide_map=False):
+        """Downloads the image data from the Google Static Map API."""
+
+        image_url = self._static_map_url(polyline=polyline, markers=markers,
+                                         marker_icon=marker_icon,
+                                         hide_map=hide_map)
+
+        try:
+            image_response = get(image_url).content
+        except RequestException as e:
+            raise DataError(e)
+        image_data = BytesIO(image_response)
+
+        return image_data
+
+    def _copyright_text(self, polyline=None, markers=None, marker_icon=None):
         """Uses OCR to extract the copyright text from the map."""
+
+        # Download a version of the map with only the copyright text.
+        image_data = self._download_map(polyline=polyline, markers=markers,
+                                        marker_icon=marker_icon,
+                                        hide_map=True)
 
         # Make a request to the Vision API.
         request_image = vision.types.Image(content=image_data.getvalue())
@@ -110,18 +140,14 @@ class GoogleMaps(object):
         """Creates a map image with optional route or markers."""
 
         # Get the static map as an image.
-        image_url = self._static_map_url(polyline=polyline, markers=markers,
-                                         marker_icon=marker_icon)
-
-        try:
-            image_response = get(image_url).content
-        except RequestException as e:
-            raise DataError(e)
-        image_data = BytesIO(image_response)
+        image_data = self._download_map(polyline=polyline, markers=markers,
+                                        marker_icon=marker_icon)
         image = Image.open(image_data).convert('RGB')
 
         # Replace the copyright text with a more readable pixel font.
-        copyright_text = self._extract_copyright_text(image_data)
+        copyright_text = self._copyright_text(polyline=polyline,
+                                              markers=markers,
+                                              marker_icon=marker_icon)
         draw_text(copyright_text,
                   font_spec=SCREENSTAR_SMALL_REGULAR,
                   text_color=COPYRIGHT_TEXT_COLOR,
