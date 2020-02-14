@@ -101,7 +101,8 @@ from response import text_response
 from schedule import Schedule
 
 # The URL of the Medium story about Accent.
-INFO_URL = 'https://medium.com/@maxbraun/meet-accent-352cfa95813a'
+INFO_URL = ('https://medium.com/@maxbraun/meet-accent-352cfa95813a'
+            '?source=friends_link&sk=4a0cab13290cf52ee5fb9c92d3e766aa')
 
 # The URL of the Medium story explaining how to set up Accent.
 SETUP_URL = 'https://medium.com/@maxbraun/setting-up-accent-b71a07c33ca9'
