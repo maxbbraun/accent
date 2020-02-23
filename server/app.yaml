@@ -1,6 +1,6 @@
 runtime: python37
 
-instance_class: F2
+instance_class: F1
 
 handlers:
 - url: /favicon\.ico
