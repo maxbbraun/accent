@@ -1,9 +1,12 @@
 User-agent: *
 Allow: /
+Allow: /info
+Allow: /setup
 Allow: /code
+Allow: /social
 Allow: /favicon.ico
+Sitemap: /sitemap.txt
 Disallow: /marker.png
-Disallow: /setup
 Disallow: /hello/*
 Disallow: /artwork
 Disallow: /city

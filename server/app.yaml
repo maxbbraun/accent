@@ -11,6 +11,10 @@ handlers:
   mime_type: text/plain
   static_files: robots.txt
   upload: robots\.txt
+- url: /sitemap\.txt
+  mime_type: text/plain
+  static_files: sitemap.txt
+  upload: sitemap\.txt
 - url: /marker\.png
   mime_type: image/png
   static_files: assets/marker.png

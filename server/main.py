@@ -110,6 +110,9 @@ SETUP_URL = 'https://medium.com/@maxbraun/setting-up-accent-b71a07c33ca9'
 # The URL of the GitHub page with Accent's source code.
 CODE_URL = 'https://github.com/maxbbraun/accent'
 
+# The URL of the Accent Twitter profile.
+SOCIAL_URL = 'https://twitter.com/AccentInk'
+
 # The template for editing user data.
 HELLO_TEMPLATE = 'hello.html'
 
@@ -198,7 +201,8 @@ def next(key=None, user=None):
 
 
 @app.route('/')
-def root():
+@app.route('/info')
+def info():
     """Redirects to the Medium story about Accent."""
 
     return redirect(INFO_URL)
@@ -216,6 +220,13 @@ def code():
     """Redirects to the GitHub page with Accent's source code."""
 
     return redirect(CODE_URL)
+
+
+@app.route('/social')
+def social():
+    """Redirects to the Accent Twitter profile."""
+
+    return redirect(SOCIAL_URL)
 
 
 @app.route('/hello/<key>', methods=['GET'])
