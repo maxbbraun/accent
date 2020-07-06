@@ -10,7 +10,7 @@ from firestore import DataError
 from firestore import Firestore
 
 # The base URL for AccuWeather API endpoints.
-BASE_URL = 'http://dataservice.accuweather.com'
+BASE_URL = 'https://dataservice.accuweather.com'
 
 # The endpoint of the AccuWeather Current Conditions API.
 CURRENT_CONDITIONS_URL = '%s/currentconditions/v1/%s?apikey=%s'
