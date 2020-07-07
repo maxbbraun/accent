@@ -9,33 +9,23 @@ from requests import RequestException
 from firestore import DataError
 from firestore import Firestore
 
-# The base URL for AccuWeather API endpoints.
-BASE_URL = 'https://dataservice.accuweather.com'
-
-# The endpoint of the AccuWeather Current Conditions API.
-CURRENT_CONDITIONS_URL = '%s/currentconditions/v1/%s?apikey=%s'
-
-# The endpoint of the AccuWeather Geoposition API.
-GEOPOSITION_URL = '%s/locations/v1/cities/geoposition/search?apikey=%s&q=%f,%f'
-
-# The maximum number of location keys kept in the cache.
-LOCATION_KEY_CACHE_SIZE = 100
-
-# The time to live in seconds for cached location keys.
-LOCATION_KEY_CACHE_TTL_S = 24 * 60 * 60  # 1 day
+# The endpoint of the OpenWeather One Call API.
+# Spec: https://openweathermap.org/api/one-call-api
+OPEN_WEATHER_URL = ('https://api.openweathermap.org/data/2.5/onecall'
+                    '?lat=%f&lon=%f&exclude=minutely,hourly,daily&appid=%s')
 
 # The maximum number of weather icons kept in the cache.
-WEATHER_ICON_CACHE_SIZE = 100
+MAX_CACHE_SIZE = 100
 
 # The time to live in seconds for cached weather icons.
-WEATHER_ICON_CACHE_TTL_S = 60 * 60  # 1 hour
+CACHE_TTL_S = 60 * 60  # 1 hour
 
 
 class Weather(object):
-    """A wrapper around the AccuWeather Current Conditions API with a cache."""
+    """A wrapper around the OpenWeather One Call API with a cache."""
 
     def __init__(self, geocoder):
-        self.accu_weather_api_key = Firestore().accu_weather_api_key()
+        self.open_weather_api_key = Firestore().open_weather_api_key()
         self.geocoder = geocoder
 
     def _icon(self, user):
@@ -53,75 +43,50 @@ class Weather(object):
         except (AstralError, KeyError) as e:
             raise DataError(e)
 
-    @cached(cache=TTLCache(maxsize=WEATHER_ICON_CACHE_SIZE,
-                           ttl=WEATHER_ICON_CACHE_TTL_S))
+    @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
     def _request_icon(self, location):
-        """Requests the current weather icon from the AccuWeather API."""
+        """Requests the current weather icon from the OpenWeather API."""
 
         # Look up the current weather conditions at the location.
-        location_key = self._request_location_key(location)
-        current_conditions_url = CURRENT_CONDITIONS_URL % (
-            BASE_URL, location_key, self.accu_weather_api_key)
+        request_url = OPEN_WEATHER_URL % (location.latitude,
+                                          location.longitude,
+                                          self.open_weather_api_key)
 
         try:
-            current_conditions = get(current_conditions_url).json()
-            icon = current_conditions[0]['WeatherIcon']
+            response_json = get(request_url).json()
+            icon = response_json['current']['weather'][0]['icon']
         except (RequestException, JSONDecodeError, KeyError) as e:
             raise DataError(e)
 
         info('Weather: %s' % icon)
         return icon
 
-    @cached(cache=TTLCache(maxsize=LOCATION_KEY_CACHE_SIZE,
-                           ttl=LOCATION_KEY_CACHE_TTL_S))
-    def _request_location_key(self, location):
-        """Requests the location key for the specified location."""
-
-        geoposition_url = GEOPOSITION_URL % (BASE_URL,
-                                             self.accu_weather_api_key,
-                                             location.latitude,
-                                             location.longitude)
-        try:
-            geoposition = get(geoposition_url).json()
-            location_key = geoposition['Key']
-        except (RequestException, JSONDecodeError, KeyError) as e:
-            raise DataError(e)
-
-        info('Location key: %s' % location_key)
-        return location_key
-
     def is_clear(self, user):
         """Checks if the current weather is clear."""
 
-        return self._icon(user) in [1, 2, 33, 34]
-
-    def is_cloudy(self, user):
-        """Checks if the current weather is cloudy."""
-
-        return self._icon(user) in [6, 7, 8]
+        return self._icon(user) in ['01d', '01n']
 
     def is_partly_cloudy(self, user):
         """Checks if the current weather is partly cloudy."""
 
-        return self._icon(user) in [3, 4, 5, 35, 36, 37, 38]
+        return self._icon(user) in ['02d', '02n']
+
+    def is_cloudy(self, user):
+        """Checks if the current weather is cloudy."""
+
+        return self._icon(user) in ['03d', '03n', '04d', '04n']
 
     def is_rainy(self, user):
         """Checks if the current weather is rainy."""
 
-        return self._icon(user) in [12, 13, 14, 15, 16, 17, 18, 24, 25, 26, 29,
-                                    39, 40, 41, 42]
-
-    def is_windy(self, user):
-        """Checks if the current weather is windy."""
-
-        return self._icon(user) in [32]
+        return self._icon(user) in ['09d', '09n', '10d', '10n', '11d', '11n']
 
     def is_snowy(self, user):
         """Checks if the current weather is snowy."""
 
-        return self._icon(user) in [19, 23, 43, 44]
+        return self._icon(user) in ['13d', '13n']
 
     def is_foggy(self, user):
         """Checks if the current weather is foggy."""
 
-        return self._icon(user) in [11]
+        return self._icon(user) in ['50d', '50n']

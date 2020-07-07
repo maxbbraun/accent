@@ -39,10 +39,10 @@ class Firestore(object):
 
         return self._api_key('google_maps')
 
-    def accu_weather_api_key(self):
-        """Retrieves the AccuWeather API key."""
+    def open_weather_api_key(self):
+        """Retrieves the OpenWeather API key."""
 
-        return self._api_key('accu_weather')
+        return self._api_key('open_weather')
 
     def google_calendar_secrets(self):
         """Loads the Google Calendar API secrets from the database."""
