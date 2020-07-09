@@ -6,7 +6,7 @@ SUBVARIO_CONDENSED_MEDIUM = {
     'file': 'assets/SubVario-Condensed-Medium.otf',
     'size': 24,
     'height': 20,
-    'y_offset': 1,
+    'y_offset': 2,
     'width_overrides': {
         ' ': 5,
         '1': 8
@@ -18,7 +18,7 @@ SCREENSTAR_SMALL_REGULAR = {
     'file': 'assets/Screenstar-Small-Regular.otf',
     'size': 12,
     'height': 10,
-    'y_offset': 4,
+    'y_offset': 2,
     'width_overrides': {
         ' ': 3
     }
