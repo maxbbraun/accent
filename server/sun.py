@@ -14,8 +14,8 @@ class Sun(object):
     """A wrapper around a calculator for sunrise and sunset times."""
 
     def __init__(self, geocoder):
-        self.astral = Astral(geocoder=GeocoderWrapper, wrapped=geocoder)
-        self.local_time = LocalTime(geocoder)
+        self._astral = Astral(geocoder=GeocoderWrapper, wrapped=geocoder)
+        self._local_time = LocalTime(geocoder)
 
     def rewrite_cron(self, cron, after, user):
         """Replaces references to sunrise and sunset in a cron expression."""
@@ -34,9 +34,9 @@ class Sun(object):
         except ValueError as e:
             raise DataError(e)
 
-        zone = self.local_time.zone(user)
+        zone = self._local_time.zone(user)
         try:
-            home = self.astral[user.get('home')]
+            home = self._astral[user.get('home')]
         except (AstralError, KeyError) as e:
             raise DataError(e)
 
@@ -72,10 +72,10 @@ class Sun(object):
         """Calculates whether the sun is currently up."""
 
         # Find the sunrise and sunset times for today.
-        time = self.local_time.now(user)
-        zone = self.local_time.zone(user)
+        time = self._local_time.now(user)
+        zone = self._local_time.zone(user)
         try:
-            home = self.astral[user.get('home')]
+            home = self._astral[user.get('home')]
         except (AstralError, KeyError) as e:
             raise DataError(e)
         sunrise = home.sunrise(time).astimezone(zone)

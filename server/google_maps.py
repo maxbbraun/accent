@@ -52,16 +52,16 @@ class GoogleMaps(object):
     """A wrapper around the Google Static Map and Directions APIs."""
 
     def __init__(self, geocoder):
-        self.google_maps_api_key = Firestore().google_maps_api_key()
-        self.local_time = LocalTime(geocoder)
-        self.vision_client = vision.ImageAnnotatorClient()
+        self._google_maps_api_key = Firestore().google_maps_api_key()
+        self._local_time = LocalTime(geocoder)
+        self._vision_client = vision.ImageAnnotatorClient()
 
     def _static_map_url(self, polyline=None, markers=None, marker_icon=None,
                         hide_map=False):
         """Constructs the URL for the Static Map API request."""
 
         url = STATIC_MAP_URL
-        url += '?key=%s' % self.google_maps_api_key
+        url += '?key=%s' % self._google_maps_api_key
         url += '&size=%dx%d' % (DISPLAY_WIDTH, DISPLAY_HEIGHT)
         url += '&maptype=roadmap'
 
@@ -121,7 +121,7 @@ class GoogleMaps(object):
 
         # Make a request to the Vision API.
         request_image = vision.types.Image(content=image_data.getvalue())
-        response = self.vision_client.document_text_detection(
+        response = self._vision_client.document_text_detection(
             image=request_image)
 
         # Parse all recognized text for the copyright.
@@ -132,7 +132,7 @@ class GoogleMaps(object):
                 return matches.group(1)
 
         warning('Falling back to default copyright text.')
-        time = self.local_time.utc_now()
+        time = self._local_time.utc_now()
         return COPYRIGHT_TEXT % time.year
 
     @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
@@ -171,7 +171,7 @@ class GoogleMaps(object):
             raise DataError('Missing travel mode')
 
         url = DIRECTIONS_URL
-        url += '?key=%s' % self.google_maps_api_key
+        url += '?key=%s' % self._google_maps_api_key
         url += '&origin=%s' % quote(home)
         url += '&destination=%s' % quote(work)
         url += '&mode=%s' % travel_mode

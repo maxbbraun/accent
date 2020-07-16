@@ -23,12 +23,12 @@ class Firestore(object):
             initialize_app(ApplicationDefault(), {
                 'projectId': environ['GOOGLE_CLOUD_PROJECT']
             })
-        self.db = firestore_client()
+        self._db = firestore_client()
 
     def _api_key(self, service):
         """Retrieves the API key for the specified service."""
 
-        api_key = self.db.collection('api_keys').document(service).get()
+        api_key = self._db.collection('api_keys').document(service).get()
         if not api_key.exists:
             raise DataError('Missing API key for: %s' % service)
 
@@ -47,7 +47,7 @@ class Firestore(object):
     def google_calendar_secrets(self):
         """Loads the Google Calendar API secrets from the database."""
 
-        clients = self.db.collection('oauth_clients')
+        clients = self._db.collection('oauth_clients')
         secrets = clients.document('google_calendar').get()
         if not secrets.exists:
             raise DataError('Missing Google Calendar secrets')
@@ -112,12 +112,12 @@ class Firestore(object):
     def users(self):
         """Returns an iterator over all users."""
 
-        return self.db.collection('users').stream()
+        return self._db.collection('users').stream()
 
     def _user_reference(self, key):
         """Retrieves the user reference matching the specified key."""
 
-        return self.db.collection('users').document(key)
+        return self._db.collection('users').document(key)
 
     def set_user(self, key, data):
         """Sets the data for the user matching the specified key."""
@@ -141,13 +141,13 @@ class GoogleCalendarStorage(Storage):
 
     def __init__(self, key):
         super(GoogleCalendarStorage, self).__init__(lock=Lock())
-        self.firestore = Firestore()
-        self.key = key
+        self._firestore = Firestore()
+        self._key = key
 
     def locked_get(self):
         """Loads credentials from Firestore and attaches this storage."""
 
-        credentials = self.firestore.google_calendar_credentials(self.key)
+        credentials = self._firestore.google_calendar_credentials(self._key)
         if not credentials:
             return None
         credentials.set_store(self)
@@ -156,13 +156,13 @@ class GoogleCalendarStorage(Storage):
     def locked_put(self, credentials):
         """Saves credentials to Firestore."""
 
-        self.firestore.update_google_calendar_credentials(self.key,
-                                                          credentials)
+        self._firestore.update_google_calendar_credentials(self._key,
+                                                           credentials)
 
     def locked_delete(self):
         """Deletes credentials from Firestore."""
 
-        self.firestore.delete_google_calendar_credentials(self.key)
+        self._firestore.delete_google_calendar_credentials(self._key)
 
 
 class DataError(Exception):

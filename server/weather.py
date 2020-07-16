@@ -25,8 +25,8 @@ class Weather(object):
     """A wrapper around the OpenWeather One Call API with a cache."""
 
     def __init__(self, geocoder):
-        self.open_weather_api_key = Firestore().open_weather_api_key()
-        self.geocoder = geocoder
+        self._open_weather_api_key = Firestore().open_weather_api_key()
+        self._geocoder = geocoder
 
     def _icon(self, user):
         """Gets the current weather icon for the user's home address."""
@@ -39,7 +39,7 @@ class Weather(object):
 
         try:
             home = user.get('home')
-            return self.geocoder[home]
+            return self._geocoder[home]
         except (AstralError, KeyError) as e:
             raise DataError(e)
 
@@ -50,7 +50,7 @@ class Weather(object):
         # Look up the current weather conditions at the location.
         request_url = OPEN_WEATHER_URL % (location.latitude,
                                           location.longitude,
-                                          self.open_weather_api_key)
+                                          self._open_weather_api_key)
 
         try:
             response_json = get(request_url).json()

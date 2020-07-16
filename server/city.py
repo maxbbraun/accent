@@ -19,14 +19,14 @@ class City(ImageContent):
     """A dynamic city scene that changes with the weather and other factors."""
 
     def __init__(self, geocoder):
-        self.local_time = LocalTime(geocoder)
-        self.sun = Sun(geocoder)
-        self.weather = Weather(geocoder)
+        self._local_time = LocalTime(geocoder)
+        self._sun = Sun(geocoder)
+        self._weather = Weather(geocoder)
 
     def _day_of_year(self, user):
         """Returns the current day of the year in the users's time zone."""
 
-        return self.local_time.now(user).timetuple().tm_yday
+        return self._local_time.now(user).timetuple().tm_yday
 
     def _modulo_3_0(self, user):
         """Returns True if the current day of the year modulo 3 is 0."""
@@ -81,17 +81,17 @@ class City(ImageContent):
         """
 
         return [{
-            'condition': self.sun.is_daylight,
+            'condition': self._sun.is_daylight,
             'layers': [
                 {
                     'file': 'day/environment/water-day.gif',
                     'xy': (0, 0),
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/environment/water-flat-day.gif',
                     'xy': (0, 0),
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/environment/isle-day.gif',
@@ -140,14 +140,14 @@ class City(ImageContent):
                              'blockbob-driving-xp-day.gif'),
                     'xy': (418, 109),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': ('day/characters/blockbob/'
                              'blockbob-driving-xp-day-rain.gif'),
                     'xy': (418, 93),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/blocks/bldg-robosuper-day.gif',
@@ -156,12 +156,12 @@ class City(ImageContent):
                 {
                     'file': 'day/blocks/block-A/block-A-day.gif',
                     'xy': (200, 6),
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/blocks/block-A/block-A-day-rain.gif',
                     'xy': (200, 6),
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/characters/blockbob/blockbob-sitting-day.gif',
@@ -209,13 +209,13 @@ class City(ImageContent):
                     'file': 'day/characters/robogroup/robogroup-day.gif',
                     'xy': (554, 168),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/characters/robogroup/robogroup-day-rain.gif',
                     'xy': (547, 157),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/misc/streetlight-xm-day.gif',
@@ -230,36 +230,36 @@ class City(ImageContent):
                              'deliverybiker-xm-day.gif'),
                     'xy': (500, 142),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': ('day/characters/deliverybiker/'
                              'deliverybiker-xm-day-rain.gif'),
                     'xy': (492, 135),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/blocks/block-E/block-E-day.gif',
                     'xy': (12, 51),
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/blocks/block-E/block-E-day-rain.gif',
                     'xy': (12, 51),
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/vehicles/boat1/boat1-yp-day.gif',
                     'xy': (6, 238),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/vehicles/boat1/boat1-yp-day-rain.gif',
                     'xy': (6, 216),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/misc/bench-day.gif',
@@ -274,13 +274,13 @@ class City(ImageContent):
                     'file': 'day/characters/ladybiker/ladybiker-day.gif',
                     'xy': (102, 251),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/characters/ladybiker/ladybiker-day-rain.gif',
                     'xy': (102, 234),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/misc/streetlight-ym-day.gif',
@@ -324,14 +324,14 @@ class City(ImageContent):
                              'robogroup-barge-empty-xm-day.gif'),
                     'xy': (574, 222),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': ('day/characters/robogroup/'
                              'robogroup-barge-empty-xm-day-rain.gif'),
                     'xy': (574, 218),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/blocks/bldg-jetty-day.gif',
@@ -354,13 +354,13 @@ class City(ImageContent):
                     'file': 'day/characters/girl/girlwbird-day.gif',
                     'xy': (400, 315),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/characters/girl/girlwbird-day-rain.gif',
                     'xy': (404, 303),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/misc/streetlight-ym-day.gif',
@@ -378,25 +378,25 @@ class City(ImageContent):
                     'file': 'day/characters/vrguys/vrguy-A-day.gif',
                     'xy': (217, 298),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/characters/vrguys/vrguy-A-day-rain.gif',
                     'xy': (203, 276),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/characters/vrguys/vrguy-B-day.gif',
                     'xy': (240, 305),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/characters/vrguys/vrguy-B-day-rain.gif',
                     'xy': (234, 293),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/blocks/bldg-honeybucket-day.gif',
@@ -444,77 +444,77 @@ class City(ImageContent):
                 {
                     'file': 'day/environment/rain1-day.gif',
                     'xy': (0, 0),
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/environment/cloud1-day.gif',
                     'xy': (523, 5),
-                    'or_condition': [self.weather.is_partly_cloudy,
-                                     self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_partly_cloudy,
+                                     self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'day/environment/cloud2-day.gif',
                     'xy': (-43, 41),
-                    'or_condition': [self.weather.is_partly_cloudy,
-                                     self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_partly_cloudy,
+                                     self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'day/environment/cloud2-day.gif',
                     'xy': (519, 177),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'day/environment/cloud3-day.gif',
                     'xy': (49, 96),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'day/environment/cloud4-day.gif',
                     'xy': (195, 156),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'day/environment/cloud5-day.gif',
                     'xy': (339, 70),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'day/environment/cloud6-day.gif',
                     'xy': (93, 264),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'day/environment/cloud7-day.gif',
                     'xy': (472, 247),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'day/environment/cloud8-day.gif',
                     'xy': (-18, 314),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 }
             ]
         }, {
-            'not_condition': self.sun.is_daylight,
+            'not_condition': self._sun.is_daylight,
             'layers': [
                 {
                     'file': 'night/environment/water-night.gif',
                     'xy': (0, 0),
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'night/environment/water-flat-night.gif',
                     'xy': (0, 0),
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'night/environment/isle-night.gif',
@@ -563,14 +563,14 @@ class City(ImageContent):
                              'blockbob-driving-xp-night.gif'),
                     'xy': (418, 109),
                     'probability': 50,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': ('night/characters/blockbob/'
                              'blockbob-driving-xp-night-rain.gif'),
                     'xy': (418, 93),
                     'probability': 50,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'night/blocks/bldg-robosuper-night.gif',
@@ -588,12 +588,12 @@ class City(ImageContent):
                 {
                     'file': 'night/blocks/block-A/block-A-night.gif',
                     'xy': (200, 6),
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'night/blocks/block-A/block-A-night-rain.gif',
                     'xy': (200, 6),
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': ('night/characters/blockbob/'
@@ -656,13 +656,13 @@ class City(ImageContent):
                     'file': 'night/vehicles/boat1-yp-night.gif',
                     'xy': (6, 238),
                     'probability': 80,
-                    'not_condition': self.weather.is_rainy
+                    'not_condition': self._weather.is_rainy
                 },
                 {
                     'file': 'night/vehicles/boat1-yp-night-rain.gif',
                     'xy': (6, 216),
                     'probability': 80,
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'night/misc/bench-night.gif',
@@ -786,63 +786,63 @@ class City(ImageContent):
                 {
                     'file': 'night/environment/rain1-night.gif',
                     'xy': (0, 0),
-                    'condition': self.weather.is_rainy
+                    'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'night/environment/cloud1-night.gif',
                     'xy': (523, 5),
-                    'or_condition': [self.weather.is_partly_cloudy,
-                                     self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_partly_cloudy,
+                                     self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'night/environment/cloud2-night.gif',
                     'xy': (-43, 41),
-                    'or_condition': [self.weather.is_partly_cloudy,
-                                     self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_partly_cloudy,
+                                     self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'night/environment/cloud2-night.gif',
                     'xy': (519, 177),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'night/environment/cloud3-night.gif',
                     'xy': (49, 96),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'night/environment/cloud4-night.gif',
                     'xy': (195, 156),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'night/environment/cloud5-night.gif',
                     'xy': (339, 70),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'night/environment/cloud6-night.gif',
                     'xy': (93, 264),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'night/environment/cloud7-night.gif',
                     'xy': (472, 247),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 },
                 {
                     'file': 'night/environment/cloud8-night.gif',
                     'xy': (-18, 314),
-                    'or_condition': [self.weather.is_cloudy,
-                                     self.weather.is_rainy]
+                    'or_condition': [self._weather.is_cloudy,
+                                     self._weather.is_rainy]
                 }
             ]
         }]

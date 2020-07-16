@@ -4,7 +4,6 @@ from google_maps import GoogleMaps
 from graphics import draw_text
 from graphics import SUBVARIO_CONDENSED_MEDIUM
 from content import ImageContent
-from local_time import LocalTime
 
 # The color of the directions text.
 DIRECTIONS_TEXT_COLOR = (255, 255, 255)
@@ -26,15 +25,14 @@ class Commute(ImageContent):
     """The commute route on a map."""
 
     def __init__(self, geocoder):
-        self.local_time = LocalTime(geocoder)
-        self.google_maps = GoogleMaps(geocoder)
+        self._google_maps = GoogleMaps(geocoder)
 
     def image(self, user):
         """Generates the current commute image."""
 
         # Extract the directions data.
         try:
-            directions = self.google_maps.directions(user)
+            directions = self._google_maps.directions(user)
             status = directions['status']
             if status != 'OK':
                 try:
@@ -56,7 +54,7 @@ class Commute(ImageContent):
 
         # Get the static map with the route as an image.
         try:
-            image = self.google_maps.map_image(polyline=polyline)
+            image = self._google_maps.map_image(polyline=polyline)
         except DataError as e:
             raise ContentError(e)
 

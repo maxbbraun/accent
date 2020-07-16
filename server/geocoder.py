@@ -27,7 +27,7 @@ class GeocoderWrapper(object):
     """A class to wrap a Geocoder instance and feed it to astral.Astral."""
 
     def __init__(self, wrapped):
-        self.geocoder = wrapped
+        self._geocoder = wrapped
 
     def __getitem__(self, key):
-        return self.geocoder.__getitem__(key)
+        return self._geocoder.__getitem__(key)

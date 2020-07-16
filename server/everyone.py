@@ -16,9 +16,9 @@ class Everyone(ImageContent):
     """A map of Accent users around the world."""
 
     def __init__(self, geocoder):
-        self.geocoder = geocoder
-        self.google_maps = GoogleMaps(geocoder)
-        self.firestore = Firestore()
+        self._geocoder = geocoder
+        self._google_maps = GoogleMaps(geocoder)
+        self._firestore = Firestore()
 
     @cached(cache=TTLCache(maxsize=1, ttl=CACHE_TTL_S))
     def _markers(self):
@@ -26,10 +26,10 @@ class Everyone(ImageContent):
 
         markers = ''
 
-        for user in self.firestore.users():
+        for user in self._firestore.users():
             try:
                 home = user.get('home')
-                location = self.geocoder[home]
+                location = self._geocoder[home]
                 # Use (city) name and region instead of latitude and longitude
                 # to avoid leaking users' exact addresses.
                 markers += '|%s,%s' % (location.name, location.region)
@@ -42,5 +42,5 @@ class Everyone(ImageContent):
     def image(self, user):
         """Generates a map with user locations."""
 
-        return self.google_maps.map_image(markers=self._markers(),
-                                          marker_icon=MARKER_ICON_URL)
+        return self._google_maps.map_image(markers=self._markers(),
+                                           marker_icon=MARKER_ICON_URL)

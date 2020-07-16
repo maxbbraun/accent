@@ -35,19 +35,19 @@ class Schedule(ImageContent):
     """
 
     def __init__(self, geocoder):
-        self.local_time = LocalTime(geocoder)
-        self.sun = Sun(geocoder)
-        self.artwork = Artwork()
-        self.city = City(geocoder)
-        self.commute = Commute(geocoder)
-        self.calendar = GoogleCalendar(geocoder)
-        self.everyone = Everyone(geocoder)
+        self._local_time = LocalTime(geocoder)
+        self._sun = Sun(geocoder)
+        self._artwork = Artwork()
+        self._city = City(geocoder)
+        self._commute = Commute(geocoder)
+        self._calendar = GoogleCalendar(geocoder)
+        self._everyone = Everyone(geocoder)
 
     def _next(self, cron, after, user):
         """Finds the next time matching the cron expression."""
 
         try:
-            cron = self.sun.rewrite_cron(cron, after, user)
+            cron = self._sun.rewrite_cron(cron, after, user)
         except DataError as e:
             raise ContentError(e)
 
@@ -60,15 +60,15 @@ class Schedule(ImageContent):
         """Creates an image based on the kind."""
 
         if kind == 'artwork':
-            content = self.artwork
+            content = self._artwork
         elif kind == 'city':
-            content = self.city
+            content = self._city
         elif kind == 'commute':
-            content = self.commute
+            content = self._commute
         elif kind == 'calendar':
-            content = self.calendar
+            content = self._calendar
         elif kind == 'everyone':
-            content = self.everyone
+            content = self._everyone
         else:
             error('Unknown image kind: %s' % kind)
             return None
@@ -80,7 +80,7 @@ class Schedule(ImageContent):
 
         # Find the current schedule entry by parsing the cron expressions.
         try:
-            time = self.local_time.now(user)
+            time = self._local_time.now(user)
         except DataError as e:
             raise ContentError(e)
         today = time.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -114,7 +114,7 @@ class Schedule(ImageContent):
 
         # Find the next schedule entry by parsing the cron expressions.
         try:
-            time = self.local_time.now(user)
+            time = self._local_time.now(user)
         except DataError as e:
             raise ContentError(e)
         entries = [(self._next(entry['start'], time, user), entry)

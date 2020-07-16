@@ -73,7 +73,7 @@ class GoogleCalendar(ImageContent):
     """A monthly calendar backed by the Google Calendar API."""
 
     def __init__(self, geocoder):
-        self.local_time = LocalTime(geocoder)
+        self._local_time = LocalTime(geocoder)
 
     def _days_range(self, start, end):
         """Returns a list of days of the month between two datetimes."""
@@ -150,7 +150,7 @@ class GoogleCalendar(ImageContent):
 
         # Show a calendar relative to the current date.
         try:
-            time = self.local_time.now(user)
+            time = self._local_time.now(user)
         except DataError as e:
             raise ContentError(e)
 
