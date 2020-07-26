@@ -15,6 +15,10 @@
 // The length in bytes per chunk when sending a static image.
 const size_t kStaticImageChunkLength = 1024;
 
+int16_t DisplayHD::Width() { return 880; }
+
+int16_t DisplayHD::Height() { return 528; }
+
 void DisplayHD::Initialize() {
   Serial.println("Initializing display");
 
@@ -213,8 +217,8 @@ void DisplayHD::ShowStatic(const char* image_data, unsigned long length) {
   Initialize();
 
   // Set drawing region to be size of static image (640x384) centered
-  uint16_t x_diff = 880 - 640;
-  uint16_t y_diff = 528 - 384;
+  uint16_t x_diff = Width() - 640;
+  uint16_t y_diff = Height() - 384;
   SetDrawRegion(x_diff/2, y_diff/2, 640, 384);
   
   const char* image_ptr = image_data;

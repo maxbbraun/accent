@@ -21,6 +21,12 @@ class Display {
   // Shows the Wifi setup image.
   void ShowWifiSetup();
 
+  // Return width of display in pixels
+  int16_t Width();
+  
+  // Return height of display in pixels
+  int16_t Height();
+
  private:
   // Wakes up the display from sleep.
   void Reset();
