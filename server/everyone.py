@@ -39,8 +39,9 @@ class Everyone(ImageContent):
 
         return markers
 
-    def image(self, user):
+    def image(self, user, size):
         """Generates a map with user locations."""
 
-        return self._google_maps.map_image(markers=self._markers(),
+        return self._google_maps.map_image(size,
+                                           markers=self._markers(),
                                            marker_icon=MARKER_ICON_URL)

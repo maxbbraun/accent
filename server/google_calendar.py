@@ -13,8 +13,6 @@ from oauth2client.client import HttpAccessTokenRefreshError
 from PIL import Image
 from PIL.ImageDraw import Draw
 
-from epd import DISPLAY_WIDTH
-from epd import DISPLAY_HEIGHT
 from firestore import DataError
 from firestore import GoogleCalendarStorage
 from graphics import draw_text
@@ -145,7 +143,7 @@ class GoogleCalendar(ImageContent):
 
         return event_counts
 
-    def image(self, user):
+    def image(self, user, size):
         """Generates an image with a calendar view."""
 
         # Show a calendar relative to the current date.
@@ -158,13 +156,13 @@ class GoogleCalendar(ImageContent):
         event_counts = self._event_counts(time, user)
 
         # Create a blank image.
-        image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
+        image = Image.new(mode='RGB', size=size,
                           color=BACKGROUND_COLOR)
         draw = Draw(image)
 
         # Determine the spacing of the days in the image.
-        x_stride = DISPLAY_WIDTH // (DAYS_IN_WEEK + 1)
-        y_stride = DISPLAY_HEIGHT // (WEEKS_IN_MONTH + 1)
+        x_stride = size[0] // (DAYS_IN_WEEK + 1)
+        y_stride = size[1] // (WEEKS_IN_MONTH + 1)
 
         # Get this month's calendar.
         calendar = Calendar(firstweekday=SUNDAY)

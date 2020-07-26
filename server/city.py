@@ -1,9 +1,8 @@
+import math
 from os.path import join as path_join
 from PIL import Image
 from random import random
 
-from epd import DISPLAY_WIDTH
-from epd import DISPLAY_HEIGHT
 from content import ContentError
 from content import ImageContent
 from firestore import DataError
@@ -847,7 +846,7 @@ class City(ImageContent):
             ]
         }]
 
-    def _draw_layers(self, image, layers, user):
+    def _draw_layers(self, image, layers, user, offset):
         """Draws a list of layers onto an image."""
 
         # Keep track of drawn layers.
@@ -899,7 +898,7 @@ class City(ImageContent):
 
             # Recursively draw groups of layers.
             try:
-                self._draw_layers(image, layer['layers'], user)
+                self._draw_layers(image, layer['layers'], user, offset)
                 continue  # Don't try to draw layer groups.
             except KeyError:
                 pass
@@ -909,21 +908,29 @@ class City(ImageContent):
                 x, y = layer['xy_transform'](layer['xy_data'])
             except KeyError:
                 x, y = layer['xy']
-
+            
             # Draw the layer.
             path = path_join(ASSETS_DIR, layer['file'])
             bitmap = Image.open(path).convert('RGBA')
-            image.paste(bitmap, (x, y), bitmap)
+            image.paste(bitmap, (x + offset[0], y + offset[1]), bitmap)
 
             # Remember the drawn file for the else condition.
             drawn_files.append(layer['file'])
 
-    def image(self, user):
+    def image(self, user, size):
         """Generates the current city image."""
 
-        image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT))
+        background_color = (0,0,0)
+        if self._sun.is_daylight(user):
+            background_color = (255,255,255)
+
+        image = Image.new(mode='RGB', size=size, color=background_color)
         try:
-            self._draw_layers(image, self._layers(), user)
+            offset = (
+                math.floor((size[0] - 640) / 2), 
+                math.floor((size[1] - 384) / 2)
+            )
+            self._draw_layers(image, self._layers(), user, offset)
             return image
         except DataError as e:
             raise ContentError(e)
