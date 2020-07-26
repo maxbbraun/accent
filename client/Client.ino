@@ -1,7 +1,10 @@
 #include <Arduino.h>
 #include "Display.h"
+#include "DisplayHD.h"
 #include "Network.h"
 #include "Power.h"
+
+#define DISPLAY_HD 1
 
 // Display: https://www.waveshare.com/wiki/7.5inch_e-Paper_HAT_(B)
 // Board: https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board
@@ -30,7 +33,12 @@ const size_t kStreamBufferSize = 1024;
 uint64_t kRestartDelayMs = 60 * 60 * 1000;  // 1 hour
 
 // Helper library instances.
+#ifdef DISPLAY_HD
+DisplayHD display;
+#else
 Display display;
+#endif
+
 Network network;
 Power power;
 
