@@ -160,7 +160,7 @@ class GoogleMaps(object):
                                               markers=markers,
                                               marker_icon=marker_icon)
 
-        scaled_font_spec = SCREENSTAR_SMALL_REGULAR
+        scaled_font_spec = SCREENSTAR_SMALL_REGULAR.copy()
         if scaled_width != size[0]:
             scaled_font_spec['size'] *= 2
             scaled_font_spec['height'] *= 2
