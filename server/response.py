@@ -4,6 +4,7 @@ from flask import url_for
 from io import BytesIO
 from logging import exception
 from PIL import Image
+import hashlib
 
 from content import ContentError
 from epd import bwr_bytes
@@ -46,8 +47,14 @@ def epd_response(image):
     data = bwr_bytes(image)
     buffer = BytesIO(data)
 
-    return send_file(buffer, mimetype='application/octet-stream',
+    response = send_file(buffer, mimetype='application/octet-stream',
                      cache_timeout=0)
+    
+    file_hash = hashlib.md5()
+    file_hash.update(buffer.getvalue())
+    response.headers['Content-MD5'] = file_hash.hexdigest()
+    
+    return response
 
 
 def text_response(text):
