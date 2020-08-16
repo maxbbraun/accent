@@ -30,9 +30,14 @@ class Everyone(ImageContent):
             try:
                 home = user.get('home')
                 location = self._geocoder[home]
-                # Use (city) name and region instead of latitude and longitude
-                # to avoid leaking users' exact addresses.
-                markers += '|%s,%s' % (location.name, location.region)
+
+                # Use the latitude and longitude of the city name and region
+                # instead of the exact coordinates to anonymize user addresses.
+                city = '%s, %s' % (location.name, location.region)
+                anonymized = self._geocoder[city]
+
+                markers += '|%f,%f' % (anonymized.latitude,
+                                       anonymized.longitude)
             except (KeyError, AstralError):
                 # Skip users with address errors.
                 pass
