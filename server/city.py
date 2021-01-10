@@ -98,11 +98,6 @@ class City(ImageContent):
                                      self._weather.is_snowy]
                 },
                 {
-                    'file': 'day/environment/fog1-day.gif',
-                    'xy': (0, 0),
-                    'condition': self._weather.is_foggy
-                },
-                {
                     'file': 'day/environment/isle-day.gif',
                     'xy': (0, 0)
                 },
@@ -159,7 +154,7 @@ class City(ImageContent):
                     'condition': self._weather.is_rainy
                 },
                 {
-                    'file': 'day/environment/fog2-day.gif',
+                    'file': 'day/environment/fog1-day.gif',
                     'xy': (0, 0),
                     'condition': self._weather.is_foggy
                 },
@@ -254,7 +249,7 @@ class City(ImageContent):
                     'condition': self._weather.is_rainy
                 },
                 {
-                    'file': 'day/environment/fog3-day.gif',
+                    'file': 'day/environment/fog2-day.gif',
                     'xy': (0, 0),
                     'condition': self._weather.is_foggy
                 },
@@ -361,7 +356,7 @@ class City(ImageContent):
                     'xy': (528, 255)
                 },
                 {
-                    'file': 'day/environment/fog4-day.gif',
+                    'file': 'day/environment/fog3-day.gif',
                     'xy': (0, 0),
                     'condition': self._weather.is_foggy
                 },
@@ -460,6 +455,11 @@ class City(ImageContent):
                 {
                     'file': 'day/misc/streetlight-xp-day.gif',
                     'xy': (216, 322)
+                },
+                {
+                    'file': 'day/environment/fog4-day.gif',
+                    'xy': (0, 0),
+                    'condition': self._weather.is_foggy
                 },
                 {
                     'file': 'day/environment/sun-day.gif',
@@ -565,11 +565,6 @@ class City(ImageContent):
                                      self._weather.is_snowy]
                 },
                 {
-                    'file': 'night/environment/fog1-night.gif',
-                    'xy': (0, 0),
-                    'condition': self._weather.is_foggy
-                },
-                {
                     'file': 'night/environment/isle-night.gif',
                     'xy': (0, 0)
                 },
@@ -626,7 +621,7 @@ class City(ImageContent):
                     'condition': self._weather.is_rainy
                 },
                 {
-                    'file': 'night/environment/fog2-night.gif',
+                    'file': 'night/environment/fog1-night.gif',
                     'xy': (0, 0),
                     'condition': self._weather.is_foggy
                 },
@@ -707,7 +702,7 @@ class City(ImageContent):
                     'xy': (516, 119)
                 },
                 {
-                    'file': 'night/environment/fog3-night.gif',
+                    'file': 'night/environment/fog2-night.gif',
                     'xy': (0, 0),
                     'condition': self._weather.is_foggy
                 },
@@ -788,7 +783,7 @@ class City(ImageContent):
                     'xy': (528, 255)
                 },
                 {
-                    'file': 'night/environment/fog4-night.gif',
+                    'file': 'night/environment/fog3-night.gif',
                     'xy': (0, 0),
                     'condition': self._weather.is_foggy
                 },
@@ -846,6 +841,11 @@ class City(ImageContent):
                 {
                     'file': 'night/misc/streetlight-xp-night.gif',
                     'xy': (216, 322)
+                },
+                {
+                    'file': 'night/environment/fog4-night.gif',
+                    'xy': (0, 0),
+                    'condition': self._weather.is_foggy
                 },
                 {
                     'file': 'night/environment/moon-night.gif',
