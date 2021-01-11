@@ -63,63 +63,62 @@ app = Flask(__name__)
 
 @app.route('/artwork')
 @user_auth(image_response=gif_response)
-def artwork_gif(key=None, user=None):
+def artwork_gif(key=None, user=None, size=None):
     """Responds with a GIF version of the artwork image."""
 
-    return content_response(artwork, gif_response, user)
+    return content_response(artwork, gif_response, user, size)
 
 
 @app.route('/city')
 @user_auth(image_response=gif_response)
-def city_gif(key=None, user=None):
+def city_gif(key=None, user=None, size=None):
     """Responds with a GIF version of the city image."""
 
-    return content_response(city, gif_response, user)
+    return content_response(city, gif_response, user, size)
 
 
 @app.route('/commute')
 @user_auth(image_response=gif_response)
-def commute_gif(key=None, user=None):
+def commute_gif(key=None, user=None, size=None):
     """Responds with a GIF version of the commute image."""
-
-    return content_response(commute, gif_response, user)
+    return content_response(commute, gif_response, user, size)
 
 
 @app.route('/calendar')
 @user_auth(image_response=gif_response)
-def calendar_gif(key=None, user=None):
+def calendar_gif(key=None, user=None, size=None):
     """Responds with a GIF version of the calendar image."""
 
-    return content_response(calendar, gif_response, user)
+    return content_response(calendar, gif_response, user, size)
 
 
 @app.route('/everyone')
 @user_auth(image_response=gif_response)
-def everyone_gif(key=None, user=None):
+def everyone_gif(key=None, user=None, size=None):
     """Responds with a GIF version of the everyone image."""
 
-    return content_response(everyone, gif_response, user)
+    return content_response(everyone, gif_response, user, size)
 
 
 @app.route('/gif')
 @user_auth(image_response=gif_response)
-def gif(key=None, user=None):
+def gif(key=None, user=None, size=None):
     """Responds with a GIF version of the scheduled image."""
 
-    return content_response(schedule, gif_response, user)
+    return content_response(schedule, gif_response, user, size)
 
 
 @app.route('/epd')
 @user_auth(image_response=epd_response)
-def epd(key=None, user=None):
+def epd(key=None, user=None, size=None):
     """Responds with an e-paper display version of the scheduled image."""
 
-    return content_response(schedule, epd_response, user)
+    return content_response(schedule, epd_response, user, size)
 
 
 @app.route('/next')
 @user_auth(bad_response=next_retry_response)
-def next(key=None, user=None):
+def next(key=None, user=None, size=None):
     """Responds with the milliseconds until the next image."""
 
     try:

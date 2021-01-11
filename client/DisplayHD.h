@@ -1,10 +1,12 @@
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#ifndef DISPLAYHD_H
+#define DISPLAYHD_H
 
 #include <Arduino.h>
 
 // A high-level wrapper around the e-paper display.
-class Display {
+// This class supports the Waveshare 7.5 HD e-ink display
+// https://www.waveshare.com/wiki/7.5inch_HD_e-Paper_HAT
+class DisplayHD {
  public:
   // Initializes the display for the next update.
   void Initialize();
@@ -31,26 +33,30 @@ class Display {
   // Wakes up the display from sleep.
   void Reset();
 
-  // Sends a command with arguments.
-  void SendCommandArgs(char command, const char* args...);
-
   // Sends one byte as a command.
-  void SendCommand(char command);
+  void SendCommand(uint8_t command);
 
   // Sends one byte as data.
-  void SendData(char data);
+  void SendData(uint8_t data);
 
   // Sends one byte over SPI.
-  void SendSpi(char data);
+  void SendSpi(uint8_t data);
 
   // Waits until the display is ready.
   void WaitForIdle();
 
-  // Converts one pixel from 2-bit input encoding to 4-bit output encoding.
-  char ConvertPixel(char input, char mask, int shift);
-
   // Initializes, loads, and shows a static image.
   void ShowStatic(const char* image, unsigned long length);
+
+  // Read the black data from two input pixels (8 output pixels/bits)
+  uint8_t ReadBlackData(const char * ptr);
+  
+  // Read the red data from two input pixels (8 output pixels/bits)
+  uint8_t ReadRedData(const char * ptr);
+
+  // Set drawing region in order to render lower resolution images
+  void SetDrawRegion(uint16_t start_x, uint16_t start_y, uint16_t width, uint16_t height);
+
 };
 
-#endif  // DISPLAY_H
+#endif  // DISPLAYHD_H

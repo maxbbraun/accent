@@ -93,6 +93,10 @@ def user_auth(image_response=None, bad_response=forbidden_response):
             # Inject the key and user into the function arguments.
             kwargs['key'] = key
             kwargs['user'] = user
+            kwargs['size'] = (
+                request.args.get('width', default=640, type=int),
+                request.args.get('height', default=384, type=int)
+            )
             return func(*args, **kwargs)
 
         return wrapper

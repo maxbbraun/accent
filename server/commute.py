@@ -27,7 +27,7 @@ class Commute(ImageContent):
     def __init__(self, geocoder):
         self._google_maps = GoogleMaps(geocoder)
 
-    def image(self, user):
+    def image(self, user, size):
         """Generates the current commute image."""
 
         # Extract the directions data.
@@ -51,10 +51,11 @@ class Commute(ImageContent):
                 duration = leg['duration']['text']
         except (DataError, IndexError, KeyError) as e:
             raise ContentError(e)
-
         # Get the static map with the route as an image.
         try:
-            image = self._google_maps.map_image(polyline=polyline)
+            image = self._google_maps.map_image(
+                polyline=polyline, 
+                size=size)
         except DataError as e:
             raise ContentError(e)
 

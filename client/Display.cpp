@@ -14,6 +14,10 @@
 // The length in bytes per chunk when sending a static image.
 const size_t kStaticImageChunkLength = 1024;
 
+int16_t Display::Width() { return 640; }
+
+int16_t Display::Height() { return 384; }
+
 void Display::Initialize() {
   Serial.println("Initializing display");
 

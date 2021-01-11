@@ -9,8 +9,6 @@ from requests import get
 from requests.exceptions import RequestException
 from urllib.parse import quote
 
-from epd import DISPLAY_WIDTH
-from epd import DISPLAY_HEIGHT
 from graphics import SCREENSTAR_SMALL_REGULAR
 from firestore import DataError
 from firestore import Firestore
@@ -56,13 +54,13 @@ class GoogleMaps(object):
         self._local_time = LocalTime(geocoder)
         self._vision_client = vision.ImageAnnotatorClient()
 
-    def _static_map_url(self, polyline=None, markers=None, marker_icon=None,
+    def _static_map_url(self, size, polyline=None, markers=None, marker_icon=None,
                         hide_map=False):
         """Constructs the URL for the Static Map API request."""
 
         url = STATIC_MAP_URL
         url += '?key=%s' % self._google_maps_api_key
-        url += '&size=%dx%d' % (DISPLAY_WIDTH, DISPLAY_HEIGHT)
+        url += '&size=%dx%d' % size
         url += '&maptype=roadmap'
 
         if hide_map:
@@ -95,11 +93,12 @@ class GoogleMaps(object):
 
         return url
 
-    def _download_map(self, polyline=None, markers=None, marker_icon=None,
+    def _download_map(self, size, polyline=None, markers=None, marker_icon=None,
                       hide_map=False):
         """Downloads the image data from the Google Static Map API."""
 
-        image_url = self._static_map_url(polyline=polyline, markers=markers,
+        image_url = self._static_map_url(size,
+                                         polyline=polyline, markers=markers,
                                          marker_icon=marker_icon,
                                          hide_map=hide_map)
 
@@ -111,11 +110,12 @@ class GoogleMaps(object):
 
         return image_data
 
-    def _copyright_text(self, polyline=None, markers=None, marker_icon=None):
+    def _copyright_text(self, size, polyline=None, markers=None, marker_icon=None):
         """Uses OCR to extract the copyright text from the map."""
 
         # Download a version of the map with only the copyright text.
-        image_data = self._download_map(polyline=polyline, markers=markers,
+        image_data = self._download_map(size, 
+                                        polyline=polyline, markers=markers,
                                         marker_icon=marker_icon,
                                         hide_map=True)
 
@@ -136,20 +136,38 @@ class GoogleMaps(object):
         return COPYRIGHT_TEXT % time.year
 
     @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
-    def map_image(self, polyline=None, markers=None, marker_icon=None):
+    def map_image(self, size, polyline=None, markers=None, marker_icon=None):
         """Creates a map image with optional route or markers."""
 
+        scaled_width = size[0]
+        scaled_height = size[1]
+
+        # Google Static Maps is limited to 640x640
+        # Limit image to this size, and resize at the end
+        if size[0] > 640:
+            scaled_width = 640
+            scaled_height = 640 * (size[1] / size[0])
+
         # Get the static map as an image.
-        image_data = self._download_map(polyline=polyline, markers=markers,
+        image_data = self._download_map(size=(scaled_width, scaled_height), 
+                                        polyline=polyline, markers=markers,
                                         marker_icon=marker_icon)
         image = Image.open(image_data).convert('RGB')
 
         # Replace the copyright text with a more readable pixel font.
-        copyright_text = self._copyright_text(polyline=polyline,
+        copyright_text = self._copyright_text(size=(scaled_width, scaled_height), 
+                                              polyline=polyline,
                                               markers=markers,
                                               marker_icon=marker_icon)
+
+        scaled_font_spec = SCREENSTAR_SMALL_REGULAR.copy()
+        if scaled_width != size[0]:
+            scaled_font_spec['size'] *= 2
+            scaled_font_spec['height'] *= 2
+            image = image.resize(size)
+
         draw_text(copyright_text,
-                  font_spec=SCREENSTAR_SMALL_REGULAR,
+                  font_spec=scaled_font_spec,
                   text_color=COPYRIGHT_TEXT_COLOR,
                   anchor='bottom_right',
                   box_color=COPYRIGHT_BOX_COLOR,

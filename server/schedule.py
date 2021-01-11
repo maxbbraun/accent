@@ -56,7 +56,7 @@ class Schedule(ImageContent):
         except ValueError as e:
             raise ContentError(e)
 
-    def _image(self, kind, user):
+    def _image(self, kind, user, size):
         """Creates an image based on the kind."""
 
         if kind == 'artwork':
@@ -73,9 +73,9 @@ class Schedule(ImageContent):
             error('Unknown image kind: %s' % kind)
             return None
 
-        return content.image(user)
+        return content.image(user, size)
 
-    def image(self, user):
+    def image(self, user, size):
         """Generates the current image based on the schedule."""
 
         # Find the current schedule entry by parsing the cron expressions.
@@ -105,7 +105,7 @@ class Schedule(ImageContent):
              latest_entry['name'],
              latest_entry['start'],
              latest_datetime.strftime('%A %B %d %Y %H:%M:%S %Z')))
-        image = self._image(latest_entry['image'], user)
+        image = self._image(latest_entry['image'], user, size)
 
         return image
 
