@@ -99,6 +99,7 @@
                 <option value="everyone">everyone</option>
             </select> &nbsp;
             <input type="button" name="preview" onclick="previewSelection('{{ schedule_image_id }}')" value="Preview" /><br />
+            <img src="{{ url_for('timeline', key=key) }}"><br /><br />
             <input type="submit" value="Save" />
         </form><br />
         <label for="calendar_connected">Google Calendar:</label>

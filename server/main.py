@@ -211,6 +211,22 @@ def hello_post(key):
     return redirect(settings_url(key))
 
 
+def _empty_timeline_response():
+    """Responds with an empty schedule timeline image."""
+
+    image = schedule.empty_timeline()
+    return gif_response(image)
+
+
+@app.route('/timeline')
+@user_auth(bad_response=_empty_timeline_response)
+def timeline(key=None, user=None):
+    """Responds with a schedule timeline image for the user."""
+
+    image = schedule.timeline(user)
+    return gif_response(image)
+
+
 @app.route('/oauth')
 def oauth():
     """Handles any OAuth flow redirects."""

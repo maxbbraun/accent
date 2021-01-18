@@ -1,11 +1,16 @@
+from calendar import day_abbr
 from croniter import croniter
 from datetime import datetime
 from datetime import timedelta
 from logging import error
 from logging import info
+from PIL import Image
+from PIL.ImageDraw import Draw
 
 from artwork import Artwork
 from google_calendar import GoogleCalendar
+from graphics import draw_text
+from graphics import SCREENSTAR_SMALL_REGULAR
 from city import City
 from commute import Commute
 from content import ContentError
@@ -18,6 +23,27 @@ from sun import Sun
 # The client sleep duration may be early by a few minutes, so we add a buffer
 # to avoid waking up twice in a row.
 DELAY_BUFFER_S = 15 * 60
+
+# The background color of the timeline image.
+TIMELINE_BACKGROUND = (255, 255, 255)
+
+# The foreground color of the timeline image.
+TIMELINE_FOREGROUND = (0, 0, 0)
+
+# The width of the timeline image in pixels.
+TIMELINE_WIDTH = 900
+
+# The height of the timeline image in pixels.
+TIMELINE_HEIGHT = 50
+
+# The drawable width of the timeline, leaving room at the end.
+TIMELINE_DRAW_WIDTH = TIMELINE_WIDTH - 1
+
+# The width of lines drawn in the timeline.
+TIMELINE_LINE_WIDTH = 1
+
+# The dash length of lines drawn in the timeline.
+TIMELINE_LINE_DASH = 2
 
 
 class Schedule(ImageContent):
@@ -134,3 +160,90 @@ class Schedule(ImageContent):
              milliseconds))
 
         return milliseconds
+
+    def empty_timeline(self):
+        """Generates an empty timeline image."""
+
+        image = Image.new(mode='RGB', size=(TIMELINE_WIDTH, TIMELINE_HEIGHT),
+                          color=TIMELINE_BACKGROUND)
+        draw = Draw(image)
+
+        # Draw each day of the week.
+        num_days = len(day_abbr)
+        for day_index in range(num_days):
+            x = TIMELINE_DRAW_WIDTH * day_index / num_days
+
+            # Draw a dashed vertical line.
+            for y in range(0, TIMELINE_HEIGHT, 2 * TIMELINE_LINE_DASH):
+                draw.line([(x, y), (x, y + TIMELINE_LINE_DASH - 1)],
+                          fill=TIMELINE_FOREGROUND, width=TIMELINE_LINE_WIDTH)
+
+            # Draw the abbreviated day name.
+            name = day_abbr[day_index]
+            day_x = x + TIMELINE_DRAW_WIDTH / num_days / 2
+            day_y = TIMELINE_HEIGHT - SCREENSTAR_SMALL_REGULAR['height']
+            draw_text(name, SCREENSTAR_SMALL_REGULAR, TIMELINE_FOREGROUND,
+                      xy=(day_x, day_y), anchor=None, box_color=None,
+                      box_padding=0, border_color=None, border_width=0,
+                      image=image, draw=draw)
+
+        # Draw another dashed line at the end.
+        for y in range(0, TIMELINE_HEIGHT, 2 * TIMELINE_LINE_DASH):
+            draw.line([(TIMELINE_DRAW_WIDTH, y),
+                       (TIMELINE_DRAW_WIDTH, y + TIMELINE_LINE_DASH - 1)],
+                      fill=TIMELINE_FOREGROUND, width=TIMELINE_LINE_WIDTH)
+
+        return image
+
+    def timeline(self, user):
+        """Generates a timeline image of the schedule for settings."""
+
+        image = self.empty_timeline()
+        draw = Draw(image)
+
+        # Find the user or return the empty timeline.
+        try:
+            now = self._local_time.now(user)
+        except DataError as e:
+            return image
+
+        # Start the timeline with the most recent beginning of the week.
+        start = now.replace(hour=0, minute=0, second=0)
+        start -= timedelta(days=start.weekday())
+        stop = start + timedelta(weeks=1)
+        start_timestamp = datetime.timestamp(start)
+        stop_timestamp = datetime.timestamp(stop)
+        timestamp_span = stop_timestamp - start_timestamp
+
+        # Generate the schedule throughout the week.
+        entries = user.get('schedule')
+        for i in range(len(entries)):
+            entries[i]['index'] = i
+        time = start
+        while time < stop:
+            # Find the next entry.
+            next_entries = [(self._next(entry['start'], time, user),
+                             entry['index'], entry) for entry in entries]
+            next_datetime, next_index, next_entry = min(next_entries,
+                                                        key=lambda x: x[0])
+
+            # Draw the entry's index and a vertical line, with a tilde to mark
+            # the variable sunrise and sunset times.
+            timestamp = datetime.timestamp(next_datetime)
+            x = TIMELINE_DRAW_WIDTH * (
+                timestamp - start_timestamp) / timestamp_span
+            y = TIMELINE_HEIGHT / 2
+            text = str(next_index + 1)
+            next_entry_start = next_entry['start']
+            if 'sunrise' in next_entry_start or 'sunset' in next_entry_start:
+                text = '~' + text
+            box = draw_text(text, SCREENSTAR_SMALL_REGULAR,
+                            TIMELINE_FOREGROUND, xy=(x, y), anchor=None,
+                            box_color=None, box_padding=4, border_color=None,
+                            border_width=0, image=image, draw=draw)
+            draw.line([(x, 0), (x, box[1])], fill=TIMELINE_FOREGROUND, width=1)
+
+            # Jump to the next entry.
+            time = next_datetime
+
+        return image
