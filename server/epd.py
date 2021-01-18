@@ -20,7 +20,7 @@ BWR_2_BIT = array([[0, 0], [0, 1], [1, 1]], dtype=uint8)
 def _color_indices(image):
     """Maps each pixel of an image to 0 (black), 1 (white), or 2 (red)."""
 
-    image_data = array(image).reshape((DISPLAY_WIDTH * DISPLAY_HEIGHT, 3))
+    image_data = array(image).reshape((image.width * image.height, 3))
     indices, _ = vq(image_data, BWR_8_BIT)
     return indices
 
@@ -29,8 +29,7 @@ def bwr_image(image):
     """Converts the image's colors to the closest black, white, or red."""
 
     indices = _color_indices(image)
-    bwr_image_data = BWR_8_BIT[indices.reshape(
-        (DISPLAY_HEIGHT, DISPLAY_WIDTH))]
+    bwr_image_data = BWR_8_BIT[indices.reshape((image.height, image.width))]
     return Image.fromarray(bwr_image_data)
 
 
@@ -38,6 +37,5 @@ def bwr_bytes(image):
     """Converts the image to the closest 2-bit black, white, or red bytes."""
 
     indices = _color_indices(image)
-    bwr_image_data = BWR_2_BIT[indices.reshape(
-        (DISPLAY_HEIGHT * DISPLAY_WIDTH))]
+    bwr_image_data = BWR_2_BIT[indices.reshape((image.height * image.width))]
     return packbits(bwr_image_data)
