@@ -27,10 +27,11 @@ SCREENSTAR_SMALL_REGULAR = {
 
 def draw_text(text, font_spec, text_color, xy=None, anchor=None,
               box_color=None, box_padding=0, border_color=None, border_width=0,
-              image=None):
+              image=None, draw=None):
     """Draws centered text on an image, optionally in a box."""
 
-    draw = Draw(image)
+    if not draw:
+        draw = Draw(image)
     text_size = font_spec['size']
     font = ImageFont.truetype(font_spec['file'], size=text_size)
 
@@ -84,3 +85,6 @@ def draw_text(text, font_spec, text_color, xy=None, anchor=None,
         character = text[index]
         draw.text((x, y), character, text_color, font)
         x += character_widths[index]
+
+    # Return the bounding box for layout calculations.
+    return border_xy
