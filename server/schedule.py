@@ -217,6 +217,9 @@ class Schedule(ImageContent):
 
         # Generate the schedule throughout the week.
         entries = user.get('schedule')
+        if not entries:
+            # Empty timeline.
+            return image
         for i in range(len(entries)):
             entries[i]['index'] = i
         time = start
