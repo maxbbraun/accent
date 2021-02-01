@@ -121,6 +121,10 @@ bool Network::HttpGet(HTTPClient* http, String url) {
   // Authenticate the request.
   AddAuthHeader(http);
 
+  const char *hdrs[] = {"content-md5"};
+  const size_t numberOfHeaders = 1;
+  http->collectHeaders(hdrs, numberOfHeaders);
+
   int status = http->GET();
   if (status <= 0) {
     Serial.printf("Request failed: %s\n", http->errorToString(status).c_str());
