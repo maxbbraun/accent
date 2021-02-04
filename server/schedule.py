@@ -30,6 +30,9 @@ TIMELINE_BACKGROUND = (255, 255, 255)
 # The foreground color of the timeline image.
 TIMELINE_FOREGROUND = (0, 0, 0)
 
+# The highlight color of the timeline image.
+TIMELINE_HIGHLIGHT = (255, 0, 0)
+
 # The width of the timeline image in pixels.
 TIMELINE_WIDTH = 900
 
@@ -214,6 +217,14 @@ class Schedule(ImageContent):
         start_timestamp = datetime.timestamp(start)
         stop_timestamp = datetime.timestamp(stop)
         timestamp_span = stop_timestamp - start_timestamp
+
+        # Draw a dashed line in highlight color at the current time.
+        now_timestamp = datetime.timestamp(now)
+        now_x = TIMELINE_DRAW_WIDTH * (
+            now_timestamp - start_timestamp) / timestamp_span
+        for y in range(0, TIMELINE_HEIGHT, 2 * TIMELINE_LINE_DASH):
+            draw.line([(now_x, y), (now_x, y + TIMELINE_LINE_DASH - 1)],
+                      fill=TIMELINE_HIGHLIGHT, width=TIMELINE_LINE_WIDTH)
 
         # Generate the schedule throughout the week.
         entries = user.get('schedule')
