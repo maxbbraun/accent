@@ -107,9 +107,28 @@ bool Network::ConnectWifi() {
   return true;
 }
 
-bool Network::HttpGet(HTTPClient* http, String url) {
-  Serial.printf("Requesting URL: %s\n", url.c_str());
+bool Network::HttpGet(HTTPClient* http, const String& url) {
+  return HttpGet(http, url, {});
+}
 
+bool Network::HttpGet(HTTPClient* http, const String& base_url,
+                      const std::vector<String>& parameters) {
+  if (parameters.size() % 2 != 0) {
+    Serial.printf("Incomplete pairs of keys and values for URL: %s\n",
+                  base_url.c_str());
+    return false;
+  }
+
+  // Add any parameters to the URL.
+  String url = base_url;
+  for (int i = 0; i < parameters.size(); i += 2) {
+    String delimiter = (i == 0 ? "?" : "&");
+    String key = parameters[i];
+    String value = parameters[i + 1];
+    url += delimiter + key + "=" + value;
+  }
+
+  Serial.printf("Requesting URL: %s\n", url.c_str());
   if (!http->begin(url, kRootCertificate)) {
     Serial.printf("Failed to connect to server: %s\n", url.c_str());
     return false;

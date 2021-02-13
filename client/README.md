@@ -16,7 +16,7 @@ Entry point: [`Client.ino`](Client.ino)
       │                    ├───┐                │
       │                    │   │ Connect Wifi   │
       │                    │◀──┘                │
-      │     /epd (Key)     │                    │
+      │  /epd (Key, Size)  │                    │
     ┌─┤◀───────────────────┤                    │
     │ │                    │                    │
     │ │       Image        │                    │

@@ -3,11 +3,6 @@
 #include "Network.h"
 #include "Power.h"
 
-// Display: https://www.waveshare.com/wiki/7.5inch_e-Paper_HAT_(B)
-// Board: https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board
-// Board Manager URL: https://dl.espressif.com/dl/package_esp32_index.json
-// Board: ESP32 Dev Module
-
 // The baud rate for the serial connection.
 const long kSerialSpeed = 115200;
 
@@ -24,7 +19,7 @@ const String kNextEndpoint = kBaseUrl + "/next";
 const String kEpdEndpoint = kBaseUrl + "/epd";
 
 // The size in bytes of the streaming HTTP response and image buffers.
-const size_t kStreamBufferSize = 1024;
+const uint32_t kStreamBufferSize = 1024;
 
 // The time in milliseconds to wait before restarting after an error.
 uint64_t kRestartDelayMs = 60 * 60 * 1000;  // 1 hour
@@ -80,14 +75,16 @@ bool downloadImage() {
   HTTPClient http;
 
   // Request the current image from the server.
-  if (!network.HttpGet(&http, kEpdEndpoint)) {
+  if (!network.HttpGet(&http, kEpdEndpoint,
+                       {"width", String(display.Width()),
+                        "height", String(display.Height())})) {
     return false;
   }
 
   // Start reading from the stream.
   char buffer[kStreamBufferSize];
   WiFiClient* stream = http.getStreamPtr();
-  unsigned long total_count = 0;
+  uint32_t total_count = 0;
   do {
     if (!http.connected()) {
       Serial.println("Connection lost");
@@ -98,12 +95,13 @@ bool downloadImage() {
     Serial.printf("%d bytes available\n", stream->available());
 
     // Fill the buffer.
-    size_t count = stream->readBytes(buffer, sizeof(buffer));
-    total_count += count;
-    Serial.printf("Read %d bytes (%lu total)\n", count, total_count);
+    uint32_t count = stream->readBytes(buffer, sizeof(buffer));
 
     // Send the buffer to the display.
-    display.Load(buffer, count);
+    display.Load(buffer, count, total_count);
+
+    total_count += count;
+    Serial.printf("Read %lu bytes (%lu total)\n", count, total_count);
   } while (stream->available() > 0);
 
   Serial.println("Download complete");

@@ -16,7 +16,7 @@ flags.DEFINE_string('input', 'assets/client/error.gif',
                     'The path to the input image.')
 
 # The string format of the output file path.
-OUTPUT_PATH_FORMAT = '../client/%sImage.h'
+OUTPUT_PATH_FORMAT = '../client/%sImage_%s.h'
 
 # The string format of the header include guard.
 INCLUDE_GUARD_FORMAT = '%s_IMAGE_H'
@@ -40,9 +40,10 @@ BYTES_PER_LINE = (COLUMNS - len(LINE_FORMAT % '')) // len(BYTE_FORMAT % 0)
 def main(_):
     source_filename = basename(FLAGS.input)
     base_name = source_filename.split(extsep)[0]
-    output_path = OUTPUT_PATH_FORMAT % base_name.title()
-    include_guard = INCLUDE_GUARD_FORMAT % base_name.upper()
-    variable_name = VARIABLE_NAME_FORMAT % base_name.title()
+    name, display = base_name.split('_')
+    output_path = OUTPUT_PATH_FORMAT % (name.title(), display.upper())
+    include_guard = INCLUDE_GUARD_FORMAT % name.upper()
+    variable_name = VARIABLE_NAME_FORMAT % name.title()
     script_filename = basename(__file__)
 
     with open(output_path, 'w') as output:

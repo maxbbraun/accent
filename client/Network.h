@@ -12,7 +12,7 @@ class Network {
  public:
   Network() : display_(), power_(), wifi_setup_server_(nullptr) {}
   ~Network() {
-    if (wifi_setup_server_) {
+    if (wifi_setup_server_ != nullptr) {
       delete wifi_setup_server_;
     }
   }
@@ -21,7 +21,12 @@ class Network {
   bool ConnectWifi();
 
   // Opens a HTTP GET connection with the specified URL.
-  bool HttpGet(HTTPClient* http, String url);
+  bool HttpGet(HTTPClient* http, const String& url);
+
+  // Opens a HTTP GET connection with the specified URL. The list of parameters
+  // is expected to come as alternating keys and values.
+  bool HttpGet(HTTPClient* http, const String& base_url,
+               const std::vector<String>& parameters);
 
   // Deletes any saved Wifi SSID and password.
   void ResetWifi();
