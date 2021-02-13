@@ -437,6 +437,16 @@ class City(ImageContent):
                     'xy': (62, 289)
                 },
                 {
+                    'file': 'day/characters/penguin1-day.gif',
+                    'xy': (287, 369),
+                    'probability': 80
+                },
+                {
+                    'file': 'day/characters/penguin2-day.gif',
+                    'xy': (259, 349),
+                    'probability': 80
+                },
+                {
                     'file': 'day/vehicles/yacht2-xm-day.gif',
                     'xy': (544, 302),
                     'probability': 50
@@ -821,6 +831,16 @@ class City(ImageContent):
                 {
                     'file': 'night/misc/memorial-cyclops-night.gif',
                     'xy': (62, 289)
+                },
+                {
+                    'file': 'night/characters/penguin1-night.gif',
+                    'xy': (287, 369),
+                    'probability': 80
+                },
+                {
+                    'file': 'night/characters/penguin2-night.gif',
+                    'xy': (259, 349),
+                    'probability': 80
                 },
                 {
                     'file': 'night/vehicles/yacht2-xm-night.gif',
