@@ -137,7 +137,9 @@ class GoogleMaps(object):
         time = self._local_time.utc_now()
         return COPYRIGHT_TEXT % time.year
 
-    @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
+    # NOTE: Unfortunately, caching is not allowed by the Google Maps Platform
+    #       Terms of Service: https://cloud.google.com/maps-platform/terms
+    # @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
     def map_image(self, width, height, polyline=None, markers=None,
                   marker_icon=None):
         """Creates a map image with optional route or markers."""
@@ -154,17 +156,21 @@ class GoogleMaps(object):
                             'tps://issuetracker.google.com/issues/110570733' %
                             (width, height, image.width, image.height))
 
-        # Replace the copyright text with a more readable pixel font.
-        copyright_text = self._copyright_text(width, height, polyline=polyline,
-                                              markers=markers,
-                                              marker_icon=marker_icon)
-        draw_text(copyright_text,
-                  font_spec=SCREENSTAR_SMALL_REGULAR,
-                  text_color=COPYRIGHT_TEXT_COLOR,
-                  anchor='bottom_right',
-                  box_color=COPYRIGHT_BOX_COLOR,
-                  box_padding=COPYRIGHT_BOX_PADDING,
-                  image=image)
+        # NOTE: Unfortunately, making the copyright text readable has been
+        #       interpreted as being against the Google Maps Platform Terms of
+        #       Service: https://cloud.google.com/maps-platform/terms
+        # # Replace the copyright text with a more readable pixel font.
+        # copyright_text = self._copyright_text(width, height,
+        #                                       polyline=polyline,
+        #                                       markers=markers,
+        #                                       marker_icon=marker_icon)
+        # draw_text(copyright_text,
+        #           font_spec=SCREENSTAR_SMALL_REGULAR,
+        #           text_color=COPYRIGHT_TEXT_COLOR,
+        #           anchor='bottom_right',
+        #           box_color=COPYRIGHT_BOX_COLOR,
+        #           box_padding=COPYRIGHT_BOX_PADDING,
+        #           image=image)
 
         return image
 
