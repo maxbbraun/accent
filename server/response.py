@@ -3,13 +3,15 @@ from flask import send_file
 from flask import url_for
 from io import BytesIO
 from logging import exception
+from logging import warning
 from PIL import Image
 
 from content import ContentError
+from epd import adjust_xy
 from epd import bwr_bytes
 from epd import bwr_image
-from epd import DISPLAY_WIDTH
-from epd import DISPLAY_HEIGHT
+from epd import DEFAULT_DISPLAY_WIDTH
+from epd import DEFAULT_DISPLAY_HEIGHT
 from graphics import draw_text
 from graphics import SUBVARIO_CONDENSED_MEDIUM
 
@@ -68,31 +70,44 @@ def settings_url(key):
     return url_for('hello_get', key=key, _external=True)
 
 
-def settings_response(key, image_func):
+def settings_response(key, image_func, width, height):
     """Creates an image response to start the new user flow."""
 
     # Draw the image with the link text and a computer.
-    image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
-                      color=BACKGROUND_COLOR)
+    image = Image.new(mode='RGB', size=(width, height), color=BACKGROUND_COLOR)
     draw_text(settings_url(key),
               font_spec=SUBVARIO_CONDENSED_MEDIUM,
               text_color=TEXT_COLOR,
-              xy=LINK_TEXT_XY,
+              xy=adjust_xy(*LINK_TEXT_XY, width, height),
               anchor='center_x',
               image=image)
     computer = Image.open(COMPUTER_FILE).convert(mode='RGBA')
-    image.paste(computer, box=COMPUTER_XY, mask=computer)
+    image.paste(computer, box=adjust_xy(*COMPUTER_XY, width, height),
+                mask=computer)
 
     return image_func(image)
 
 
-def content_response(content, image_response, user):
+def content_response(content, image_response, user, width, height):
     """Creates an image response and handles the error case flow."""
 
     try:
-        image = content.image(user)
+        image = content.image(user, width, height)
         return image_response(image)
     except ContentError as e:
         exception('Failed to create %s content: %s' % (
             content.__class__.__name__, e))
-        return settings_response(user.id, image_response)
+        return settings_response(user.id, image_response, width, height)
+
+
+def display_size(request):
+    """Extracts the display size from the request or uses defaults."""
+
+    width = request.args.get('width', default=DEFAULT_DISPLAY_WIDTH)
+    height = request.args.get('height', default=DEFAULT_DISPLAY_HEIGHT)
+
+    try:
+        return int(width), int(height)
+    except ValueError as e:
+        warning('Malformed display size: %sx%s' % (width, height))
+        return DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT

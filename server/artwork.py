@@ -6,8 +6,6 @@ from random import choice
 from random import randint
 
 from content import ImageContent
-from epd import DISPLAY_WIDTH
-from epd import DISPLAY_HEIGHT
 
 # The directory containing static artwork images.
 IMAGES_DIR = 'assets/artwork'
@@ -19,7 +17,7 @@ IMAGE_EXTENSION = 'gif'
 class Artwork(ImageContent):
     """A collection of randomly selected image artwork."""
 
-    def image(self, _):
+    def image(self, _, width, height):
         """Generates an artwork image."""
 
         # Load a random image.
@@ -30,8 +28,8 @@ class Artwork(ImageContent):
         image = image.convert('RGB')
 
         # Crop the image to a random display-sized area.
-        x = randint(0, max(0, image.width - DISPLAY_WIDTH))
-        y = randint(0, max(0, image.height - DISPLAY_HEIGHT))
-        image = image.crop((x, y, x + DISPLAY_WIDTH, y + DISPLAY_HEIGHT))
+        x = randint(0, max(0, image.width - width))
+        y = randint(0, max(0, image.height - height))
+        image = image.crop((x, y, x + width, y + height))
 
         return image

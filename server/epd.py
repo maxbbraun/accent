@@ -4,11 +4,11 @@ from numpy import uint8
 from PIL import Image
 from scipy.cluster.vq import vq
 
-# The width of the display in pixels.
-DISPLAY_WIDTH = 640
+# The default width of the display in pixels.
+DEFAULT_DISPLAY_WIDTH = 640
 
-# The height of the display in pixels.
-DISPLAY_HEIGHT = 384
+# The default height of the display in pixels.
+DEFAULT_DISPLAY_HEIGHT = 384
 
 # Black, white, and red as 8-bit RGB arrays.
 BWR_8_BIT = array([[0, 0, 0], [255, 255, 255], [255, 0, 0]], dtype=uint8)
@@ -39,3 +39,13 @@ def bwr_bytes(image):
     indices = _color_indices(image)
     bwr_image_data = BWR_2_BIT[indices.reshape((image.height * image.width))]
     return packbits(bwr_image_data)
+
+
+def adjust_xy(x, y, width, height):
+    """Converts coordinates expressed relative to the default display size."""
+
+    # Adjust by half the difference for a center crop.
+    x += (width - DEFAULT_DISPLAY_WIDTH) // 2
+    y += (height - DEFAULT_DISPLAY_HEIGHT) // 2
+
+    return x, y

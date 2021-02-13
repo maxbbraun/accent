@@ -2,10 +2,9 @@ from os.path import join as path_join
 from PIL import Image
 from random import random
 
-from epd import DISPLAY_WIDTH
-from epd import DISPLAY_HEIGHT
 from content import ContentError
 from content import ImageContent
+from epd import adjust_xy
 from firestore import DataError
 from local_time import LocalTime
 from sun import Sun
@@ -85,7 +84,7 @@ class City(ImageContent):
             'layers': [
                 {
                     'file': 'day/environment/water-day.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'or_condition': [self._weather.is_clear,
                                      self._weather.is_partly_cloudy,
                                      self._weather.is_cloudy,
@@ -93,13 +92,13 @@ class City(ImageContent):
                 },
                 {
                     'file': 'day/environment/water-flat-day.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'or_condition': [self._weather.is_rainy,
                                      self._weather.is_snowy]
                 },
                 {
                     'file': 'day/environment/isle-day.gif',
-                    'xy': (0, 0)
+                    'xy': (-4, 24)
                 },
                 {
                     'file': 'day/blocks/bldg-facstdo-day.gif',
@@ -155,7 +154,7 @@ class City(ImageContent):
                 },
                 {
                     'file': 'day/environment/fog1-day.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_foggy
                 },
                 {
@@ -250,7 +249,7 @@ class City(ImageContent):
                 },
                 {
                     'file': 'day/environment/fog2-day.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_foggy
                 },
                 {
@@ -357,7 +356,7 @@ class City(ImageContent):
                 },
                 {
                     'file': 'day/environment/fog3-day.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_foggy
                 },
                 {
@@ -458,7 +457,7 @@ class City(ImageContent):
                 },
                 {
                     'file': 'day/environment/fog4-day.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_foggy
                 },
                 {
@@ -473,12 +472,12 @@ class City(ImageContent):
                 },
                 {
                     'file': 'day/environment/rain1-day.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'day/environment/snow1-day.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_snowy
                 },
                 {
@@ -552,7 +551,7 @@ class City(ImageContent):
             'layers': [
                 {
                     'file': 'night/environment/water-night.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'or_condition': [self._weather.is_clear,
                                      self._weather.is_partly_cloudy,
                                      self._weather.is_cloudy,
@@ -560,13 +559,13 @@ class City(ImageContent):
                 },
                 {
                     'file': 'night/environment/water-flat-night.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'or_condition': [self._weather.is_rainy,
                                      self._weather.is_snowy]
                 },
                 {
                     'file': 'night/environment/isle-night.gif',
-                    'xy': (0, 0)
+                    'xy': (-4, 24)
                 },
                 {
                     'file': 'night/blocks/bldg-facstdo-night.gif',
@@ -622,7 +621,7 @@ class City(ImageContent):
                 },
                 {
                     'file': 'night/environment/fog1-night.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_foggy
                 },
                 {
@@ -703,7 +702,7 @@ class City(ImageContent):
                 },
                 {
                     'file': 'night/environment/fog2-night.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_foggy
                 },
                 {
@@ -784,7 +783,7 @@ class City(ImageContent):
                 },
                 {
                     'file': 'night/environment/fog3-night.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_foggy
                 },
                 {
@@ -844,7 +843,7 @@ class City(ImageContent):
                 },
                 {
                     'file': 'night/environment/fog4-night.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_foggy
                 },
                 {
@@ -859,12 +858,12 @@ class City(ImageContent):
                 },
                 {
                     'file': 'night/environment/rain1-night.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_rainy
                 },
                 {
                     'file': 'night/environment/snow1-night.gif',
-                    'xy': (0, 0),
+                    'xy': (-640, -384),
                     'condition': self._weather.is_snowy
                 },
                 {
@@ -935,7 +934,7 @@ class City(ImageContent):
             ]
         }]
 
-    def _draw_layers(self, image, layers, user):
+    def _draw_layers(self, image, layers, user, width, height):
         """Draws a list of layers onto an image."""
 
         # Keep track of drawn layers.
@@ -987,7 +986,7 @@ class City(ImageContent):
 
             # Recursively draw groups of layers.
             try:
-                self._draw_layers(image, layer['layers'], user)
+                self._draw_layers(image, layer['layers'], user, width, height)
                 continue  # Don't try to draw layer groups.
             except KeyError:
                 pass
@@ -998,6 +997,9 @@ class City(ImageContent):
             except KeyError:
                 x, y = layer['xy']
 
+            # Adjust the coordinates to be centered on the display.
+            x, y = adjust_xy(x, y, width, height)
+
             # Draw the layer.
             path = path_join(ASSETS_DIR, layer['file'])
             bitmap = Image.open(path).convert('RGBA')
@@ -1006,12 +1008,12 @@ class City(ImageContent):
             # Remember the drawn file for the else condition.
             drawn_files.append(layer['file'])
 
-    def image(self, user):
+    def image(self, user, width, height):
         """Generates the current city image."""
 
-        image = Image.new(mode='RGB', size=(DISPLAY_WIDTH, DISPLAY_HEIGHT))
+        image = Image.new(mode='RGB', size=(width, height))
         try:
-            self._draw_layers(image, self._layers(), user)
+            self._draw_layers(image, self._layers(), user, width, height)
             return image
         except DataError as e:
             raise ContentError(e)

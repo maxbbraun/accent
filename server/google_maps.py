@@ -9,8 +9,6 @@ from requests import get
 from requests.exceptions import RequestException
 from urllib.parse import quote
 
-from epd import DISPLAY_WIDTH
-from epd import DISPLAY_HEIGHT
 from graphics import SCREENSTAR_SMALL_REGULAR
 from firestore import DataError
 from firestore import Firestore
@@ -56,13 +54,14 @@ class GoogleMaps(object):
         self._local_time = LocalTime(geocoder)
         self._vision_client = vision.ImageAnnotatorClient()
 
-    def _static_map_url(self, polyline=None, markers=None, marker_icon=None,
-                        hide_map=False):
+    def _static_map_url(self, width, height, polyline=None, markers=None,
+                        marker_icon=None, hide_map=False):
         """Constructs the URL for the Static Map API request."""
 
         url = STATIC_MAP_URL
         url += '?key=%s' % self._google_maps_api_key
-        url += '&size=%dx%d' % (DISPLAY_WIDTH, DISPLAY_HEIGHT)
+        url += '&size=%dx%d' % (width, height)
+        url += '&scale=1'
         url += '&maptype=roadmap'
 
         if hide_map:
@@ -95,11 +94,12 @@ class GoogleMaps(object):
 
         return url
 
-    def _download_map(self, polyline=None, markers=None, marker_icon=None,
-                      hide_map=False):
+    def _download_map(self, width, height, polyline=None, markers=None,
+                      marker_icon=None, hide_map=False):
         """Downloads the image data from the Google Static Map API."""
 
-        image_url = self._static_map_url(polyline=polyline, markers=markers,
+        image_url = self._static_map_url(width, height, polyline=polyline,
+                                         markers=markers,
                                          marker_icon=marker_icon,
                                          hide_map=hide_map)
 
@@ -111,11 +111,13 @@ class GoogleMaps(object):
 
         return image_data
 
-    def _copyright_text(self, polyline=None, markers=None, marker_icon=None):
+    def _copyright_text(self, width, height, polyline=None, markers=None,
+                        marker_icon=None):
         """Uses OCR to extract the copyright text from the map."""
 
         # Download a version of the map with only the copyright text.
-        image_data = self._download_map(polyline=polyline, markers=markers,
+        image_data = self._download_map(width, height, polyline=polyline,
+                                        markers=markers,
                                         marker_icon=marker_icon,
                                         hide_map=True)
 
@@ -136,16 +138,24 @@ class GoogleMaps(object):
         return COPYRIGHT_TEXT % time.year
 
     @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
-    def map_image(self, polyline=None, markers=None, marker_icon=None):
+    def map_image(self, width, height, polyline=None, markers=None,
+                  marker_icon=None):
         """Creates a map image with optional route or markers."""
 
         # Get the static map as an image.
-        image_data = self._download_map(polyline=polyline, markers=markers,
+        image_data = self._download_map(width, height, polyline=polyline,
+                                        markers=markers,
                                         marker_icon=marker_icon)
         image = Image.open(image_data).convert('RGB')
 
+        # Catch map size restrictions.
+        if image.width != width or image.height != height:
+            raise DataError('Requested a %dx%d map but got %dx%d. Try this: ht'
+                            'tps://issuetracker.google.com/issues/110570733' %
+                            (width, height, image.width, image.height))
+
         # Replace the copyright text with a more readable pixel font.
-        copyright_text = self._copyright_text(polyline=polyline,
+        copyright_text = self._copyright_text(width, height, polyline=polyline,
                                               markers=markers,
                                               marker_icon=marker_icon)
         draw_text(copyright_text,

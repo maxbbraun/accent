@@ -13,7 +13,7 @@ Entry point: [`main.py`](main.py)
       │   │ Wake           │                    │
       │◀──┘                │                    │
       │                    │                    │
-      │     /epd (Key)     │                    │
+      │  /epd (Key, Size)  │                    │
       ├───────────────────▶├─┐ Schedule (User)  │
       │                    │ ├─────────────────▶├─┐
       │                    │ │                  │ │
@@ -50,7 +50,7 @@ Entry point: [`main.py`](main.py)
       │   │ Wake           │                    │                    │
       │◀──┘                │                    │                    │
       │                    │                    │                    │
-      │     /epd (Key)     ├─┐ Schedule (User)  │                    │
+      │  /epd (Key, Size)  ├─┐ Schedule (User)  │                    │
       ├───────────────────▶│ ├─────────────────▶├─┐                  │
       │                    │ │                  │ │                  │
       │                    │ │      Error       │ │                  │

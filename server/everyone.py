@@ -1,7 +1,9 @@
 from astral import AstralError
 from cachetools import cached
 from cachetools import TTLCache
+from content import ContentError
 from content import ImageContent
+from firestore import DataError
 from firestore import Firestore
 from google_maps import GoogleMaps
 
@@ -44,8 +46,12 @@ class Everyone(ImageContent):
 
         return markers
 
-    def image(self, user):
+    def image(self, user, width, height):
         """Generates a map with user locations."""
 
-        return self._google_maps.map_image(markers=self._markers(),
-                                           marker_icon=MARKER_ICON_URL)
+        try:
+            return self._google_maps.map_image(width, height,
+                                               markers=self._markers(),
+                                               marker_icon=MARKER_ICON_URL)
+        except DataError as e:
+            raise ContentError(e)
