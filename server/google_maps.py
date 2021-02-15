@@ -153,8 +153,9 @@ class GoogleMaps(object):
         # Catch map size restrictions.
         if image.width != width or image.height != height:
             raise DataError('Requested a %dx%d map but got %dx%d. Try this: ht'
-                            'tps://issuetracker.google.com/issues/110570733' %
-                            (width, height, image.width, image.height))
+                            'tps://developers.google.com/maps/documentation/ma'
+                            'ps-static/start#Largerimagesizes' % (
+                                width, height, image.width, image.height))
 
         # NOTE: Unfortunately, making the copyright text readable has been
         #       interpreted as being against the Google Maps Platform Terms of
