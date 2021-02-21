@@ -10,7 +10,8 @@
 // A high-level wrapper around Wifi connections and HTTP requests.
 class Network {
  public:
-  Network() : display_(), power_(), wifi_setup_server_(nullptr) {}
+  Network(uint32_t serial_speed)
+      : display_(serial_speed), power_(), wifi_setup_server_(nullptr) {}
   ~Network() {
     if (wifi_setup_server_ != nullptr) {
       delete wifi_setup_server_;

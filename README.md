@@ -18,6 +18,7 @@ To push the client code to the board:
 3. Pick one display type in [`Display.h`](client/Display.h).
    - [GDEW075Z09](https://www.e-paper-display.com/products_detail/productId=324.html)  (7.5" 640x384)
    - [GDEW075Z08](https://www.e-paper-display.com/products_detail/productId=457.html) (7.5" 800x480)
+   - [GDEH075Z90](https://www.e-paper-display.com/products_detail/productId=535.html) (7.5" 880x528)
 4. If you want to point the client to a custom server, change `kBaseUrl` in [`Client.ino`](client/Client.ino).
 5. Verify and upload the sketch.
 

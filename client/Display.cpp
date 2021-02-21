@@ -9,29 +9,29 @@ const int8_t kSpiPinBusy = 25;
 const int8_t kSpiPinRst = 26;
 const int8_t kSpiPinDc = 27;
 
-// The size in bytes per chunk when sending a static image.
-const uint32_t kStaticImageChunkSize = 1024;
-
 void Display::Initialize() {
   Serial.println("Initializing display");
 
   // Allocate display buffers.
-  gx_epd_ = new GxEPD2_3C<DISPLAY_TYPE, DISPLAY_TYPE::HEIGHT>(
+  gx_epd_ = new GxEPD2_3C<DISPLAY_TYPE, PAGE_HEIGHT>(
       DISPLAY_TYPE(kSpiPinCs, kSpiPinDc, kSpiPinRst, kSpiPinBusy));
-  gx_epd_->init();
+  gx_epd_->init(serial_speed_);
 
   // Remap the Waveshare ESP32's non-standard SPI pins.
   SPI.end();
   SPI.begin(kSpiPinSck, kSpiPinMiso, kSpiPinMosi, kSpiPinCs);
+
+  // Start paged drawing.
+  gx_epd_->firstPage();
 }
 
-void Display::Load(const char* image_data, uint32_t size, uint32_t offset) {
+void Display::Load(const uint8_t* image_data, uint32_t size, uint32_t offset) {
   Serial.printf("Loading image data: %lu bytes\n", size);
 
   // Look at the image data one byte at a time, which is 4 input pixels.
   for (int i = 0; i < size; ++i) {
     // Read 4 input pixels.
-    char input = image_data[i];
+    uint8_t input = image_data[i];
     uint16_t pixels[] = {
         ConvertPixel(input, 0xC0, 6),
         ConvertPixel(input, 0x30, 4),
@@ -46,14 +46,17 @@ void Display::Load(const char* image_data, uint32_t size, uint32_t offset) {
       int16_t x = out % gx_epd_->width();
       int16_t y = out / gx_epd_->width();
       gx_epd_->drawPixel(x, y, pixel);
+
+      // Trigger a display update after the last pixel of each page.
+      if ((y + 1) % gx_epd_->pageHeight() == 0 && x == gx_epd_->width() - 1) {
+        Serial.println("Updating display");
+        gx_epd_->nextPage();
+      }
     }
   }
 }
 
-void Display::Update() {
-  Serial.println("Updating display");
-  gx_epd_->display(true /* no power off */);
-
+void Display::Finalize() {
   Serial.println("Suspending display");
   gx_epd_->hibernate();
 
@@ -61,16 +64,22 @@ void Display::Update() {
   delete gx_epd_;
 }
 
-void Display::ShowError() { ShowStatic(kErrorImage, sizeof(kErrorImage)); }
+void Display::ShowError() {
+  ShowStatic(kErrorImageBlack, kErrorImageRed, kErrorWidth, kErrorHeight,
+             kErrorBackground);
+}
 
-void Display::ShowWifiSetup() { ShowStatic(kWifiImage, sizeof(kWifiImage)); }
+void Display::ShowWifiSetup() {
+  ShowStatic(kWifiImageBlack, kWifiImageRed, kWifiWidth, kWifiHeight,
+             kWifiBackground);
+}
 
 int16_t Display::Width() { return gx_epd_->width(); }
 
 int16_t Display::Height() { return gx_epd_->height(); }
 
-uint16_t Display::ConvertPixel(char input, char mask, int shift) {
-  const char value = (input & mask) >> shift;
+uint16_t Display::ConvertPixel(uint8_t input, uint8_t mask, uint8_t shift) {
+  uint8_t value = (input & mask) >> shift;
   switch (value) {
     case 0x0:
       return GxEPD_BLACK;
@@ -84,19 +93,25 @@ uint16_t Display::ConvertPixel(char input, char mask, int shift) {
   }
 }
 
-void Display::ShowStatic(const char* image_data, uint32_t size) {
+void Display::ShowStatic(const uint8_t* black_data, const uint8_t* red_data,
+                         uint16_t width, uint16_t height, uint16_t background) {
   Serial.println("Showing static image");
 
   Initialize();
 
-  const char* image_ptr = image_data;
-  const char* image_end = image_ptr + size - 1 /* null terminator */;
-  do {
-    uint32_t chunk_size = min(kStaticImageChunkSize,
-                              static_cast<uint32_t>(image_end - image_ptr));
-    Load(image_ptr, chunk_size, image_ptr - image_data);
-    image_ptr += chunk_size;
-  } while (image_ptr < image_end);
+  // Calculate the offset to center the static image in the display.
+  int16_t x = (gx_epd_->width() - width) / 2;
+  int16_t y = (gx_epd_->height() - height) / 2;
 
-  Update();
+  do {
+    // Fill in the background first.
+    gx_epd_->fillScreen(background);
+
+    // Draw the static image one color at a time.
+    gx_epd_->fillRect(x, y, width, height, GxEPD_WHITE);
+    gx_epd_->drawBitmap(x, y, black_data, width, height, GxEPD_BLACK);
+    gx_epd_->drawBitmap(x, y, red_data, width, height, GxEPD_RED);
+  } while (gx_epd_->nextPage());
+
+  Finalize();
 }

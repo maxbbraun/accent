@@ -4,28 +4,34 @@
 #include <Arduino.h>
 #include <GFX.h>
 #include <GxEPD2_3C.h>
+#include "ErrorImage.h"
+#include "WifiImage.h"
 
 // Display type GDEW075Z09 (7.5" 640x384)
 // #define DISPLAY_TYPE GxEPD2_750c
-// #include "ErrorImage_GDEW075Z09.h"
-// #include "WifiImage_GDEW075Z09.h"
+// #define PAGE_HEIGHT GxEPD2_750c::HEIGHT
 
 // Display type GDEW075Z08 (7.5" 800x480)
 #define DISPLAY_TYPE GxEPD2_750c_Z08
-#include "ErrorImage_GDEW075Z08.h"
-#include "WifiImage_GDEW075Z08.h"
+#define PAGE_HEIGHT GxEPD2_750c_Z08::HEIGHT
+
+// Display type GDEH075Z90 (7.5" 880x528)
+// #define DISPLAY_TYPE GxEPD2_750c_Z90
+// #define PAGE_HEIGHT (GxEPD2_750c_Z90::HEIGHT / 2)
 
 // A high-level wrapper around the e-paper display.
 class Display {
  public:
-  // Initializes the display for the next update.
+  Display(uint32_t serial_speed) : serial_speed_(serial_speed) {}
+
+  // Initializes the display connection and buffers.
   void Initialize();
 
-  // Loads partial image data onto the display.
-  void Load(const char* image_data, uint32_t size, uint32_t offset);
+  // Loads partial image data onto the display and updates after each page.
+  void Load(const uint8_t* image_data, uint32_t size, uint32_t offset);
 
-  // Shows the loaded image and sends the display to sleep.
-  void Update();
+  // Frees display buffers and sends the display to sleep.
+  void Finalize();
 
   // Shows the error image.
   void ShowError();
@@ -41,13 +47,17 @@ class Display {
 
  private:
   // Converts one pixel from 2-bit input encoding to 16-bit output encoding.
-  uint16_t ConvertPixel(char input, char mask, int shift);
+  uint16_t ConvertPixel(uint8_t input, uint8_t mask, uint8_t shift);
 
-  // Initializes, loads, and shows a static image.
-  void ShowStatic(const char* image, uint32_t size);
+  // Initializes, loads, and finalizes a static image.
+  void ShowStatic(const uint8_t* black_data, const uint8_t* red_data,
+                  uint16_t width, uint16_t height, uint16_t background);
 
   // The entrypoint to the GxEPD2 tri-color e-paper display API.
-  GxEPD2_3C<DISPLAY_TYPE, DISPLAY_TYPE::HEIGHT>* gx_epd_;
+  GxEPD2_3C<DISPLAY_TYPE, PAGE_HEIGHT>* gx_epd_;
+
+  // The baud rate for the serial connection. Used for GxEPD2 logging.
+  uint32_t serial_speed_;
 };
 
 #endif  // DISPLAY_H

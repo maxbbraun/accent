@@ -4,7 +4,7 @@
 #include "Power.h"
 
 // The baud rate for the serial connection.
-const long kSerialSpeed = 115200;
+const uint32_t kSerialSpeed = 115200;
 
 // The GPIO pin used to reset Wifi settings.
 const uint8_t kWifiResetPin = 23;
@@ -25,8 +25,8 @@ const uint32_t kStreamBufferSize = 1024;
 uint64_t kRestartDelayMs = 60 * 60 * 1000;  // 1 hour
 
 // Helper library instances.
-Display display;
-Network network;
+Display display(kSerialSpeed);
+Network network(kSerialSpeed);
 Power power;
 
 void setup() {
@@ -51,7 +51,7 @@ void setup() {
   if (!downloadImage()) {
     return;
   }
-  display.Update();
+  display.Finalize();
 
   // Go to sleep until the next refresh.
   scheduleSleep();
@@ -82,7 +82,7 @@ bool downloadImage() {
   }
 
   // Start reading from the stream.
-  char buffer[kStreamBufferSize];
+  uint8_t buffer[kStreamBufferSize];
   WiFiClient* stream = http.getStreamPtr();
   uint32_t total_count = 0;
   do {
