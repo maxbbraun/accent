@@ -439,12 +439,11 @@ class City(ImageContent):
                 {
                     'file': 'day/characters/penguin1-day.gif',
                     'xy': (289, 370),
-                    'probability': 80
+                    'probability': 50
                 },
                 {
                     'file': 'day/characters/penguin2-day.gif',
-                    'xy': (261, 352),
-                    'probability': 80
+                    'xy': (261, 352)
                 },
                 {
                     'file': 'day/vehicles/yacht2-xm-day.gif',
@@ -835,12 +834,11 @@ class City(ImageContent):
                 {
                     'file': 'night/characters/penguin1-night.gif',
                     'xy': (289, 370),
-                    'probability': 80
+                    'probability': 50
                 },
                 {
                     'file': 'night/characters/penguin2-night.gif',
-                    'xy': (261, 352),
-                    'probability': 80
+                    'xy': (261, 352)
                 },
                 {
                     'file': 'night/vehicles/yacht2-xm-night.gif',
