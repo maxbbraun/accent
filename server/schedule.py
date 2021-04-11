@@ -85,6 +85,19 @@ class Schedule(ImageContent):
         except ValueError as e:
             raise ContentError(e)
 
+    def _prev(seld, cron, before, user):
+        """Finds the previous time matching the cron expression"""
+
+        try:
+            cron = seld._sun.rewrite_cron(cron, before, user)
+        except DataError as e:
+            raise ContentError
+
+        try:
+            return croniter(cron, before, user).get_prev(datetime)
+        except ValueError as e:
+            raise ContentError(e)
+
     def _image(self, kind, user, width, height):
         """Creates an image based on the kind."""
 
@@ -114,7 +127,7 @@ class Schedule(ImageContent):
             raise ContentError(e)
         today = time.replace(hour=0, minute=0, second=0, microsecond=0)
         while True:
-            entries = [(self._next(entry['start'], today, user), entry)
+            entries = [(self._prev(entry['start'], time, user), entry)
                        for entry in user.get('schedule')]
             if not entries:
                 raise ContentError('Empty schedule')
@@ -127,7 +140,7 @@ class Schedule(ImageContent):
                 break
 
             # If there were no past entries, try the previous day.
-            today -= timedelta(days=1)
+            time -= timedelta(days=1)
 
         # Generate the image from the current schedule entry.
         info('Using image from schedule entry: %s (%s, %s)' % (
