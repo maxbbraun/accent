@@ -85,13 +85,13 @@ class Schedule(ImageContent):
         except ValueError as e:
             raise ContentError(e)
 
-    def _prev(seld, cron, before, user):
-        """Finds the previous time matching the cron expression"""
+    def _previous(self, cron, before, user):
+        """Finds the previous time matching the cron expression."""
 
         try:
-            cron = seld._sun.rewrite_cron(cron, before, user)
+            cron = self._sun.rewrite_cron(cron, before, user)
         except DataError as e:
-            raise ContentError
+            raise ContentError(e)
 
         try:
             return croniter(cron, before, user).get_prev(datetime)
@@ -125,9 +125,9 @@ class Schedule(ImageContent):
             time = self._local_time.now(user)
         except DataError as e:
             raise ContentError(e)
-        today = time.replace(hour=0, minute=0, second=0, microsecond=0)
+
         while True:
-            entries = [(self._prev(entry['start'], time, user), entry)
+            entries = [(self._previous(entry['start'], time, user), entry)
                        for entry in user.get('schedule')]
             if not entries:
                 raise ContentError('Empty schedule')
