@@ -6,6 +6,7 @@ from random import choice
 from random import randint
 
 from content import ImageContent
+from epd import edge_color
 
 # The directory containing static artwork images.
 IMAGES_DIR = 'assets/artwork'
@@ -27,9 +28,17 @@ class Artwork(ImageContent):
         image = Image.open(filename)
         image = image.convert('RGB')
 
-        # Crop the image to a random display-sized area.
-        x = randint(0, max(0, image.width - width))
-        y = randint(0, max(0, image.height - height))
-        image = image.crop((x, y, x + width, y + height))
-
-        return image
+        # Larger images are cropped to a random display-sized area.
+        # Smaller images are centered in the middle of the display.
+        if width > image.width:
+            x = int((width - image.width) / 2)
+        else:
+            x = -randint(0, image.width - width)
+        if height > image.height:
+            y = int((height - image.height) / 2)
+        else:
+            y = -randint(0, image.height - height)
+        
+        output = Image.new('RGB', (width, height), color=edge_color(image))
+        output.paste(image, (x, y))
+        return output
