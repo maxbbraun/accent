@@ -33,9 +33,6 @@ CALENDAR_ID = 'primary'
 # The number of days in a week.
 DAYS_IN_WEEK = 7
 
-# The maximum nubmer of (partial) weeks in a month.
-WEEKS_IN_MONTH = 6
-
 # The color of the image background.
 BACKGROUND_COLOR = (255, 255, 255)
 
@@ -160,13 +157,13 @@ class GoogleCalendar(ImageContent):
                           color=BACKGROUND_COLOR)
         draw = Draw(image)
 
-        # Determine the spacing of the days in the image.
-        x_stride = width // (DAYS_IN_WEEK + 1)
-        y_stride = height // (WEEKS_IN_MONTH + 1)
-
         # Get this month's calendar.
         calendar = Calendar(firstweekday=SUNDAY)
         weeks = calendar.monthdayscalendar(time.year, time.month)
+
+        # Determine the spacing of the days in the image.
+        x_stride = width // (DAYS_IN_WEEK + 1)
+        y_stride = height // (len(weeks) + 1)
 
         # Draw each week in a row.
         for week_index in range(len(weeks)):
