@@ -104,12 +104,9 @@ class GoogleMaps(object):
                                          hide_map=hide_map)
 
         try:
-            image_response = get(image_url).content
+            return get(image_url).content
         except RequestException as e:
             raise DataError(e)
-        image_data = BytesIO(image_response)
-
-        return image_data
 
     def _copyright_text(self, width, height, polyline=None, markers=None,
                         marker_icon=None):
@@ -122,9 +119,10 @@ class GoogleMaps(object):
                                         hide_map=True)
 
         # Make a request to the Vision API.
-        request_image = vision.types.Image(content=image_data.getvalue())
-        response = self._vision_client.document_text_detection(
-            image=request_image)
+        with BytesIO(image_data) as buffer:
+            request_image = vision.types.Image(content=buffer.getvalue())
+            response = self._vision_client.document_text_detection(
+                image=request_image)
 
         # Parse all recognized text for the copyright.
         lines = response.full_text_annotation.text.splitlines()
@@ -148,7 +146,8 @@ class GoogleMaps(object):
         image_data = self._download_map(width, height, polyline=polyline,
                                         markers=markers,
                                         marker_icon=marker_icon)
-        image = Image.open(image_data).convert('RGB')
+        with BytesIO(image_data) as buffer:
+            image = Image.open(buffer).convert('RGB')
 
         # Catch map size restrictions.
         if image.width != width or image.height != height:
