@@ -89,12 +89,12 @@ class Schedule(ImageContent):
         """Finds the previous time matching the cron expression."""
 
         try:
-            cron = self._sun.rewrite_cron(cron, before, user)
+            cron = self._sun.rewrite_cron(cron, before, user, False)
         except DataError as e:
             raise ContentError(e)
 
         try:
-            return croniter(cron, before, user).get_prev(datetime)
+            return croniter(cron, before).get_prev(datetime)
         except ValueError as e:
             raise ContentError(e)
 
@@ -126,21 +126,14 @@ class Schedule(ImageContent):
         except DataError as e:
             raise ContentError(e)
 
-        while True:
-            entries = [(self._previous(entry['start'], time, user), entry)
-                       for entry in user.get('schedule')]
-            if not entries:
-                raise ContentError('Empty schedule')
-            past_entries = list(filter(lambda x: x[0] <= time, entries))
+        entries = [(self._previous(entry['start'], time, user), entry)
+                   for entry in user.get('schedule')]
 
-            # Use the most recent past entry.
-            if past_entries:
-                latest_datetime, latest_entry = max(past_entries,
-                                                    key=lambda x: x[0])
-                break
+        if not entries:
+            raise ContentError('Empty schedule')
 
-            # If there were no past entries, try the previous day.
-            time -= timedelta(days=1)
+        # Use the most recent past entry.
+        latest_datetime, latest_entry = max(entries, key=lambda x: x[0])
 
         # Generate the image from the current schedule entry.
         info('Using image from schedule entry: %s (%s, %s)' % (

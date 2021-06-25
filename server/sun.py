@@ -17,23 +17,22 @@ class Sun(object):
         self._astral = Astral(geocoder=GeocoderWrapper, wrapped=geocoder)
         self._local_time = LocalTime(geocoder)
 
-    def rewrite_cron(self, cron, reference, user):
+    def rewrite_cron(self, cron, reference, user, forward=True):
         """Replaces references to sunrise and sunset in a cron expression."""
 
         # Skip if there is nothing to rewrite.
         if 'sunrise' not in cron and 'sunset' not in cron:
             return cron
 
-        # Replace H:M:S in the reference time so that we get the correct sunrise / set
-        reference_midnight = reference.replace(hour=0, minute=0, second=0, microsecond=0)
-
-        # Determine the first two days of the cron expression after the
-        # reference, which covers all candidate sunrises and sunsets.
-        yesterday = reference_midnight - timedelta(days=1)
+        # Determine the two days surrounding the cron expression for the
+        # reference time, which covers all candidate sunrises and sunsets.
+        yesterday = reference - timedelta(days=2)
         midnight_cron = cron.replace('sunrise', '0 0').replace('sunset', '0 0')
         try:
-            first_day = croniter(midnight_cron, yesterday).get_next(datetime)
-            second_day = croniter(midnight_cron, first_day).get_next(datetime)
+            prev_day = croniter(midnight_cron, yesterday).get_next(datetime)
+            current_day = croniter(midnight_cron, prev_day).get_next(datetime)
+            next_day = croniter(midnight_cron, current_day).get_next(datetime)
+
         except ValueError as e:
             raise DataError(e)
 
@@ -43,32 +42,54 @@ class Sun(object):
         except (AstralError, KeyError) as e:
             raise DataError(e)
 
-        # Calculate the closest future sunrise time and replace the term in the
+        # Set the candidate days and filter based on direction
+        candidate_days = []
+        direction_filter = None
+        sorter = None
+
+        def forward_filter(x):
+            return x >= reference
+
+        def backward_filter(x):
+            return x <= reference
+
+        if forward:
+            candidate_days.extend([current_day, next_day])
+            direction_filter = forward_filter
+            sorter = min
+        else:
+            candidate_days.extend([prev_day, current_day])
+            direction_filter = backward_filter
+            sorter = max
+
+        # Calculate the closest sunrise time and replace the term in the
         # cron expression with minutes and hours.
         if 'sunrise' in cron:
-            sunrises = map(lambda x: home.sunrise(x).astimezone(zone),
-                           [first_day, second_day])
-            next_sunrise = min(filter(lambda x: x >= reference_midnight, sunrises))
+            sunrises = map(
+                    lambda x: home.sunrise(x).astimezone(zone),
+                    candidate_days)
+            next_sunrise = sorter(filter(direction_filter, sunrises))
             sunrise_cron = cron.replace('sunrise', '%d %d' % (
                 next_sunrise.minute, next_sunrise.hour))
             info('Rewrote cron: (%s) -> (%s), reference %s' % (
                 cron,
                 sunrise_cron,
-                reference_midnight.strftime('%A %B %d %Y %H:%M:%S %Z')))
+                reference.strftime('%A %B %d %Y %H:%M:%S %Z')))
             return sunrise_cron
 
         # Calculate the closest future sunset time and replace the term in the
         # cron expression with minutes and hours.
         if 'sunset' in cron:
-            sunsets = map(lambda x: home.sunset(x).astimezone(zone),
-                          [first_day, second_day])
-            next_sunset = min(filter(lambda x: x >= reference_midnight, sunsets))
+            sunsets = map(
+                    lambda x: home.sunset(x).astimezone(zone),
+                    candidate_days)
+            next_sunset = sorter(filter(direction_filter, sunsets))
             sunset_cron = cron.replace('sunset', '%d %d' % (next_sunset.minute,
                                                             next_sunset.hour))
             info('Rewrote cron: (%s) -> (%s), reference %s' % (
                 cron,
                 sunset_cron,
-                reference_midnight.strftime('%A %B %d %Y %H:%M:%S %Z')))
+                reference.strftime('%A %B %d %Y %H:%M:%S %Z')))
             return sunset_cron
 
     def is_daylight(self, user):
