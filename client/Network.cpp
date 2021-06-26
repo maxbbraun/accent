@@ -169,14 +169,18 @@ void Network::ResetWifi() {
 bool Network::StartWifiSetupServer() {
   Serial.println("Starting Wifi setup");
 
-  if (!WiFi.softAPConfig(kSetupIp, kSetupIp, kSetupSubnet)) {
-    Serial.println("Failed to apply access point config");
+  WiFi.mode(WIFI_AP);
+  if (!WiFi.softAP(kSetupSsid)) {
+    Serial.println("Failed to start access point");
     wifi_setup_server_ = nullptr;
     return false;
   }
 
-  if (!WiFi.softAP(kSetupSsid)) {
-    Serial.println("Failed to start access point");
+  // Wait for the access point to start.
+  delay(100);
+
+  if (!WiFi.softAPConfig(kSetupIp, kSetupIp, kSetupSubnet)) {
+    Serial.println("Failed to apply access point config");
     wifi_setup_server_ = nullptr;
     return false;
   }
