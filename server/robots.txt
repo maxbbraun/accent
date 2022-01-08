@@ -1,5 +1,5 @@
 User-agent: *
-Sitemap: /sitemap.txt
+Sitemap: https://accent.ink/sitemap.txt
 Disallow: /marker.png
 Disallow: /hello/*
 Disallow: /artwork
