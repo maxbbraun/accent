@@ -14,7 +14,18 @@ void Display::Initialize() {
 
   // Allocate display buffers.
   gx_epd_ = new GxEPD2_3C<DISPLAY_TYPE, PAGE_HEIGHT>(
-      DISPLAY_TYPE(kSpiPinCs, kSpiPinDc, kSpiPinRst, kSpiPinBusy));
+#ifdef DISPLAY_GDEY1248Z51
+      // Configure the additional connection board for this display type.
+      GxEPD2_1248c(kSpiPinSck, kSpiPinMiso, kSpiPinMosi, /* CS M1 */ 23,
+                   /* CS S1 */ 22, /* CS M2 */ 16, /* CS S2 */ 19,
+                   /* DC 1 */ 25, /* DC 2 */ 17, /* RST 1 */ 33, /* RST 2 */ 5,
+                   /* BUSY M1 */ 32, /* BUSY S1 */ 26, /* BUSY M2 */ 18,
+                   /* BUSY S2 */ 4)
+#else
+      // Use the standard configuration for all other display types.
+      DISPLAY_TYPE(kSpiPinCs, kSpiPinDc, kSpiPinRst, kSpiPinBusy)
+#endif
+  );
   gx_epd_->init(serial_speed_);
 
   // Remap the Waveshare ESP32's non-standard SPI pins.

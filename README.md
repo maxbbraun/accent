@@ -13,7 +13,8 @@ To push the client code to the board:
 2. Pick one display type via `build_flags` in [`platformio.ini`](client/platformio.ini):
    - [GDEW075Z09](https://www.e-paper-display.com/products_detail/productId=324.html)  (7.5" 640x384)
    - [GDEW075Z08](https://www.e-paper-display.com/products_detail/productId=457.html) (7.5" 800x480)
-   - [GDEH075Z90](https://www.e-paper-display.com/products_detail/productId=535.html) (7.5" 880x528)
+   - [GDEH075Z90](https://www.good-display.com/product/344.html) (7.5" 880x528)
+   - [GDEY1248Z51](https://www.good-display.com/product/422.html) (12.48" 1304x984, requires [DESPI-C1248](https://www.e-paper-display.com/products_detail/productId=418.html))
 3. If you want to point the client to a custom server, change `kBaseUrl` in [`Client.cpp`](client/src/Client.cpp).
 5. Compile and upload with `pio run -t upload`.
 

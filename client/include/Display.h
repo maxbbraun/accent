@@ -25,6 +25,12 @@
 #define PAGE_HEIGHT (GxEPD2_750c_Z90::HEIGHT / 2)
 #endif
 
+// Display type GDEY1248Z51 (12.48" 1304x984)
+#ifdef DISPLAY_GDEY1248Z51
+#define DISPLAY_TYPE GxEPD2_1248c
+#define PAGE_HEIGHT (GxEPD2_1248c::HEIGHT / 4)
+#endif
+
 // A high-level wrapper around the e-paper display.
 class Display {
  public:
