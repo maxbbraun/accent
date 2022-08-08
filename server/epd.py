@@ -1,6 +1,8 @@
+from numpy import argmax
 from numpy import array
 from numpy import packbits
 from numpy import uint8
+from numpy import unique
 from PIL import Image
 from scipy.cluster.vq import vq
 
@@ -49,3 +51,20 @@ def adjust_xy(x, y, width, height):
     y += (height - DEFAULT_DISPLAY_HEIGHT) // 2
 
     return x, y
+
+
+def edge_color(image):
+    """Returns the most common color (r, g, b) of the image edge.
+
+    Looks at the pixels at the edge of the image and returns the most
+    common color. This is then used as a background color in case display
+    size is larger than the image size.
+    """
+    i = array(bwr_image(image))
+    edge = array(
+        list(i[0]) +  # top
+        list(i[-1]) +  # bottom
+        [r[0] for r in i] + # left
+        [r[-1] for r in i]) # right
+    values, counts = unique(edge, axis=0, return_counts=True)
+    return tuple(values[argmax(counts)])
