@@ -6,21 +6,16 @@ Accent is a smart picture frame with a pop of color and no cables. Read more ab
 
 ## Client
 
-The Accent client uses the [Arduino toolchain](https://www.arduino.cc/en/software) for the [Waveshare ESP32 board](https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board). See the [client control flow](client/README.md) for a high-level overview of the client code.
+The Accent client uses the [PlatformIO Arduino toolchain](https://platformio.org) for the [Waveshare ESP32 board](https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board). See the [client control flow](client/README.md) for a high-level overview of the client code.
 
 To push the client code to the board:
-1. Configure the build environment.
-   - [Board Manager](https://www.arduino.cc/en/guide/cores) URL: `https://dl.espressif.com/dl/package_esp32_index.json`
-   - Board: `ESP32 Dev Module`
-2. [Install](https://www.arduino.cc/en/guide/libraries) the required libraries.
-   - [GxEPD](https://github.com/ZinggJM/GxEPD2) (1.3.0)
-   - [GFX_Root](https://github.com/ZinggJM/GFX_Root) (2.0.0)
-3. Pick one display type in [`Display.h`](client/Display.h).
+1. Configure the [IDE](https://platformio.org/platformio-ide) or [CLI](https://platformio.org/install/cli) with [`platformio.ini`](client/platformio.ini).
+2. Pick one display type via `build_flags` in [`platformio.ini`](client/platformio.ini):
    - [GDEW075Z09](https://www.e-paper-display.com/products_detail/productId=324.html)  (7.5" 640x384)
    - [GDEW075Z08](https://www.e-paper-display.com/products_detail/productId=457.html) (7.5" 800x480)
    - [GDEH075Z90](https://www.e-paper-display.com/products_detail/productId=535.html) (7.5" 880x528)
-4. If you want to point the client to a custom server, change `kBaseUrl` in [`Client.ino`](client/Client.ino).
-5. Verify and upload the sketch.
+3. If you want to point the client to a custom server, change `kBaseUrl` in [`Client.cpp`](client/src/Client.cpp).
+5. Compile and upload with `pio run -t upload`.
 
 Follow the on-screen instructions to connect the client to a Wifi access point. The settings will be preserved across uploads and can be reset manually. See the [setup documentation](https://accent.ink/setup) for details.
 

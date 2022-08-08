@@ -8,16 +8,22 @@
 #include "WifiImage.h"
 
 // Display type GDEW075Z09 (7.5" 640x384)
-// #define DISPLAY_TYPE GxEPD2_750c
-// #define PAGE_HEIGHT GxEPD2_750c::HEIGHT
+#ifdef DISPLAY_GDEW075Z09
+#define DISPLAY_TYPE GxEPD2_750c
+#define PAGE_HEIGHT GxEPD2_750c::HEIGHT
+#endif
 
 // Display type GDEW075Z08 (7.5" 800x480)
+#ifdef DISPLAY_GDEW075Z08
 #define DISPLAY_TYPE GxEPD2_750c_Z08
 #define PAGE_HEIGHT GxEPD2_750c_Z08::HEIGHT
+#endif
 
 // Display type GDEH075Z90 (7.5" 880x528)
-// #define DISPLAY_TYPE GxEPD2_750c_Z90
-// #define PAGE_HEIGHT (GxEPD2_750c_Z90::HEIGHT / 2)
+#ifdef DISPLAY_GDEH075Z90
+#define DISPLAY_TYPE GxEPD2_750c_Z90
+#define PAGE_HEIGHT (GxEPD2_750c_Z90::HEIGHT / 2)
+#endif
 
 // A high-level wrapper around the e-paper display.
 class Display {

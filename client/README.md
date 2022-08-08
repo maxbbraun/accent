@@ -1,6 +1,6 @@
 ## Client
 
-Entry point: [`Client.ino`](Client.ino)
+Entry point: [`Client.cpp`](src/Client.cpp)
 
 ### Regular Flow
 

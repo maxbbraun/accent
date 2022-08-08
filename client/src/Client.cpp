@@ -29,46 +29,6 @@ Display display(kSerialSpeed);
 Network network(kSerialSpeed);
 Power power;
 
-void setup() {
-  Serial.begin(kSerialSpeed);
-
-  // Check if the Wifi reset pin has been connected to GND.
-  pinMode(kWifiResetPin, INPUT_PULLUP);
-  delay(1);  // Wait for pull-up to become active.
-  if (digitalRead(kWifiResetPin) == LOW) {
-    network.ResetWifi();
-  }
-
-  // Connect to Wifi or start the setup flow.
-  if (!network.ConnectWifi()) {
-    display.ShowWifiSetup();
-    network.StartWifiSetupServer();
-    return;
-  }
-
-  // Show the latest image.
-  display.Initialize();
-  if (!downloadImage()) {
-    return;
-  }
-  display.Finalize();
-
-  // Go to sleep until the next refresh.
-  scheduleSleep();
-}
-
-void loop() {
-  if (network.HandleWifiSetupServer()) {
-    // Continue to loop.
-    return;
-  }
-
-  // Falling through means there was an error.
-  Serial.println("Restarting after error");
-  display.ShowError();
-  power.DeepSleep(kRestartDelayMs);
-}
-
 // Streams the image from the server and sends it to the display in chunks.
 bool downloadImage() {
   Serial.println("Downloading image");
@@ -125,4 +85,44 @@ void scheduleSleep() {
   Serial.printf("Sleep server response: %s\n", delay_ms_str.c_str());
   uint64_t delay_ms = strtoull(delay_ms_str.c_str(), nullptr, 10);
   power.DeepSleep(delay_ms);
+}
+
+void setup() {
+  Serial.begin(kSerialSpeed);
+
+  // Check if the Wifi reset pin has been connected to GND.
+  pinMode(kWifiResetPin, INPUT_PULLUP);
+  delay(1);  // Wait for pull-up to become active.
+  if (digitalRead(kWifiResetPin) == LOW) {
+    network.ResetWifi();
+  }
+
+  // Connect to Wifi or start the setup flow.
+  if (!network.ConnectWifi()) {
+    display.ShowWifiSetup();
+    network.StartWifiSetupServer();
+    return;
+  }
+
+  // Show the latest image.
+  display.Initialize();
+  if (!downloadImage()) {
+    return;
+  }
+  display.Finalize();
+
+  // Go to sleep until the next refresh.
+  scheduleSleep();
+}
+
+void loop() {
+  if (network.HandleWifiSetupServer()) {
+    // Continue to loop.
+    return;
+  }
+
+  // Falling through means there was an error.
+  Serial.println("Restarting after error");
+  display.ShowError();
+  power.DeepSleep(kRestartDelayMs);
 }

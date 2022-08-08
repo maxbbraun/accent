@@ -76,7 +76,7 @@ def main(_):
     source_filename = basename(FLAGS.input)
     base_name = source_filename.split(extsep)[0]
 
-    output_path = '../client/%sImage.h' % base_name.title()
+    output_path = '../client/include/%sImage.h' % base_name.title()
     include_guard = '%s_IMAGE_H' % base_name.upper()
     black_image_variable_name = 'k%sImageBlack' % base_name.title()
     red_image_variable_name = 'k%sImageRed' % base_name.title()
