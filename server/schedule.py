@@ -85,6 +85,19 @@ class Schedule(ImageContent):
         except ValueError as e:
             raise ContentError(e)
 
+    def _previous(self, cron, before, user):
+        """Finds the previous time matching the cron expression."""
+
+        try:
+            cron = self._sun.rewrite_cron(cron, before, user, False)
+        except DataError as e:
+            raise ContentError(e)
+
+        try:
+            return croniter(cron, before).get_prev(datetime)
+        except ValueError as e:
+            raise ContentError(e)
+
     def _image(self, kind, user, width, height):
         """Creates an image based on the kind."""
 
@@ -112,22 +125,15 @@ class Schedule(ImageContent):
             time = self._local_time.now(user)
         except DataError as e:
             raise ContentError(e)
-        today = time.replace(hour=0, minute=0, second=0, microsecond=0)
-        while True:
-            entries = [(self._next(entry['start'], today, user), entry)
-                       for entry in user.get('schedule')]
-            if not entries:
-                raise ContentError('Empty schedule')
-            past_entries = list(filter(lambda x: x[0] <= time, entries))
 
-            # Use the most recent past entry.
-            if past_entries:
-                latest_datetime, latest_entry = max(past_entries,
-                                                    key=lambda x: x[0])
-                break
+        entries = [(self._previous(entry['start'], time, user), entry)
+                   for entry in user.get('schedule')]
 
-            # If there were no past entries, try the previous day.
-            today -= timedelta(days=1)
+        if not entries:
+            raise ContentError('Empty schedule')
+
+        # Use the most recent past entry.
+        latest_datetime, latest_entry = max(entries, key=lambda x: x[0])
 
         # Generate the image from the current schedule entry.
         info('Using image from schedule entry: %s (%s, %s)' % (
