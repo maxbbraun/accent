@@ -7,6 +7,7 @@ Disallow: /city
 Disallow: /commute
 Disallow: /calendar
 Disallow: /everyone
+Disallow: /wittgenstein
 Disallow: /gif
 Disallow: /epd
 Disallow: /next

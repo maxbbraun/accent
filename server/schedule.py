@@ -19,6 +19,7 @@ from everyone import Everyone
 from firestore import DataError
 from local_time import LocalTime
 from sun import Sun
+from wittgenstein import Wittgenstein
 
 # The client sleep duration may be early by a few minutes, so we add a buffer
 # to avoid waking up twice in a row.
@@ -60,7 +61,8 @@ class Schedule(ImageContent):
              expression syntax additionally supports the keywords 'sunrise' and
              'sunset' instead of hours and minutes, e.g. 'sunrise * * *'.
     'image': The kind of image to show when this entry is active. Valid kinds
-             are 'artwork', 'city', 'commute', 'calendar', and 'everyone'.
+             are 'artwork', 'city', 'commute', 'calendar', 'everyone', and
+             'wittgenstein'.
     """
 
     def __init__(self, geocoder):
@@ -71,6 +73,7 @@ class Schedule(ImageContent):
         self._commute = Commute(geocoder)
         self._calendar = GoogleCalendar(geocoder)
         self._everyone = Everyone(geocoder)
+        self._wittgenstein = Wittgenstein()
 
     def _next(self, cron, after, user):
         """Finds the next time matching the cron expression."""
@@ -98,6 +101,8 @@ class Schedule(ImageContent):
             content = self._calendar
         elif kind == 'everyone':
             content = self._everyone
+        elif kind == 'wittgenstein':
+            content = self._wittgenstein
         else:
             error('Unknown image kind: %s' % kind)
             return None

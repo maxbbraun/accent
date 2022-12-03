@@ -30,6 +30,7 @@ from response import gif_response
 from response import settings_url
 from response import text_response
 from schedule import Schedule
+from wittgenstein import Wittgenstein
 
 # The URL of the Medium story about Accent.
 INFO_URL = ('https://medium.com/@maxbraun/meet-accent-352cfa95813a'
@@ -57,6 +58,7 @@ city = City(geocoder)
 commute = Commute(geocoder)
 everyone = Everyone(geocoder)
 schedule = Schedule(geocoder)
+wittgenstein = Wittgenstein()
 
 # The Flask app handling requests.
 app = Flask(__name__)
@@ -105,6 +107,15 @@ def everyone_gif(key=None, user=None):
 
     width, height = display_size(request)
     return content_response(everyone, gif_response, user, width, height)
+
+
+@app.route('/wittgenstein')
+@user_auth(image_response=gif_response)
+def wittgenstein_gif(key=None, user=None):
+    """Responds with a GIF version of the wittgenstein image."""
+
+    width, height = display_size(request)
+    return content_response(wittgenstein, gif_response, user, width, height)
 
 
 @app.route('/gif')
