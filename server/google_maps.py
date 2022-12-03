@@ -1,5 +1,6 @@
 from cachetools import cached
 from cachetools import TTLCache
+from epd import epd_palette
 from google.cloud import vision
 from io import BytesIO
 from logging import warning
@@ -120,7 +121,7 @@ class GoogleMaps(object):
 
         # Make a request to the Vision API.
         with BytesIO(image_data) as buffer:
-            request_image = vision.types.Image(content=buffer.getvalue())
+            request_image = vision.Image(content=buffer.getvalue())
             response = self._vision_client.document_text_detection(
                 image=request_image)
 
@@ -171,6 +172,11 @@ class GoogleMaps(object):
         #           box_color=COPYRIGHT_BOX_COLOR,
         #           box_padding=COPYRIGHT_BOX_PADDING,
         #           image=image)
+
+        # Quantize the image now to avoid dithering later.
+        image = image.convert(mode='P', dither=Image.NONE,
+                              palette=epd_palette())
+        image = image.convert('RGB')
 
         return image
 

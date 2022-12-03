@@ -8,8 +8,8 @@ from PIL import Image
 
 from content import ContentError
 from epd import adjust_xy
-from epd import bwr_bytes
-from epd import bwr_image
+from epd import to_epd_bytes
+from epd import to_epd_image
 from epd import DEFAULT_DISPLAY_WIDTH
 from epd import DEFAULT_DISPLAY_HEIGHT
 from graphics import draw_text
@@ -35,7 +35,7 @@ def gif_response(image):
     """Creates a Flask GIF response from the specified image."""
 
     buffer = BytesIO()
-    image = bwr_image(image)
+    image = to_epd_image(image)
     image.save(buffer, format='gif')
     buffer.seek(0)
 
@@ -45,7 +45,7 @@ def gif_response(image):
 def epd_response(image):
     """Creates a Flask e-paper display response from the specified image."""
 
-    data = bwr_bytes(image)
+    data = to_epd_bytes(image)
     buffer = BytesIO(data)
 
     return send_file(buffer, mimetype='application/octet-stream',

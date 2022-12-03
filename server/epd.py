@@ -2,6 +2,7 @@ from numpy import array
 from numpy import packbits
 from numpy import uint8
 from PIL import Image
+from PIL import ImagePalette
 from scipy.cluster.vq import vq
 
 # The default width of the display in pixels.
@@ -18,27 +19,39 @@ BWR_2_BIT = array([[0, 0], [0, 1], [1, 1]], dtype=uint8)
 
 
 def _color_indices(image):
-    """Maps each pixel of an image to 0 (black), 1 (white), or 2 (red)."""
+    """Maps each image pixel to the index of the closest palette color."""
 
+    # Apply dithering, which will not affect already quantized images.
+    image = image.convert(mode='P', palette=epd_palette(),
+                          dither=Image.FLOYDSTEINBERG)
+    image = image.convert('RGB')
     image_data = array(image).reshape((image.width * image.height, 3))
     indices, _ = vq(image_data, BWR_8_BIT)
+
     return indices
 
 
-def bwr_image(image):
-    """Converts the image's colors to the closest black, white, or red."""
+def epd_palette():
+    """Returns the RGB palette used by the display."""
+
+    colors = [tuple(c) for c in BWR_8_BIT]
+    return ImagePalette.ImagePalette(mode='RGB', palette=colors)
+
+
+def to_epd_image(image):
+    """Converts the image's colors to the closest palette color."""
 
     indices = _color_indices(image)
-    bwr_image_data = BWR_8_BIT[indices.reshape((image.height, image.width))]
-    return Image.fromarray(bwr_image_data)
+    epd_image_data = BWR_8_BIT[indices.reshape((image.height, image.width))]
+    return Image.fromarray(epd_image_data)
 
 
-def bwr_bytes(image):
-    """Converts the image to the closest 2-bit black, white, or red bytes."""
+def to_epd_bytes(image):
+    """Converts the image to the closest 2-bit palette color bytes."""
 
     indices = _color_indices(image)
-    bwr_image_data = BWR_2_BIT[indices.reshape((image.height * image.width))]
-    return packbits(bwr_image_data)
+    epd_image_data = BWR_2_BIT[indices.reshape((image.height * image.width))]
+    return packbits(epd_image_data)
 
 
 def adjust_xy(x, y, width, height):
