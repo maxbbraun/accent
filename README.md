@@ -39,7 +39,7 @@ To populate the cross-user data after [setting up](https://firebase.google.com/d
 To test and deploy the server:
 1. Install the [Google Cloud SDK](https://cloud.google.com/sdk/docs/), [create a project](https://cloud.google.com/resource-manager/docs/creating-managing-projects), and [authenticate with a service account](https://cloud.google.com/docs/authentication/getting-started).
 2. Run `cd server && python3 -m venv venv && . venv/bin/activate`.
-3. Run `pip install -r requirements.txt`.
+3. Run `pip install -r requirements.txt` (which also builds the [C extension](server/dithering_extension)).
 4. Run the server locally with `export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project) && python main.py`.
 5. Test the local server with:
    - [/hello/<USER_KEY>](http://localhost:8080/hello/<USER_KEY>) for the settings UI to edit user-specific data.

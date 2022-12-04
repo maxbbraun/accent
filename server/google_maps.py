@@ -175,7 +175,7 @@ class GoogleMaps(object):
 
         # Quantize the image now to avoid dithering later.
         image = image.convert(mode='P', dither=Image.NONE,
-                              palette=epd_palette())
+                              palette=epd_palette(for_pil=True))
         image = image.convert('RGB')
 
         return image
