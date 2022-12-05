@@ -140,7 +140,7 @@ class GoogleCalendar(ImageContent):
 
         return event_counts
 
-    def image(self, user, width, height):
+    def image(self, user, width, height, variant):
         """Generates an image with a calendar view."""
 
         # Show a calendar relative to the current date.

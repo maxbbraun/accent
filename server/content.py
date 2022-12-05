@@ -1,7 +1,7 @@
 class ImageContent(object):
     """An abstract base class for image content."""
 
-    def image(self, user, width, height):
+    def image(self, user, width, height, variant):
         """Generates the current image for the specified user."""
 
         raise NotImplementedError('Missing image content')

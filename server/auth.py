@@ -9,7 +9,7 @@ from re import compile as re_compile
 
 from firestore import Firestore
 from firestore import GoogleCalendarStorage
-from response import display_size
+from response import display_metadata
 from response import forbidden_response
 from response import settings_response
 from response import text_response
@@ -86,9 +86,9 @@ def user_auth(image_response=None, bad_response=forbidden_response):
             if not user:
                 if image_response:
                     # For image requests, start the new user flow.
-                    width, height = display_size(request)
+                    width, height, variant = display_metadata(request)
                     return settings_response(key, image_response, width,
-                                             height)
+                                             height, variant)
                 else:
                     # Otherwise, return a forbidden response.
                     return bad_response()

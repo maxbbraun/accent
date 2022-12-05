@@ -18,13 +18,14 @@ from auth import validate_key
 from city import City
 from commute import Commute
 from content import ContentError
+from epd import DEFAULT_DISPLAY_VARIANT
 from everyone import Everyone
 from firestore import Firestore
 from firestore import GoogleCalendarStorage
 from geocoder import Geocoder
 from google_calendar import GoogleCalendar
 from response import content_response
-from response import display_size
+from response import display_metadata
 from response import epd_response
 from response import gif_response
 from response import settings_url
@@ -69,8 +70,9 @@ app = Flask(__name__)
 def artwork_gif(key=None, user=None):
     """Responds with a GIF version of the artwork image."""
 
-    width, height = display_size(request)
-    return content_response(artwork, gif_response, user, width, height)
+    width, height, variant = display_metadata(request)
+    return content_response(artwork, gif_response, user, width, height,
+                            variant)
 
 
 @app.route('/city')
@@ -78,8 +80,8 @@ def artwork_gif(key=None, user=None):
 def city_gif(key=None, user=None):
     """Responds with a GIF version of the city image."""
 
-    width, height = display_size(request)
-    return content_response(city, gif_response, user, width, height)
+    width, height, variant = display_metadata(request)
+    return content_response(city, gif_response, user, width, height, variant)
 
 
 @app.route('/commute')
@@ -87,8 +89,9 @@ def city_gif(key=None, user=None):
 def commute_gif(key=None, user=None):
     """Responds with a GIF version of the commute image."""
 
-    width, height = display_size(request)
-    return content_response(commute, gif_response, user, width, height)
+    width, height, variant = display_metadata(request)
+    return content_response(commute, gif_response, user, width, height,
+                            variant)
 
 
 @app.route('/calendar')
@@ -96,8 +99,9 @@ def commute_gif(key=None, user=None):
 def calendar_gif(key=None, user=None):
     """Responds with a GIF version of the calendar image."""
 
-    width, height = display_size(request)
-    return content_response(calendar, gif_response, user, width, height)
+    width, height, variant = display_metadata(request)
+    return content_response(calendar, gif_response, user, width, height,
+                            variant)
 
 
 @app.route('/everyone')
@@ -105,8 +109,9 @@ def calendar_gif(key=None, user=None):
 def everyone_gif(key=None, user=None):
     """Responds with a GIF version of the everyone image."""
 
-    width, height = display_size(request)
-    return content_response(everyone, gif_response, user, width, height)
+    width, height, variant = display_metadata(request)
+    return content_response(everyone, gif_response, user, width, height,
+                            variant)
 
 
 @app.route('/wittgenstein')
@@ -114,8 +119,9 @@ def everyone_gif(key=None, user=None):
 def wittgenstein_gif(key=None, user=None):
     """Responds with a GIF version of the wittgenstein image."""
 
-    width, height = display_size(request)
-    return content_response(wittgenstein, gif_response, user, width, height)
+    width, height, variant = display_metadata(request)
+    return content_response(wittgenstein, gif_response, user, width, height,
+                            variant)
 
 
 @app.route('/gif')
@@ -123,8 +129,9 @@ def wittgenstein_gif(key=None, user=None):
 def gif(key=None, user=None):
     """Responds with a GIF version of the scheduled image."""
 
-    width, height = display_size(request)
-    return content_response(schedule, gif_response, user, width, height)
+    width, height, variant = display_metadata(request)
+    return content_response(schedule, gif_response, user, width, height,
+                            variant)
 
 
 @app.route('/epd')
@@ -132,8 +139,9 @@ def gif(key=None, user=None):
 def epd(key=None, user=None):
     """Responds with an e-paper display version of the scheduled image."""
 
-    width, height = display_size(request)
-    return content_response(schedule, epd_response, user, width, height)
+    width, height, variant = display_metadata(request)
+    return content_response(schedule, epd_response, user, width, height,
+                            variant)
 
 
 @app.route('/next')
@@ -234,7 +242,7 @@ def _empty_timeline_response():
     """Responds with an empty schedule timeline image."""
 
     image = schedule.empty_timeline()
-    return gif_response(image)
+    return gif_response(image, 'bwr')
 
 
 @app.route('/timeline')
@@ -243,7 +251,7 @@ def timeline(key=None, user=None):
     """Responds with a schedule timeline image for the user."""
 
     image = schedule.timeline(user)
-    return gif_response(image)
+    return gif_response(image, 'bwr')
 
 
 @app.route('/oauth')

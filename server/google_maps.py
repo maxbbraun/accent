@@ -139,7 +139,7 @@ class GoogleMaps(object):
     # NOTE: Unfortunately, caching is not allowed by the Google Maps Platform
     #       Terms of Service: https://cloud.google.com/maps-platform/terms
     # @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
-    def map_image(self, width, height, polyline=None, markers=None,
+    def map_image(self, width, height, variant, polyline=None, markers=None,
                   marker_icon=None):
         """Creates a map image with optional route or markers."""
 
@@ -173,10 +173,11 @@ class GoogleMaps(object):
         #           box_padding=COPYRIGHT_BOX_PADDING,
         #           image=image)
 
-        # Quantize the image now to avoid dithering later.
-        image = image.convert(mode='P', dither=Image.NONE,
-                              palette=epd_palette(for_pil=True))
-        image = image.convert('RGB')
+        # For three colors, quantize the image now to avoid dithering later.
+        if variant == 'bwr':
+            image = image.convert(mode='P', dither=Image.NONE,
+                                  palette=epd_palette(variant, for_pil=True))
+            image = image.convert('RGB')
 
         return image
 

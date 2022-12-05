@@ -13,11 +13,28 @@ DEFAULT_DISPLAY_WIDTH = 640
 # The default height of the display in pixels.
 DEFAULT_DISPLAY_HEIGHT = 384
 
+# The variants of supported displays.
+DISPLAY_VARIANTS = ['bwr', '7color']
+
+# The default display variant.
+DEFAULT_DISPLAY_VARIANT = 'bwr'
+
 # Black, white, and red as an 8-bit RGB array.
-BWR_8_BIT = array([[0, 0, 0], [255, 255, 255], [255, 0, 0]], dtype=uint8)
+PALETTE_BWR = array([[0, 0, 0], [255, 255, 255], [255, 0, 0]], dtype=uint8)
 
 # Black, white and red as a 2-bit index array.
-BWR_2_BIT = array([[0, 0], [0, 1], [1, 1]], dtype=uint8)
+ENCODING_BWR = array([[0, 0], [0, 1], [1, 1]], dtype=uint8)
+
+# 7-color (black, white, green, blue, red, yellow, orange) as an 8-bit RGB
+# array.
+PALETTE_7COLOR = array([[16, 16, 16], [239, 239, 239], [27, 120, 27],
+                        [54, 43, 162], [180, 21, 21], [224, 212, 13],
+                        [193, 103, 13]], dtype=uint8)
+
+# 7-color (black, white, green, blue, red, yellow, orange) as a 3-bit index
+# array.
+ENCODING_7COLOR = array([[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], [1, 0, 0],
+                         [1, 0, 1], [1, 1, 0]], dtype=uint8)
 
 
 def _dither(image, palette):
@@ -30,11 +47,11 @@ def _dither(image, palette):
     return Image.fromarray(pixels)
 
 
-def _color_indices(image):
+def _color_indices(image, variant):
     """Maps each image pixel to the index of the closest palette color."""
 
     # Apply dithering, which will not affect already quantized images.
-    palette = epd_palette()
+    palette = epd_palette(variant)
     image = _dither(image, palette)
     image_data = array(image).reshape((image.width * image.height, 3))
     indices, _ = vq(image_data, palette)
@@ -42,10 +59,15 @@ def _color_indices(image):
     return indices
 
 
-def epd_palette(for_pil=False):
+def epd_palette(variant, for_pil=False):
     """Returns the RGB palette used by the display."""
 
-    palette = BWR_8_BIT
+    if variant == 'bwr':
+        palette = PALETTE_BWR
+    elif variant == '7color':
+        palette = PALETTE_7COLOR
+    else:
+        raise ValueError('Unsupported display variant: %s' % variant)
 
     if not for_pil:
         return palette
@@ -55,26 +77,31 @@ def epd_palette(for_pil=False):
     return ImagePalette.ImagePalette(mode='RGB', palette=palette_data)
 
 
-def epd_encoding():
+def epd_encoding(variant):
     """Returns the color encoding used to send data to the display."""
 
-    return BWR_2_BIT
+    if variant == 'bwr':
+        return ENCODING_BWR
+    elif variant == '7color':
+        return ENCODING_7COLOR
+    else:
+        raise ValueError('Unsupported display variant: %s' % variant)
 
 
-def to_epd_image(image):
+def to_epd_image(image, variant):
     """Converts the image's colors to the closest palette color."""
 
-    indices = _color_indices(image)
-    palette = epd_palette()
+    indices = _color_indices(image, variant)
+    palette = epd_palette(variant)
     epd_image_data = palette[indices.reshape((image.height, image.width))]
     return Image.fromarray(epd_image_data)
 
 
-def to_epd_bytes(image):
+def to_epd_bytes(image, variant):
     """Converts the image to the closest 2-bit palette color bytes."""
 
-    indices = _color_indices(image)
-    encoding = epd_encoding()
+    indices = _color_indices(image, variant)
+    encoding = epd_encoding(variant)
     epd_image_data = encoding[indices.reshape((image.height * image.width))]
     return packbits(epd_image_data)
 

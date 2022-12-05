@@ -46,11 +46,11 @@ class Everyone(ImageContent):
 
         return markers
 
-    def image(self, user, width, height):
+    def image(self, user, width, height, variant):
         """Generates a map with user locations."""
 
         try:
-            return self._google_maps.map_image(width, height,
+            return self._google_maps.map_image(width, height, variant,
                                                markers=self._markers(),
                                                marker_icon=MARKER_ICON_URL)
         except DataError as e:

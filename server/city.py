@@ -1026,7 +1026,7 @@ class City(ImageContent):
             # Remember the drawn file for the else condition.
             drawn_files.append(layer['file'])
 
-    def image(self, user, width, height):
+    def image(self, user, width, height, variant):
         """Generates the current city image."""
 
         image = Image.new(mode='RGB', size=(width, height))

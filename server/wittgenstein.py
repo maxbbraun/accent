@@ -16,7 +16,7 @@ PREVIEW_IMAGE_URL = 'https://wittgenstein.app/preview/%s.png'
 class Wittgenstein(ImageContent):
     """A random proposition from Wittgenstein 2022."""
 
-    def image(self, _, width, height):
+    def image(self, user, width, height, variant):
         """Picks a random proposition preview image."""
 
         try:
