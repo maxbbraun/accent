@@ -16,7 +16,7 @@ DEFAULT_DISPLAY_HEIGHT = 384
 # Black, white, and red as an 8-bit RGB array.
 BWR_8_BIT = array([[0, 0, 0], [255, 255, 255], [255, 0, 0]], dtype=uint8)
 
-# Black, white and red as a 2-bit BWR array.
+# Black, white and red as a 2-bit index array.
 BWR_2_BIT = array([[0, 0], [0, 1], [1, 1]], dtype=uint8)
 
 
@@ -25,7 +25,6 @@ def _dither(image, palette):
 
     # Call the C extension to iterate over all image pixels efficiently.
     pixels = array(image)
-    palette = epd_palette()
     dither(pixels, palette)
 
     return Image.fromarray(pixels)
@@ -35,9 +34,10 @@ def _color_indices(image):
     """Maps each image pixel to the index of the closest palette color."""
 
     # Apply dithering, which will not affect already quantized images.
-    image = _dither(image, BWR_8_BIT)
+    palette = epd_palette()
+    image = _dither(image, palette)
     image_data = array(image).reshape((image.width * image.height, 3))
-    indices, _ = vq(image_data, BWR_8_BIT)
+    indices, _ = vq(image_data, palette)
 
     return indices
 
@@ -55,11 +55,18 @@ def epd_palette(for_pil=False):
     return ImagePalette.ImagePalette(mode='RGB', palette=palette_data)
 
 
+def epd_encoding():
+    """Returns the color encoding used to send data to the display."""
+
+    return BWR_2_BIT
+
+
 def to_epd_image(image):
     """Converts the image's colors to the closest palette color."""
 
     indices = _color_indices(image)
-    epd_image_data = BWR_8_BIT[indices.reshape((image.height, image.width))]
+    palette = epd_palette()
+    epd_image_data = palette[indices.reshape((image.height, image.width))]
     return Image.fromarray(epd_image_data)
 
 
@@ -67,7 +74,8 @@ def to_epd_bytes(image):
     """Converts the image to the closest 2-bit palette color bytes."""
 
     indices = _color_indices(image)
-    epd_image_data = BWR_2_BIT[indices.reshape((image.height * image.width))]
+    encoding = epd_encoding()
+    epd_image_data = encoding[indices.reshape((image.height * image.width))]
     return packbits(epd_image_data)
 
 
