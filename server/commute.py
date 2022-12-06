@@ -1,9 +1,11 @@
-from content import ContentError
 from firestore import DataError
+from PIL import Image
+
+from content import ContentError
+from content import ImageContent
 from google_maps import GoogleMaps
 from graphics import draw_text
 from graphics import SUBVARIO_CONDENSED_MEDIUM
-from content import ImageContent
 
 # The color of the directions text.
 DIRECTIONS_TEXT_COLOR = (255, 255, 255)
@@ -73,5 +75,8 @@ class Commute(ImageContent):
                   border_color=DIRECTIONS_BORDER_COLOR,
                   border_width=DIRECTIONS_BORDER_WIDTH,
                   image=image)
+
+        # The map looks better without dithering.
+        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
 
         return image

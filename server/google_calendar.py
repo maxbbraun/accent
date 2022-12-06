@@ -211,4 +211,7 @@ class GoogleCalendar(ImageContent):
                                   y + DOT_OFFSET - dot.width // 2]
                         draw.bitmap(dot_xy, dot, event_color)
 
+        # The calendar image is already quantized (no dithering).
+        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
+
         return image

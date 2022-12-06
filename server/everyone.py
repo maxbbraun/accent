@@ -6,6 +6,7 @@ from content import ImageContent
 from firestore import DataError
 from firestore import Firestore
 from google_maps import GoogleMaps
+from PIL import Image
 
 # The URL of the image used as a marker icon.
 MARKER_ICON_URL = 'http://accent.ink/marker.png'
@@ -50,8 +51,13 @@ class Everyone(ImageContent):
         """Generates a map with user locations."""
 
         try:
-            return self._google_maps.map_image(width, height, variant,
-                                               markers=self._markers(),
-                                               marker_icon=MARKER_ICON_URL)
+            image = self._google_maps.map_image(width, height, variant,
+                                                markers=self._markers(),
+                                                marker_icon=MARKER_ICON_URL)
+
+            # The map looks better without dithering.
+            image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
+
+            return image
         except DataError as e:
             raise ContentError(e)

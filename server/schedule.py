@@ -202,12 +202,15 @@ class Schedule(ImageContent):
                        (TIMELINE_DRAW_WIDTH, y + TIMELINE_LINE_DASH - 1)],
                       fill=TIMELINE_FOREGROUND, width=TIMELINE_LINE_WIDTH)
 
+        # The calendar image is already quantized (no dithering).
+        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
+
         return image
 
     def timeline(self, user):
         """Generates a timeline image of the schedule for settings."""
 
-        image = self.empty_timeline()
+        image = self.empty_timeline().convert('RGB')
         draw = Draw(image)
 
         # Find the user or return the empty timeline.
@@ -265,5 +268,8 @@ class Schedule(ImageContent):
 
             # Jump to the next entry.
             time = next_datetime
+
+        # The timeline image is already quantized (no dithering).
+        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
 
         return image

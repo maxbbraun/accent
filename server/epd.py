@@ -1,10 +1,8 @@
 from dithering import dither
 from numpy import array
-from numpy import frombuffer
 from numpy import packbits
 from numpy import uint8
 from PIL import Image
-from PIL import ImagePalette
 from scipy.cluster.vq import vq
 
 # The default width of the display in pixels.
@@ -41,6 +39,7 @@ def _dither(image, palette):
     """Dithers the image using the Floyd-Steinberg algorithm."""
 
     # Call the C extension to iterate over all image pixels efficiently.
+    image = image.convert('RGB')
     pixels = array(image)
     dither(pixels, palette)
 
@@ -50,31 +49,28 @@ def _dither(image, palette):
 def _color_indices(image, variant):
     """Maps each image pixel to the index of the closest palette color."""
 
-    # Apply dithering, which will not affect already quantized images.
+    # Apply dithering unless the image is already quantized.
     palette = epd_palette(variant)
-    image = _dither(image, palette)
+    if image.mode not in ('1', 'L', 'P'):
+        image = _dither(image, palette)
+
+    # Map each pixel to the closest palette color.
+    image = image.convert('RGB')
     image_data = array(image).reshape((image.width * image.height, 3))
     indices, _ = vq(image_data, palette)
 
     return indices
 
 
-def epd_palette(variant, for_pil=False):
+def epd_palette(variant):
     """Returns the RGB palette used by the display."""
 
     if variant == 'bwr':
-        palette = PALETTE_BWR
+        return PALETTE_BWR
     elif variant == '7color':
-        palette = PALETTE_7COLOR
+        return PALETTE_7COLOR
     else:
         raise ValueError('Unsupported display variant: %s' % variant)
-
-    if not for_pil:
-        return palette
-
-    # Convert the palette to the PIL format.
-    palette_data = list(palette.flatten())
-    return ImagePalette.ImagePalette(mode='RGB', palette=palette_data)
 
 
 def epd_encoding(variant):

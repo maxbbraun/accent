@@ -1,6 +1,5 @@
 from cachetools import cached
 from cachetools import TTLCache
-from epd import epd_palette
 from google.cloud import vision
 from io import BytesIO
 from logging import warning
@@ -172,12 +171,6 @@ class GoogleMaps(object):
         #           box_color=COPYRIGHT_BOX_COLOR,
         #           box_padding=COPYRIGHT_BOX_PADDING,
         #           image=image)
-
-        # For three colors, quantize the image now to avoid dithering later.
-        if variant == 'bwr':
-            image = image.convert(mode='P', dither=Image.NONE,
-                                  palette=epd_palette(variant, for_pil=True))
-            image = image.convert('RGB')
 
         return image
 

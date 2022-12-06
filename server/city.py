@@ -1032,6 +1032,10 @@ class City(ImageContent):
         image = Image.new(mode='RGB', size=(width, height))
         try:
             self._draw_layers(image, self._layers(), user, width, height)
-            return image
         except DataError as e:
             raise ContentError(e)
+
+        # The city image is already quantized (no dithering).
+        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
+
+        return image

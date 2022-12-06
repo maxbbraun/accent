@@ -32,4 +32,7 @@ class Artwork(ImageContent):
         y = randint(0, max(0, image.height - height))
         image = image.crop((x, y, x + width, y + height))
 
+        # The source artwork is already quantized (no dithering).
+        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
+
         return image
