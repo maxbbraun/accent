@@ -29,10 +29,11 @@ PALETTE_7COLOR = array([[16, 16, 16], [239, 239, 239], [27, 120, 27],
                         [54, 43, 162], [180, 21, 21], [224, 212, 13],
                         [193, 103, 13]], dtype=uint8)
 
-# 7-color (black, white, green, blue, red, yellow, orange) as a 3-bit index
+# 7-color (black, white, green, blue, red, yellow, orange) as a 4-bit index
 # array.
-ENCODING_7COLOR = array([[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], [1, 0, 0],
-                         [1, 0, 1], [1, 1, 0]], dtype=uint8)
+ENCODING_7COLOR = array([[0, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0],
+                         [0, 0, 1, 1], [0, 1, 0, 0], [0, 1, 0, 1],
+                         [0, 1, 1, 0]], dtype=uint8)
 
 
 def _dither(image, palette):
