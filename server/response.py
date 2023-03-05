@@ -87,7 +87,7 @@ def settings_response(key, image_func, width, height, variant):
     image.paste(computer, box=adjust_xy(*COMPUTER_XY, width, height),
                 mask=computer)
 
-    return image_func(image)
+    return image_func(image, variant)
 
 
 def content_response(content, image_response, user, width, height, variant):
