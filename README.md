@@ -11,10 +11,11 @@ The Accent client uses the [PlatformIO Arduino toolchain](https://platformio.org
 To push the client code to the board:
 1. Configure the [IDE](https://platformio.org/platformio-ide) or [CLI](https://platformio.org/install/cli) with [`platformio.ini`](client/platformio.ini).
 2. Pick one display type via `build_flags` in [`platformio.ini`](client/platformio.ini):
-   - [GDEW075Z09](https://www.e-paper-display.com/products_detail/productId=324.html)  (7.5" 640x384)
-   - [GDEW075Z08](https://www.e-paper-display.com/products_detail/productId=457.html) (7.5" 800x480)
-   - [GDEH075Z90](https://www.good-display.com/product/344.html) (7.5" 880x528)
-   - [GDEY1248Z51](https://www.good-display.com/product/422.html) (12.48" 1304x984, requires [DESPI-C1248](https://www.e-paper-display.com/products_detail/productId=418.html))
+   - [GDEW075Z09](https://www.e-paper-display.com/products_detail/productId=324.html)  (7.5" 640x384 3-color)
+   - [GDEW075Z08](https://www.e-paper-display.com/products_detail/productId=457.html) (7.5" 800x480 3-color)
+   - [GDEH075Z90](https://www.good-display.com/product/344.html) (7.5" 880x528 3-color)
+   - [GDEY1248Z51](https://www.good-display.com/product/422.html) (12.48" 1304x984 3-color, requires [DESPI-C1248](https://www.e-paper-display.com/products_detail/productId=418.html) adapter)
+   - [GDEY073D46](https://www.good-display.com/product/442.html) (7.3" 800x480 7-color, comes with DESPI-C73 adapter)
 3. If you want to point the client to a custom server, change `kBaseUrl` in [`Client.cpp`](client/src/Client.cpp).
 5. Compile and upload with `pio run -t upload`.
 
@@ -44,7 +45,7 @@ To test and deploy the server:
 5. Test the local server with:
    - [/hello/<USER_KEY>](http://localhost:8080/hello/<USER_KEY>) for the settings UI to edit user-specific data.
    - [/next?key=<USER_KEY>](http://localhost:8080/next?key=<USER_KEY>) for the time in milliseconds until the next schedule entry.
-   - [/epd?key=<USER_KEY>](http://localhost:8080/epd?key=<USER_KEY>) for the currently scheduled 2-bit image used by the e-paper display.
+   - [/epd?key=<USER_KEY>](http://localhost:8080/epd?key=<USER_KEY>) for the currently scheduled client image used by the e-paper display.
    - [/gif?key=<USER_KEY>](http://localhost:8080/gif?key=<USER_KEY>) for a GIF version of the currently scheduled image for testing.
    - [/artwork?key=<USER_KEY>](http://localhost:8080/artwork?key=<USER_KEY>) to bypass the schedule and get the artwork image directly.
    - [/city?key=<USER_KEY>](http://localhost:8080/city?key=<USER_KEY>) to bypass the schedule and get the city image directly.

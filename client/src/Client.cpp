@@ -37,7 +37,8 @@ bool downloadImage() {
   // Request the current image from the server.
   if (!network.HttpGet(&http, kEpdEndpoint,
                        {"width", String(display.Width()),
-                        "height", String(display.Height())})) {
+                        "height", String(display.Height()),
+                        "variant", display.Variant()})) {
     return false;
   }
 
