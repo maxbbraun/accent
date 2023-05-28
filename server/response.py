@@ -41,7 +41,7 @@ def gif_response(image, variant):
     image.save(buffer, format='gif')
     buffer.seek(0)
 
-    return send_file(buffer, mimetype='image/gif', cache_timeout=0)
+    return send_file(buffer, mimetype='image/gif', max_age=0)
 
 
 def epd_response(image, variant):
@@ -50,8 +50,7 @@ def epd_response(image, variant):
     data = to_epd_bytes(image, variant)
     buffer = BytesIO(data)
 
-    return send_file(buffer, mimetype='application/octet-stream',
-                     cache_timeout=0)
+    return send_file(buffer, mimetype='application/octet-stream', max_age=0)
 
 
 def text_response(text):
