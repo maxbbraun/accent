@@ -43,7 +43,7 @@ def draw_text(text, font_spec, text_color, xy=None, anchor=None,
         if character in width_overrides.keys():
             character_width = width_overrides[character]
         else:
-            character_width, _ = draw.textsize(character, font)
+            character_width = draw.textlength(character, font)
         character_widths.append(character_width)
     text_width = sum(character_widths)
 
