@@ -63,6 +63,8 @@ HIGHLIGHT_COLOR = (255, 0, 0)
 # The maximum number of events to show.
 MAX_EVENTS = 3
 
+# Indexes of days that a week can begin on.
+WEEK_DAYS = {'monday': 0, 'friday': 4, 'saturday': 5, 'sunday': 6}
 
 class GoogleCalendar(ImageContent):
     """A monthly calendar backed by the Google Calendar API."""
@@ -158,7 +160,11 @@ class GoogleCalendar(ImageContent):
         draw = Draw(image)
 
         # Get this month's calendar.
-        calendar = Calendar(firstweekday=SUNDAY)
+        try:
+            firstweekday = WEEK_DAYS[user.get('first_week_day')]
+        except KeyError:
+            firstweekday = SUNDAY
+        calendar = Calendar(firstweekday=firstweekday)
         weeks = calendar.monthdayscalendar(time.year, time.month)
 
         # Determine the spacing of the days in the image.
