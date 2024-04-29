@@ -11,7 +11,7 @@ from firestore import Firestore
 
 # The endpoint of the OpenWeather One Call API.
 # Spec: https://openweathermap.org/api/one-call-api
-OPEN_WEATHER_URL = ('https://api.openweathermap.org/data/2.5/onecall'
+OPEN_WEATHER_URL = ('https://api.openweathermap.org/data/3.0/onecall'
                     '?lat=%f&lon=%f&exclude=minutely,hourly,daily&appid=%s')
 
 # The maximum number of weather icons kept in the cache.
