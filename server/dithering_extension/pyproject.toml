@@ -1,9 +1,9 @@
 [build-system]
-requires = ['setuptools==69.0.3', 'wheel==0.42.0', 'numpy==1.26.3']
+requires = ['setuptools==70.0.0', 'wheel==0.43.0', 'numpy==1.26.4']
 build-backend = 'setuptools.build_meta'
 
 [project]
 name = 'dithering'
 version = '1.0.0'
 description = 'Floyd-Steinberg dithering written in C'
-dependencies = ['numpy==1.26.3']
+dependencies = ['numpy==1.26.4']
