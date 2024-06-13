@@ -232,6 +232,7 @@ def hello_post(key):
         'home': form['home'],
         'work': form['work'],
         'travel_mode': form['travel_mode'],
+        'first_week_day': form['first_week_day'],
         'schedule': schedule})
 
     # Redirect back to the GET version.

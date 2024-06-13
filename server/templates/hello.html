@@ -61,6 +61,14 @@
                 <option value="walking"{% if travel_mode == 'walking' %} selected{% endif %}>walking</option>
                 <option value="bicycling"{% if travel_mode == 'bicycling' %} selected{% endif %}>bicycling</option>
                 <option value="transit"{% if travel_mode == 'transit' %} selected{% endif %}>transit</option>
+            </select>
+            <label for="first_week_day">Week starts on:</label>
+            {% set first_week_day = user.get('first_week_day') if user and 'first_week_day' in user._data else 'sunday' %}
+            <select name="first_week_day">
+                <option value="monday"{% if first_week_day == 'monday' %} selected{% endif %}>Monday</option>
+                <option value="friday"{% if first_week_day == 'friday' %} selected{% endif %}>Friday</option>
+                <option value="saturday"{% if first_week_day == 'saturday' %} selected{% endif %}>Saturday</option>
+                <option value="sunday"{% if first_week_day == 'sunday' %} selected{% endif %}>Sunday</option>
             </select><br />
             <i>Schedule start times use the <a href="https://en.wikipedia.org/wiki/Cron#CRON_expression" target="_blank">cron expression</a> format, plus "sunrise" or "sunset" in place of hours and minutes.</i><br /><br />
             {% set schedule_name_placeholder = 'City Sunrise' %}
