@@ -18,7 +18,6 @@ from auth import validate_key
 from city import City
 from commute import Commute
 from content import ContentError
-from epd import DEFAULT_DISPLAY_VARIANT
 from everyone import Everyone
 from firestore import Firestore
 from firestore import GoogleCalendarStorage
