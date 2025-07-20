@@ -216,7 +216,7 @@ class Schedule(ImageContent):
         # Find the user or return the empty timeline.
         try:
             now = self._local_time.now(user)
-        except DataError as e:
+        except DataError:
             return image
 
         # Start the timeline with the most recent beginning of the week.
