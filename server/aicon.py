@@ -5,6 +5,8 @@ from PIL import Image
 from io import BytesIO
 import logging
 
+# The prompt for generating images.
+IMAGE_PROMPT = "Eastern Christian Orthodox icon but make it slightly AI"
 
 class AIcon(ImageContent):
     """AI-generated Eastern Christian Orthodox icons."""
@@ -12,28 +14,18 @@ class AIcon(ImageContent):
     def __init__(self):
         self._firestore = Firestore()
 
-    def _get_api_key(self):
-        """Retrieves the Gemini API key from Firestore."""
-        try:
-            return self._firestore._api_key('gemini')
-        except Exception as e:
-            raise ContentError(f"Failed to retrieve Gemini API key: {e}")
-
     def image(self, user, width, height, variant):
-        """Generates an AI Orthodox icon using Imagen 4 Ultra."""
+        """Generates the icon image"""
 
         try:
             # Configure the API
-            api_key = self._get_api_key()
+            api_key = self._firestore.gemini_api_key()
             client = genai.Client(api_key=api_key)
-
-            # The prompt for generating Orthodox-style AI icons
-            prompt = "Eastern Christian Orthodox icon but make it slightly AI"
 
             # Generate the image with Imagen 4 Ultra and safety settings
             response = client.models.generate_images(
                 model='imagen-4.0-ultra-generate-preview-06-06',
-                prompt=prompt,
+                prompt=IMAGE_PROMPT,
                 config={
                     'number_of_images': 1,
                     'person_generation': 'ALLOW_ALL',
