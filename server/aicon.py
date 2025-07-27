@@ -26,21 +26,18 @@ class AIcon(ImageContent):
             # Calculate the appropriate aspect ratio based on requested dimensions
             aspect_ratio = width / height
             
-            # Map to closest supported aspect ratio options for Imagen 4 Ultra
-            # Available options: 1:1, 3:4, 4:3, 9:16, 16:9
-            if abs(aspect_ratio - 1.0) < 0.1:  # Square (1:1)
-                config_aspect_ratio = "1:1"
-            elif abs(aspect_ratio - 0.75) < 0.1:  # Portrait 3:4
-                config_aspect_ratio = "3:4"
-            elif abs(aspect_ratio - 1.33) < 0.1:  # Landscape 4:3
-                config_aspect_ratio = "4:3"
-            elif abs(aspect_ratio - 0.56) < 0.1:  # Portrait 9:16
-                config_aspect_ratio = "9:16"
-            elif abs(aspect_ratio - 1.78) < 0.1:  # Landscape 16:9
-                config_aspect_ratio = "16:9"
-            else:
-                # Default to square if no close match
-                config_aspect_ratio = "1:1"
+            # Map of supported aspect ratios for Imagen 4 Ultra
+            aspect_ratio_map = {
+                1.0: "1:1",      # Square (1024x1024)
+                0.75: "3:4",     # Portrait (896x1280)
+                1.33: "4:3",     # Landscape (1280x896)
+                0.56: "9:16",    # Portrait (768x1408)
+                1.78: "16:9",    # Landscape (1408x768)
+            }
+            
+            # Find the closest supported aspect ratio
+            closest_ratio = min(aspect_ratio_map.keys(), key=lambda x: abs(x - aspect_ratio))
+            config_aspect_ratio = aspect_ratio_map[closest_ratio]
 
             # Generate the image using GenerateImagesConfig class
             config = GenerateImagesConfig(
