@@ -9,6 +9,15 @@ import logging
 # The prompt for generating images.
 IMAGE_PROMPT = "Eastern Christian Orthodox icon but make it slightly AI"
 
+# Map of supported aspect ratios for Imagen 4 Ultra
+ASPECT_RATIO_MAP = {
+    1.0: "1:1",      # Square (1024x1024)
+    0.75: "3:4",     # Portrait (896x1280)
+    1.33: "4:3",     # Landscape (1280x896)
+    0.56: "9:16",    # Portrait (768x1408)
+    1.78: "16:9",    # Landscape (1408x768)
+}
+
 class AIcon(ImageContent):
     """AI-generated Eastern Christian Orthodox icons using Imagen 4 Ultra."""
 
@@ -26,18 +35,9 @@ class AIcon(ImageContent):
             # Calculate the appropriate aspect ratio based on requested dimensions
             aspect_ratio = width / height
             
-            # Map of supported aspect ratios for Imagen 4 Ultra
-            aspect_ratio_map = {
-                1.0: "1:1",      # Square (1024x1024)
-                0.75: "3:4",     # Portrait (896x1280)
-                1.33: "4:3",     # Landscape (1280x896)
-                0.56: "9:16",    # Portrait (768x1408)
-                1.78: "16:9",    # Landscape (1408x768)
-            }
-            
             # Find the closest supported aspect ratio
-            closest_ratio = min(aspect_ratio_map.keys(), key=lambda x: abs(x - aspect_ratio))
-            config_aspect_ratio = aspect_ratio_map[closest_ratio]
+            closest_ratio = min(ASPECT_RATIO_MAP.keys(), key=lambda x: abs(x - aspect_ratio))
+            config_aspect_ratio = ASPECT_RATIO_MAP[closest_ratio]
 
             # Generate the image using GenerateImagesConfig class
             config = GenerateImagesConfig(
