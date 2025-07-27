@@ -32,10 +32,20 @@ class AIcon(ImageContent):
             api_key = self._firestore.gemini_api_key()
             client = genai.Client(api_key=api_key)
 
-            # Find the appropriate aspect ratio based on the image dimensions.
-            aspect_ratio = width / height
-            closest_ratio = min(ASPECT_RATIO_MAP.keys(), key=lambda x: abs(x - aspect_ratio))
-            config_aspect_ratio = ASPECT_RATIO_MAP[closest_ratio]
+            # Find the aspect ratio that minimizes excess crop
+            target_ratio = width / height
+            
+            def calculate_crop_ratio(supported_ratio):
+                """Calculate how much excess area we'd need to crop"""
+                if supported_ratio > target_ratio:
+                    # Generated image is wider than target, crop sides
+                    return supported_ratio / target_ratio
+                else:
+                    # Generated image is taller than target, crop top/bottom
+                    return target_ratio / supported_ratio
+            
+            best_ratio = min(ASPECT_RATIO_MAP.keys(), key=calculate_crop_ratio)
+            config_aspect_ratio = ASPECT_RATIO_MAP[best_ratio]
 
             # Generate the image using GenerateImagesConfig class
             config = GenerateImagesConfig(
@@ -64,16 +74,20 @@ class AIcon(ImageContent):
             logging.error(f"Failed to generate AIcon: {e}")
             raise ContentError(f"Image generation failed: {e}")
 
-        # Resize the image to fit the requested dimensions
-        scale = min(width / image.width, height / image.height)
+        # Center crop the image to the requested dimensions
+        # Scale to fill the target dimensions (crop excess)
+        scale = max(width / image.width, height / image.height)
         scaled_width = int(image.width * scale)
         scaled_height = int(image.height * scale)
         image = image.resize((scaled_width, scaled_height), resample=Image.LANCZOS)
 
-        # Create a canvas and center the image
-        canvas = Image.new(mode='RGB', size=(width, height), color='white')
-        x = (width - scaled_width) // 2
-        y = (height - scaled_height) // 2
-        canvas.paste(image, (x, y))
+        # Calculate center crop coordinates
+        left = (scaled_width - width) // 2
+        top = (scaled_height - height) // 2
+        right = left + width
+        bottom = top + height
 
-        return canvas
+        # Crop from center to exact target dimensions
+        cropped_image = image.crop((left, top, right, bottom))
+
+        return cropped_image
