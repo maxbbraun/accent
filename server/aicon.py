@@ -9,7 +9,7 @@ import logging
 # The prompt for generating images.
 IMAGE_PROMPT = "Eastern Christian Orthodox icon but make it slightly AI"
 
-# Map of supported aspect ratios for Imagen 4 Ultra
+# Map of supported aspect ratios for Imagen 4 Ultra.
 ASPECT_RATIO_MAP = {
     1.0: "1:1",      # Square (1024x1024)
     0.75: "3:4",     # Portrait (896x1280)
@@ -19,7 +19,7 @@ ASPECT_RATIO_MAP = {
 }
 
 class AIcon(ImageContent):
-    """AI-generated Eastern Christian Orthodox icons using Imagen 4 Ultra."""
+    """AI-generated Eastern Christian Orthodox icons."""
 
     def __init__(self):
         self._firestore = Firestore()
@@ -28,14 +28,12 @@ class AIcon(ImageContent):
         """Generates the icon image"""
 
         try:
-            # Configure the API
+            # Configure the API.
             api_key = self._firestore.gemini_api_key()
             client = genai.Client(api_key=api_key)
 
-            # Calculate the appropriate aspect ratio based on requested dimensions
+            # Find the appropriate aspect ratio based on the image dimensions.
             aspect_ratio = width / height
-            
-            # Find the closest supported aspect ratio
             closest_ratio = min(ASPECT_RATIO_MAP.keys(), key=lambda x: abs(x - aspect_ratio))
             config_aspect_ratio = ASPECT_RATIO_MAP[closest_ratio]
 
