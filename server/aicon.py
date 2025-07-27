@@ -9,13 +9,13 @@ import logging
 # The prompt for generating images.
 IMAGE_PROMPT = "Eastern Christian Orthodox icon but make it slightly AI"
 
-# Map of supported aspect ratios for Imagen 4 Ultra.
+# Map of supported aspect ratios of the image generation API.
 ASPECT_RATIO_MAP = {
-    1.0: "1:1",      # Square (1024x1024)
-    0.75: "3:4",     # Portrait (896x1280)
-    1.33: "4:3",     # Landscape (1280x896)
-    0.56: "9:16",    # Portrait (768x1408)
-    1.78: "16:9",    # Landscape (1408x768)
+    1.0: "1:1",
+    0.75: "3:4",
+    1.33: "4:3",
+    0.56: "9:16",
+    1.78: "16:9",
 }
 
 class AIcon(ImageContent):
@@ -25,25 +25,22 @@ class AIcon(ImageContent):
         self._firestore = Firestore()
 
     def image(self, user, width, height, variant):
-        """Generates the icon image"""
+        """Generates the AI icon image."""
 
         try:
             # Configure the API.
             api_key = self._firestore.gemini_api_key()
             client = genai.Client(api_key=api_key)
 
-            # Find the aspect ratio that minimizes excess crop
-            target_ratio = width / height
-            
+            # Find the aspect ratio that minimizes excess crop.
             def calculate_crop_ratio(supported_ratio):
-                """Calculate how much excess area we'd need to crop"""
+                target_ratio = width / height
                 if supported_ratio > target_ratio:
                     # Generated image is wider than target, crop sides
                     return supported_ratio / target_ratio
                 else:
                     # Generated image is taller than target, crop top/bottom
                     return target_ratio / supported_ratio
-            
             best_ratio = min(ASPECT_RATIO_MAP.keys(), key=calculate_crop_ratio)
             config_aspect_ratio = ASPECT_RATIO_MAP[best_ratio]
 
