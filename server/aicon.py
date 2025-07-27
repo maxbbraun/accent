@@ -7,15 +7,15 @@ from io import BytesIO
 import logging
 
 # The prompt for generating images.
-IMAGE_PROMPT = "Eastern Christian Orthodox icon but make it slightly AI"
+IMAGE_PROMPT = 'Eastern Christian Orthodox icon but make it slightly AI'
 
-# Supported aspect ratios for Imagen 4 Ultra.
+# Supported aspect ratios for the image generation API.
 ASPECT_RATIOS = [
-    (1.0, "1:1"),
-    (0.75, "3:4"),
-    (4/3, "4:3"),
-    (9/16, "9:16"),
-    (16/9, "16:9"),
+    (1.0, '1:1'),
+    (0.75, '3:4'),
+    (4/3, '4:3'),
+    (9/16, '9:16'),
+    (16/9, '16:9'),
 ]
 
 class AIcon(ImageContent):
