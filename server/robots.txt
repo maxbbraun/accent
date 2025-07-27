@@ -8,6 +8,7 @@ Disallow: /commute
 Disallow: /calendar
 Disallow: /everyone
 Disallow: /wittgenstein
+Disallow: /aicon
 Disallow: /gif
 Disallow: /epd
 Disallow: /next

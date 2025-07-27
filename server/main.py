@@ -31,6 +31,7 @@ from response import settings_url
 from response import text_response
 from schedule import Schedule
 from wittgenstein import Wittgenstein
+from aicon import AIcon
 
 # The URL of the Medium story about Accent.
 INFO_URL = ('https://medium.com/@maxbraun/meet-accent-352cfa95813a'
@@ -59,6 +60,7 @@ commute = Commute(geocoder)
 everyone = Everyone(geocoder)
 schedule = Schedule(geocoder)
 wittgenstein = Wittgenstein()
+aicon = AIcon()
 
 # The Flask app handling requests.
 app = Flask(__name__)
@@ -120,6 +122,16 @@ def wittgenstein_gif(key=None, user=None):
 
     width, height, variant = display_metadata(request)
     return content_response(wittgenstein, gif_response, user, width, height,
+                            variant)
+
+
+@app.route('/aicon')
+@user_auth(image_response=gif_response)
+def aicon_gif(key=None, user=None):
+    """Responds with a GIF version of the AI Orthodox icon image."""
+
+    width, height, variant = display_metadata(request)
+    return content_response(aicon, gif_response, user, width, height,
                             variant)
 
 

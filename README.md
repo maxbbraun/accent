@@ -53,6 +53,7 @@ To test and deploy the server:
    - [/calendar?key=<USER_KEY>](http://localhost:8080/calendar?key=<USER_KEY>) to bypass the schedule and get the calendar image directly.
    - [/everyone?key=<USER_KEY>](http://localhost:8080/everyone?key=<USER_KEY>) to bypass the schedule and get the everyone image directly.
    - [/wittgenstein?key=<USER_KEY>](http://localhost:8080/wittgenstein?key=<USER_KEY>) to bypass the schedule and get the wittgenstein image directly.
+   - [/aicon?key=<USER_KEY>](http://localhost:8080/aicon?key=<USER_KEY>) to bypass the schedule and get the AI Orthodox icon image directly.
 6. Deploy the server with `gcloud app deploy`.
 
 ## Frame
