@@ -2,13 +2,13 @@ User-agent: *
 Sitemap: https://accent.ink/sitemap.txt
 Disallow: /marker.png
 Disallow: /hello/*
+Disallow: /aicon
 Disallow: /artwork
 Disallow: /city
 Disallow: /commute
 Disallow: /calendar
 Disallow: /everyone
 Disallow: /wittgenstein
-Disallow: /aicon
 Disallow: /gif
 Disallow: /epd
 Disallow: /next

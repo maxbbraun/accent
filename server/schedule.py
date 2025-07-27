@@ -62,8 +62,8 @@ class Schedule(ImageContent):
              expression syntax additionally supports the keywords 'sunrise' and
              'sunset' instead of hours and minutes, e.g. 'sunrise * * *'.
     'image': The kind of image to show when this entry is active. Valid kinds
-             are 'aicon', 'artwork', 'city', 'commute', 'calendar', 'everyone',
-             and 'wittgenstein'.
+             are 'aicon', 'artwork', 'city', 'commute', 'calendar',
+             'everyone', and 'wittgenstein'.
     """
 
     def __init__(self, geocoder):
