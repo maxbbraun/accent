@@ -6,7 +6,9 @@ from PIL import Image
 from io import BytesIO
 
 # The prompt for generating images.
-IMAGE_PROMPT = 'Eastern Christian Orthodox icon but make it slightly AI'
+IMAGE_PROMPT = """
+Eastern Christian Orthodox icon with artificial intelligence elements
+"""
 
 # Supported aspect ratios for the image generation API.
 ASPECT_RATIOS = [
@@ -14,11 +16,10 @@ ASPECT_RATIOS = [
     (0.75, '3:4'),
     (4/3, '4:3'),
     (9/16, '9:16'),
-    (16/9, '16:9'),
-]
+    (16/9, '16:9')]
 
 class AIcon(ImageContent):
-    """AI-generated Eastern Christian Orthodox icons."""
+    """AI-themed icons."""
 
     def __init__(self):
         self._firestore = Firestore()
@@ -51,9 +52,7 @@ class AIcon(ImageContent):
                 prompt=IMAGE_PROMPT,
                 config=GenerateImagesConfig(
                     number_of_images=1,
-                    aspect_ratio=config_aspect_ratio,
-                )
-            )
+                    aspect_ratio=config_aspect_ratio))
 
             # Retrieve and convert the generated image.
             if response.generated_images:
@@ -61,9 +60,9 @@ class AIcon(ImageContent):
                 image_bytes = generated_image.image.image_bytes
                 image = Image.open(BytesIO(image_bytes)).convert('RGB')
             else:
-                raise ContentError("Empty image generation response")
+                raise ContentError('Empty image generation response')
         except Exception as e:
-            raise ContentError(f"Image generation failed: {e}")
+            raise ContentError(f'Image generation failed: {e}')
 
         # Scale and center crop the image to the requested dimensions.
         scale = max(width / image.width, height / image.height)
