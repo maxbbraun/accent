@@ -51,8 +51,6 @@ class AIcon(ImageContent):
                 prompt=IMAGE_PROMPT,
                 config=GenerateImagesConfig(
                     number_of_images=1,
-                    person_generation='allow_all',
-                    safety_filter_level='block_few',
                     aspect_ratio=config_aspect_ratio,
                 )
             )
