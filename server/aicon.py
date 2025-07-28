@@ -1,9 +1,10 @@
 from google import genai
 from google.genai.types import GenerateImagesConfig
-from content import ContentError, ImageContent
-from firestore import Firestore
-from PIL import Image
+from content import ContentError
+from content import ImageContent
 from io import BytesIO
+from os import environ
+from PIL import Image
 
 # The prompt for generating images.
 IMAGE_PROMPT = """
@@ -21,16 +22,15 @@ ASPECT_RATIOS = [
 class AIcon(ImageContent):
     """AI-themed icons."""
 
-    def __init__(self):
-        self._firestore = Firestore()
-
     def image(self, user, width, height, variant):
         """Generates the AI icon image."""
 
         try:
             # Configure the API.
-            api_key = self._firestore.gemini_api_key()
-            client = genai.Client(api_key=api_key)
+            client = genai.Client(
+                vertexai=True,
+                project=environ['GOOGLE_CLOUD_PROJECT'],
+                location='us-central1')
 
             # Find the aspect ratio that minimizes excess crop.
             def calculate_crop_ratio(ratio_tuple):
