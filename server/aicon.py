@@ -1,5 +1,7 @@
 from google import genai
 from google.genai.types import GenerateImagesConfig
+from google.genai.types import PersonGeneration
+from google.genai.types import SafetyFilterLevel
 from content import ContentError
 from content import ImageContent
 from io import BytesIO
@@ -52,7 +54,9 @@ class AIcon(ImageContent):
                 prompt=IMAGE_PROMPT,
                 config=GenerateImagesConfig(
                     number_of_images=1,
-                    aspect_ratio=config_aspect_ratio))
+                    aspect_ratio=config_aspect_ratio,
+                    person_generation=PersonGeneration.ALLOW_ALL,
+                    safety_filter_level=SafetyFilterLevel.BLOCK_ONLY_HIGH))
 
             # Retrieve and convert the generated image.
             if response.generated_images:
