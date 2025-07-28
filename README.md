@@ -29,6 +29,7 @@ The database backend uses [Cloud Firestore](https://firebase.google.com/products
    - `/users/<USER_KEY>/home` - The home address used for the local time, the weather, and the commute origin.
    - `/users/<USER_KEY>/work` - The work address used for the commute destination.
    - `/users/<USER_KEY>/travel_mode` - The commute [travel mode](https://developers.google.com/maps/documentation/directions/intro#TravelModes).
+   - `/users/<USER_KEY>/rotation` - The display rotation in degrees (0, 90, 180, or 270).
    - `/users/<USER_KEY>/schedule` - The content schedule.
    - `/users/<USER_KEY>/google_calendar_credentials` - The OAuth credentials for Google Calendar.
 

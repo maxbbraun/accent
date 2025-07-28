@@ -17,6 +17,25 @@ from epd import DISPLAY_VARIANTS
 from graphics import draw_text
 from graphics import SUBVARIO_CONDENSED_MEDIUM
 
+
+def rotate_dimensions(width, height, rotation):
+    """Applies the rotation, swapping width and height if needed."""
+
+    if rotation in [90, 270]:
+        return height, width
+
+    return width, height
+
+
+def rotate_image(image, rotation):
+    """Applies rotation to an image to match the display orientation."""
+
+    if not rotation in [0, 90, 180, 270]:
+        raise ContentError('Invalid rotation: %s' % rotation)
+
+    return image.rotate(rotation, expand=True)
+
+
 # The color of the new user image background.
 BACKGROUND_COLOR = (255, 0, 0)
 
@@ -93,7 +112,19 @@ def content_response(content, image_response, user, width, height, variant):
     """Creates an image response and handles the error case flow."""
 
     try:
-        image = content.image(user, width, height, variant)
+        # Get the user's rotation setting.
+        rotation = user.get('rotation') if user else 0
+
+        # Apply the rotation to the dimensions for content generation.
+        rotated_width, rotated_height = rotate_dimensions(width, height,
+                                                          rotation)
+
+        # Generate the image with the rotated dimensions.
+        image = content.image(user, rotated_width, rotated_height, variant)
+
+        # Correct the rotation of the image content itself.
+        image = rotate_image(image, rotation)
+
         return image_response(image, variant)
     except ContentError as e:
         exception('Failed to create %s content: %s' % (

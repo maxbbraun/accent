@@ -243,6 +243,7 @@ def hello_post(key):
         'home': form['home'],
         'work': form['work'],
         'travel_mode': form['travel_mode'],
+        'rotation': int(form.get('rotation', 0)),
         'schedule': schedule})
 
     # Redirect back to the GET version.

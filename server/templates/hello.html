@@ -62,6 +62,14 @@
                 <option value="bicycling"{% if travel_mode == 'bicycling' %} selected{% endif %}>bicycling</option>
                 <option value="transit"{% if travel_mode == 'transit' %} selected{% endif %}>transit</option>
             </select><br />
+            <label for="rotation">Rotation:</label>
+            {% set rotation = user.get('rotation')|int if user and 'rotation' in user._data else 0 %}
+            <select name="rotation">
+                <option value="0"{% if rotation == 0 %} selected{% endif %}>0°</option>
+                <option value="90"{% if rotation == 90 %} selected{% endif %}>90°</option>
+                <option value="180"{% if rotation == 180 %} selected{% endif %}>180°</option>
+                <option value="270"{% if rotation == 270 %} selected{% endif %}>270°</option>
+            </select><br />
             <i>Schedule start times use the <a href="https://en.wikipedia.org/wiki/Cron#CRON_expression" target="_blank">cron expression</a> format, plus "sunrise" or "sunset" in place of hours and minutes.</i><br /><br />
             {% set schedule_name_placeholder = 'City Sunrise' %}
             {% set schedule_start_placeholder = 'sunrise * * *' %}
