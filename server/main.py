@@ -8,6 +8,7 @@ from logging import exception
 from oauth2client.client import HttpAccessTokenRefreshError
 from time import time
 
+from aicon import AIcon
 from artwork import Artwork
 from auth import ACCOUNT_ACCESS_URL
 from auth import google_calendar_step1
@@ -52,6 +53,7 @@ HELLO_TEMPLATE = 'hello.html'
 geocoder = Geocoder()
 
 # Helper library instances.
+aicon = AIcon()
 artwork = Artwork()
 calendar = GoogleCalendar(geocoder)
 city = City(geocoder)
@@ -62,6 +64,16 @@ wittgenstein = Wittgenstein()
 
 # The Flask app handling requests.
 app = Flask(__name__)
+
+
+@app.route('/aicon')
+@user_auth(image_response=gif_response)
+def aicon_gif(key=None, user=None):
+    """Responds with a GIF version of the aicon image."""
+
+    width, height, variant = display_metadata(request)
+    return content_response(aicon, gif_response, user, width, height,
+                            variant)
 
 
 @app.route('/artwork')

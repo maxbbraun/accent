@@ -75,6 +75,7 @@
                     <label for="schedule_image">Image:</label>
                     {% set schedule_image_id = 'schedule_image_' ~ loop.index %}
                     <select name="schedule_image" id="{{ schedule_image_id }}">
+                        <option value="aicon"{% if entry['image'] == 'aicon' %} selected{% endif %}>aicon</option>
                         <option value="artwork"{% if entry['image'] == 'artwork' %} selected{% endif %}>artwork</option>
                         <option value="city"{% if entry['image'] == 'city' %} selected{% endif %}>city</option>
                         <option value="commute"{% if entry['image'] == 'commute' %} selected{% endif %}>commute</option>
@@ -94,6 +95,7 @@
             <label for="schedule_image">Image:</label>
             {% set schedule_image_id = 'schedule_image_' ~ next_index %}
             <select name="schedule_image" id="{{ schedule_image_id }}">
+                <option value="aicon">aicon</option>
                 <option value="artwork">artwork</option>
                 <option value="city" selected>city</option>
                 <option value="commute">commute</option>

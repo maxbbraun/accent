@@ -7,6 +7,7 @@ from logging import info
 from PIL import Image
 from PIL.ImageDraw import Draw
 
+from aicon import AIcon
 from artwork import Artwork
 from google_calendar import GoogleCalendar
 from graphics import draw_text
@@ -61,13 +62,14 @@ class Schedule(ImageContent):
              expression syntax additionally supports the keywords 'sunrise' and
              'sunset' instead of hours and minutes, e.g. 'sunrise * * *'.
     'image': The kind of image to show when this entry is active. Valid kinds
-             are 'artwork', 'city', 'commute', 'calendar', 'everyone', and
-             'wittgenstein'.
+             are 'aicon', 'artwork', 'city', 'commute', 'calendar',
+             'everyone', and 'wittgenstein'.
     """
 
     def __init__(self, geocoder):
         self._local_time = LocalTime(geocoder)
         self._sun = Sun(geocoder)
+        self._aicon = AIcon()
         self._artwork = Artwork()
         self._city = City(geocoder)
         self._commute = Commute(geocoder)
@@ -91,7 +93,9 @@ class Schedule(ImageContent):
     def _image(self, kind, user, width, height, variant):
         """Creates an image based on the kind."""
 
-        if kind == 'artwork':
+        if kind == 'aicon':
+            content = self._aicon
+        elif kind == 'artwork':
             content = self._artwork
         elif kind == 'city':
             content = self._city
