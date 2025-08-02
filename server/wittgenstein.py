@@ -25,20 +25,26 @@ class Wittgenstein(ImageContent):
             id = json['id']
 
             # Download the preview image for the proposition.
-            image_data = BytesIO(get(PREVIEW_IMAGE_URL % id).content)
-            image = Image.open(image_data).convert('RGB')
+            image_bytes = get(PREVIEW_IMAGE_URL % id).content
         except (RequestException, KeyError) as e:
             raise ContentError(e)
 
         # Resize the image and extend the background.
-        scale = min(width / image.width, height / image.height)
-        scaled_width = int(image.width * scale)
-        scaled_height = int(image.height * scale)
-        image = image.resize((scaled_width, scaled_height),
-                             resample=Image.LANCZOS)
-        canvas = Image.new(mode='RGB', size=(width, height), color='white')
-        x = (width - scaled_width) // 2
-        y = (height - scaled_height) // 2
-        canvas.paste(image, (x, y), 0)
+        with BytesIO(image_bytes) as image_data:
+            with Image.open(image_data).convert('RGB') as image:
+                # Scale to fit.
+                scale = min(width / image.width, height / image.height)
+                scaled_width = int(image.width * scale)
+                scaled_height = int(image.height * scale)
+                image = image.resize((scaled_width, scaled_height),
+                                    resample=Image.LANCZOS)
 
-        return canvas
+                # Extend the background.
+                with Image.new(mode='RGB',
+                                size=(width, height),
+                                color='white') as canvas:
+                    x = (width - scaled_width) // 2
+                    y = (height - scaled_height) // 2
+                    canvas.paste(image, (x, y), 0)
+
+                return canvas

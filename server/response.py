@@ -101,9 +101,10 @@ def settings_response(key, image_func, width, height, variant):
               xy=adjust_xy(*LINK_TEXT_XY, width, height),
               anchor='center_x',
               image=image)
-    computer = Image.open(COMPUTER_FILE).convert(mode='RGBA')
-    image.paste(computer, box=adjust_xy(*COMPUTER_XY, width, height),
-                mask=computer)
+    with Image.open(COMPUTER_FILE).convert(mode='RGBA') as computer:
+        image.paste(computer,
+                    box=adjust_xy(*COMPUTER_XY, width, height),
+                    mask=computer)
 
     return image_func(image, variant)
 
@@ -113,7 +114,13 @@ def content_response(content, image_response, user, width, height, variant):
 
     try:
         # Get the user's rotation setting.
-        rotation = user.get('rotation') if user else 0
+        if user:
+            try:
+                rotation = user.get('rotation')
+            except KeyError:
+                rotation = 0
+        else:
+            rotation = 0
 
         # Apply the rotation to the dimensions for content generation.
         rotated_width, rotated_height = rotate_dimensions(width, height,

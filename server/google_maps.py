@@ -145,29 +145,29 @@ class GoogleMaps(object):
                                         markers=markers,
                                         marker_icon=marker_icon)
         with BytesIO(image_data) as buffer:
-            image = Image.open(buffer).convert('RGB')
+            with Image.open(buffer).convert('RGB') as image:
+                # Catch map size restrictions.
+                if image.width != width or image.height != height:
+                    raise DataError(
+                        'Requested a %dx%d map but got %dx%d. Try this: '
+                        'https://developers.google.com/maps/documentation/'
+                        'maps-static/start#Largerimagesizes' % (
+                            width, height, image.width, image.height))
 
-        # Catch map size restrictions.
-        if image.width != width or image.height != height:
-            raise DataError('Requested a %dx%d map but got %dx%d. Try this: ht'
-                            'tps://developers.google.com/maps/documentation/ma'
-                            'ps-static/start#Largerimagesizes' % (
-                                width, height, image.width, image.height))
+                # Replace the copyright text with a more readable pixel font.
+                copyright_text = self._copyright_text(width, height,
+                                                      polyline=polyline,
+                                                      markers=markers,
+                                                      marker_icon=marker_icon)
+                draw_text(copyright_text,
+                          font_spec=SCREENSTAR_SMALL_REGULAR,
+                          text_color=COPYRIGHT_TEXT_COLOR,
+                          anchor='bottom_right',
+                          box_color=COPYRIGHT_BOX_COLOR,
+                          box_padding=COPYRIGHT_BOX_PADDING,
+                          image=image)
 
-        # Replace the copyright text with a more readable pixel font.
-        copyright_text = self._copyright_text(width, height,
-                                              polyline=polyline,
-                                              markers=markers,
-                                              marker_icon=marker_icon)
-        draw_text(copyright_text,
-                  font_spec=SCREENSTAR_SMALL_REGULAR,
-                  text_color=COPYRIGHT_TEXT_COLOR,
-                  anchor='bottom_right',
-                  box_color=COPYRIGHT_BOX_COLOR,
-                  box_padding=COPYRIGHT_BOX_PADDING,
-                  image=image)
-
-        return image
+                return image
 
     def _route_url(self, home, work, travel_mode):
         """Constructs the URL for the Directions API request."""

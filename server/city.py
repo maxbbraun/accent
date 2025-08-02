@@ -1020,8 +1020,8 @@ class City(ImageContent):
 
             # Draw the layer.
             path = path_join(ASSETS_DIR, layer['file'])
-            bitmap = Image.open(path).convert('RGBA')
-            image.paste(bitmap, (x, y), bitmap)
+            with Image.open(path).convert('RGBA') as bitmap:
+                image.paste(bitmap, (x, y), bitmap)
 
             # Remember the drawn file for the else condition.
             drawn_files.append(layer['file'])

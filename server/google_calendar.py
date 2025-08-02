@@ -183,10 +183,10 @@ class GoogleCalendar(ImageContent):
 
                 # Mark the current day with a squircle.
                 if day == time.day:
-                    squircle = Image.open(SQUIRCLE_FILE).convert(mode='RGBA')
-                    squircle_xy = (x - squircle.width // 2,
-                                   y - squircle.height // 2)
-                    draw.bitmap(squircle_xy, squircle, HIGHLIGHT_COLOR)
+                    with Image.open(SQUIRCLE_FILE).convert(mode='RGBA') as squircle:
+                        squircle_xy = (x - squircle.width // 2,
+                                       y - squircle.height // 2)
+                        draw.bitmap(squircle_xy, squircle, HIGHLIGHT_COLOR)
                     number_color = TODAY_COLOR
                     event_color = TODAY_COLOR
                 else:
@@ -200,16 +200,16 @@ class GoogleCalendar(ImageContent):
 
                 # Draw a dot for each event.
                 num_events = min(MAX_EVENTS, event_counts[day])
-                dot = Image.open(DOT_FILE).convert(mode='RGBA')
                 if num_events > 0:
-                    events_width = (num_events * dot.width +
-                                    (num_events - 1) * DOT_MARGIN)
-                    for event_index in range(num_events):
-                        event_offset = (event_index * (dot.width +
-                                        DOT_MARGIN) - events_width // 2)
-                        dot_xy = [x + event_offset,
-                                  y + DOT_OFFSET - dot.width // 2]
-                        draw.bitmap(dot_xy, dot, event_color)
+                    with Image.open(DOT_FILE).convert(mode='RGBA') as dot:
+                        events_width = (num_events * dot.width +
+                                        (num_events - 1) * DOT_MARGIN)
+                        for event_index in range(num_events):
+                            event_offset = (event_index * (dot.width +
+                                            DOT_MARGIN) - events_width // 2)
+                            dot_xy = [x + event_offset,
+                                    y + DOT_OFFSET - dot.width // 2]
+                            draw.bitmap(dot_xy, dot, event_color)
 
         # The calendar image is already quantized (no dithering).
         image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
