@@ -40,7 +40,7 @@ COPYRIGHT_BOX_PADDING = 3
 PATH_WEIGHT = 6
 
 # The maximum number of map images kept in the cache.
-MAX_CACHE_SIZE = 100
+MAX_CACHE_SIZE = 10
 
 # The time to live in seconds for cached map images.
 CACHE_TTL_S = 24 * 60 * 60  # 1 day
