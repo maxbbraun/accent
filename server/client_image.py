@@ -4,6 +4,7 @@
 
 from absl import app
 from absl import flags
+from epd import ensure_rgb
 from epd import vector_quantize
 from ntpath import basename
 from numpy import array
@@ -89,9 +90,7 @@ def main(_):
         output.write('#ifndef %s\n' % include_guard)
         output.write('#define %s\n\n' % include_guard)
 
-        with Image.open(FLAGS.input) as image:
-            image = image.convert('RGB')
-
+        with ensure_rgb(Image.open(FLAGS.input)) as image:
             assert image.width % 8 == 0, 'Image width must be a multiple of 8'
 
             output.write('// Generated from "%s" using "%s".\n' % (

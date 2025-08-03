@@ -62,7 +62,7 @@ def _dither(image, palette):
     """Dithers the image using the Floyd-Steinberg algorithm."""
 
     # Call the C extension to iterate over all image pixels efficiently.
-    with image.convert('RGB') as rgb_image:
+    with ensure_rgb(image) as rgb_image:
         pixels = np.array(rgb_image)
         dither(pixels, palette)
 
@@ -81,7 +81,7 @@ def _color_indices(image, variant):
         image = _dither(image, palette)
 
     # Map each pixel to the closest palette color.
-    with image.convert('RGB') as rgb_image:
+    with ensure_rgb(image) as rgb_image:
         pixels = np.array(rgb_image).reshape(-1, 3)
 
         # Match against the BWR palette for quantized images. This requires
@@ -142,3 +142,19 @@ def adjust_xy(x, y, width, height):
     y += (height - DEFAULT_DISPLAY_HEIGHT) // 2
 
     return x, y
+
+
+def ensure_rgb(image, alpha=False):
+    """Converts an image to RGB(A) mode unless it already is."""
+
+    if alpha:
+        if image.mode == 'RGBA':
+            return image
+    else:
+        if image.mode == 'RGB':
+            return image
+
+    try:
+        return image.convert('RGBA' if alpha else 'RGB')
+    finally:
+        image.close()

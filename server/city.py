@@ -5,6 +5,7 @@ from random import random
 from content import ContentError
 from content import ImageContent
 from epd import adjust_xy
+from epd import ensure_rgb
 from firestore import DataError
 from local_time import LocalTime
 from sun import Sun
@@ -1020,8 +1021,7 @@ class City(ImageContent):
 
             # Draw the layer.
             path = path_join(ASSETS_DIR, layer['file'])
-            with Image.open(path) as bitmap:
-                bitmap = bitmap.convert('RGBA')
+            with ensure_rgb(Image.open(path), alpha=True) as bitmap:
                 image.paste(bitmap, (x, y), bitmap)
 
             # Remember the drawn file for the else condition.

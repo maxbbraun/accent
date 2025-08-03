@@ -8,6 +8,7 @@ from PIL import Image
 
 from content import ContentError
 from epd import adjust_xy
+from epd import ensure_rgb
 from epd import to_epd_bytes
 from epd import to_epd_image
 from epd import DEFAULT_DISPLAY_HEIGHT
@@ -103,8 +104,7 @@ def settings_response(key, image_func, width, height, variant):
                 xy=adjust_xy(*LINK_TEXT_XY, width, height),
                 anchor='center_x',
                 image=image)
-        with Image.open(COMPUTER_FILE) as computer:
-            computer = computer.convert(mode='RGBA')
+        with ensure_rgb(Image.open(COMPUTER_FILE), alpha=True) as computer:
             image.paste(computer,
                         box=adjust_xy(*COMPUTER_XY, width, height),
                         mask=computer)

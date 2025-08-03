@@ -13,6 +13,7 @@ from oauth2client.client import HttpAccessTokenRefreshError
 from PIL import Image
 from PIL.ImageDraw import Draw
 
+from epd import ensure_rgb
 from firestore import DataError
 from firestore import GoogleCalendarStorage
 from graphics import draw_text
@@ -184,10 +185,10 @@ class GoogleCalendar(ImageContent):
 
                     # Mark the current day with a squircle.
                     if day == time.day:
-                        with Image.open(SQUIRCLE_FILE) as squircle:
-                            squircle = squircle.convert(mode='RGBA')
+                        with ensure_rgb(Image.open(SQUIRCLE_FILE),
+                                        alpha=True) as squircle:
                             squircle_xy = (x - squircle.width // 2,
-                                        y - squircle.height // 2)
+                                           y - squircle.height // 2)
                             draw.bitmap(squircle_xy, squircle, HIGHLIGHT_COLOR)
                         number_color = TODAY_COLOR
                         event_color = TODAY_COLOR
@@ -203,8 +204,7 @@ class GoogleCalendar(ImageContent):
                     # Draw a dot for each event.
                     num_events = min(MAX_EVENTS, event_counts[day])
                     if num_events > 0:
-                        with Image.open(DOT_FILE) as dot:
-                            dot = dot.convert(mode='RGBA')
+                        with ensure_rgb(Image.open(DOT_FILE), alpha=True) as dot:
                             events_width = (num_events * dot.width +
                                             (num_events - 1) * DOT_MARGIN)
                             for event_index in range(num_events):

@@ -9,6 +9,7 @@ from PIL.ImageDraw import Draw
 
 from aicon import AIcon
 from artwork import Artwork
+from epd import ensure_rgb
 from google_calendar import GoogleCalendar
 from graphics import draw_text
 from graphics import SCREENSTAR_SMALL_REGULAR
@@ -213,64 +214,64 @@ class Schedule(ImageContent):
     def timeline(self, user):
         """Generates a timeline image of the schedule for settings."""
 
-        image = self.empty_timeline().convert('RGB')
-        draw = Draw(image)
+        with ensure_rgb(self.empty_timeline()) as image:
+            draw = Draw(image)
 
-        # Find the user or return the empty timeline.
-        try:
-            now = self._local_time.now(user)
-        except DataError:
-            return image
+            # Find the user or return the empty timeline.
+            try:
+                now = self._local_time.now(user)
+            except DataError:
+                return image
 
-        # Start the timeline with the most recent beginning of the week.
-        start = now.replace(hour=0, minute=0, second=0)
-        start -= timedelta(days=start.weekday())
-        stop = start + timedelta(weeks=1)
-        start_timestamp = datetime.timestamp(start)
-        stop_timestamp = datetime.timestamp(stop)
-        timestamp_span = stop_timestamp - start_timestamp
+            # Start the timeline with the most recent beginning of the week.
+            start = now.replace(hour=0, minute=0, second=0)
+            start -= timedelta(days=start.weekday())
+            stop = start + timedelta(weeks=1)
+            start_timestamp = datetime.timestamp(start)
+            stop_timestamp = datetime.timestamp(stop)
+            timestamp_span = stop_timestamp - start_timestamp
 
-        # Draw a dashed line in highlight color at the current time.
-        now_timestamp = datetime.timestamp(now)
-        now_x = TIMELINE_DRAW_WIDTH * (
-            now_timestamp - start_timestamp) / timestamp_span
-        for y in range(0, TIMELINE_HEIGHT, 2 * TIMELINE_LINE_DASH):
-            draw.line([(now_x, y), (now_x, y + TIMELINE_LINE_DASH - 1)],
-                      fill=TIMELINE_HIGHLIGHT, width=TIMELINE_LINE_WIDTH)
+            # Draw a dashed line in highlight color at the current time.
+            now_timestamp = datetime.timestamp(now)
+            now_x = TIMELINE_DRAW_WIDTH * (
+                now_timestamp - start_timestamp) / timestamp_span
+            for y in range(0, TIMELINE_HEIGHT, 2 * TIMELINE_LINE_DASH):
+                draw.line([(now_x, y), (now_x, y + TIMELINE_LINE_DASH - 1)],
+                        fill=TIMELINE_HIGHLIGHT, width=TIMELINE_LINE_WIDTH)
 
-        # Generate the schedule throughout the week.
-        entries = user.get('schedule')
-        if not entries:
-            # Empty timeline.
-            return image
-        for i in range(len(entries)):
-            entries[i]['index'] = i
-        time = start
-        while time < stop:
-            # Find the next entry.
-            next_entries = [(self._next(entry['start'], time, user),
-                             entry['index'], entry) for entry in entries]
-            next_datetime, next_index, next_entry = min(next_entries,
-                                                        key=lambda x: x[0])
+            # Generate the schedule throughout the week.
+            entries = user.get('schedule')
+            if not entries:
+                # Empty timeline.
+                return image
+            for i in range(len(entries)):
+                entries[i]['index'] = i
+            time = start
+            while time < stop:
+                # Find the next entry.
+                next_entries = [(self._next(entry['start'], time, user),
+                                entry['index'], entry) for entry in entries]
+                next_datetime, next_index, next_entry = min(next_entries,
+                                                            key=lambda x: x[0])
 
-            # Draw the entry's index and a vertical line, with a tilde to mark
-            # the variable sunrise and sunset times.
-            timestamp = datetime.timestamp(next_datetime)
-            x = TIMELINE_DRAW_WIDTH * (
-                timestamp - start_timestamp) / timestamp_span
-            y = TIMELINE_HEIGHT / 2
-            text = str(next_index + 1)
-            next_entry_start = next_entry['start']
-            if 'sunrise' in next_entry_start or 'sunset' in next_entry_start:
-                text = '~' + text
-            box = draw_text(text, SCREENSTAR_SMALL_REGULAR,
-                            TIMELINE_FOREGROUND, xy=(x, y), anchor=None,
-                            box_color=None, box_padding=4, border_color=None,
-                            border_width=0, image=image, draw=draw)
-            draw.line([(x, 0), (x, box[1])], fill=TIMELINE_FOREGROUND, width=1)
+                # Draw the entry's index and a vertical line, with a tilde to mark
+                # the variable sunrise and sunset times.
+                timestamp = datetime.timestamp(next_datetime)
+                x = TIMELINE_DRAW_WIDTH * (
+                    timestamp - start_timestamp) / timestamp_span
+                y = TIMELINE_HEIGHT / 2
+                text = str(next_index + 1)
+                next_entry_start = next_entry['start']
+                if 'sunrise' in next_entry_start or 'sunset' in next_entry_start:
+                    text = '~' + text
+                box = draw_text(text, SCREENSTAR_SMALL_REGULAR,
+                                TIMELINE_FOREGROUND, xy=(x, y), anchor=None,
+                                box_color=None, box_padding=4, border_color=None,
+                                border_width=0, image=image, draw=draw)
+                draw.line([(x, 0), (x, box[1])], fill=TIMELINE_FOREGROUND, width=1)
 
-            # Jump to the next entry.
-            time = next_datetime
+                # Jump to the next entry.
+                time = next_datetime
 
-        # The timeline image is already quantized (no dithering).
-        return image.convert('P', dither=None, palette=Image.ADAPTIVE)
+            # The timeline image is already quantized (no dithering).
+            return image.convert('P', dither=None, palette=Image.ADAPTIVE)

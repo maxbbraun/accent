@@ -5,6 +5,7 @@ from requests.exceptions import RequestException
 from PIL import Image
 
 from content import ImageContent
+from epd import ensure_rgb
 
 # The URL for requesting a random Wittgenstein 2022 proposition.
 RANDOM_PROPOSITION_URL = 'https://wittgenstein.app/random.json'
@@ -31,22 +32,19 @@ class Wittgenstein(ImageContent):
 
         # Resize the image and extend the background.
         with BytesIO(image_bytes) as image_data:
-            with Image.open(image_data) as image:
-                image = image.convert('RGB')
-
+            with ensure_rgb(Image.open(image_data)) as image:
                 # Scale to fit.
                 scale = min(width / image.width, height / image.height)
                 scaled_width = int(image.width * scale)
                 scaled_height = int(image.height * scale)
-                image = image.resize((scaled_width, scaled_height),
-                                    resample=Image.LANCZOS)
+                with image.resize((scaled_width, scaled_height),
+                                  resample=Image.LANCZOS) as scaled_image:
 
-                # Extend the background.
-                with Image.new(mode='RGB',
-                                size=(width, height),
-                                color='white') as canvas:
-                    x = (width - scaled_width) // 2
-                    y = (height - scaled_height) // 2
-                    canvas.paste(image, (x, y), 0)
+                    # Extend the background.
+                    with Image.new(mode='RGB', size=(width, height),
+                                   color='white') as canvas:
+                        x = (width - scaled_width) // 2
+                        y = (height - scaled_height) // 2
+                        canvas.paste(scaled_image, (x, y), 0)
 
-                return canvas
+                        return canvas

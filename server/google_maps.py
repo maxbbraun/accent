@@ -9,6 +9,7 @@ from requests import get
 from requests.exceptions import RequestException
 from urllib.parse import quote
 
+from epd import ensure_rgb
 from graphics import SCREENSTAR_SMALL_REGULAR
 from firestore import DataError
 from firestore import Firestore
@@ -145,8 +146,7 @@ class GoogleMaps(object):
                                         markers=markers,
                                         marker_icon=marker_icon)
         with BytesIO(image_data) as buffer:
-            with Image.open(buffer) as image:
-                image = image.convert('RGB')
+            with ensure_rgb(Image.open(buffer)) as image:
 
                 # Catch map size restrictions.
                 if image.width != width or image.height != height:

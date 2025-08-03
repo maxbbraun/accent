@@ -6,6 +6,7 @@ from random import choice
 from random import randint
 
 from content import ImageContent
+from epd import ensure_rgb
 
 # The directory containing static artwork images.
 IMAGES_DIR = 'assets/artwork'
@@ -25,13 +26,12 @@ class Artwork(ImageContent):
         filename = choice(paths)
         info('Using artwork file: %s' % filename)
 
-        with Image.open(filename) as image:
-            image = image.convert('RGB')
-
+        with ensure_rgb(Image.open(filename)) as image:
             # Crop the image to a random display-sized area.
             x = randint(0, max(0, image.width - width))
             y = randint(0, max(0, image.height - height))
-            image = image.crop((x, y, x + width, y + height))
+            with image.crop((x, y, x + width, y + height)) as cropped_image:
 
-            # The source artwork is already quantized (no dithering).
-            return image.convert('P', dither=None, palette=Image.ADAPTIVE)
+                # The source artwork is already quantized (no dithering).
+                return cropped_image.convert('P', dither=None,
+                                             palette=Image.ADAPTIVE)

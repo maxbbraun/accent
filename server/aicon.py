@@ -5,6 +5,7 @@ from google.genai.types import PersonGeneration
 from google.genai.types import SafetyFilterLevel
 from content import ContentError
 from content import ImageContent
+from epd import ensure_rgb
 from io import BytesIO
 from os import environ
 from PIL import Image
@@ -66,21 +67,19 @@ class AIcon(ImageContent):
         # Scale and crop the generated image.
         generated_image = response.generated_images[0]
         with BytesIO(generated_image.image.image_bytes) as image_data:
-            with Image.open(image_data) as image:
-                image = image.convert('RGB')
+            with ensure_rgb(Image.open(image_data)) as image:
 
                 # Scale to fill.
                 scale = max(width / image.width, height / image.height)
                 scaled_width = int(image.width * scale)
                 scaled_height = int(image.height * scale)
-                image = image.resize((scaled_width, scaled_height),
-                                        resample=Image.LANCZOS)
+                with image.resize((scaled_width, scaled_height),
+                                  resample=Image.LANCZOS) as scaled_image:
 
-                # Center crop.
-                left = (scaled_width - width) // 2
-                top = (scaled_height - height) // 2
-                right = left + width
-                bottom = top + height
-                cropped_image = image.crop((left, top, right, bottom))
-
-                return cropped_image
+                    # Center crop.
+                    left = (scaled_width - width) // 2
+                    top = (scaled_height - height) // 2
+                    right = left + width
+                    bottom = top + height
+                    with scaled_image.crop((left, top, right, bottom)) as cropped_image:
+                        return cropped_image
