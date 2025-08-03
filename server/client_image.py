@@ -4,6 +4,7 @@
 
 from absl import app
 from absl import flags
+from epd import vector_quantize
 from ntpath import basename
 from numpy import array
 from numpy import packbits
@@ -11,7 +12,6 @@ from numpy import uint8
 from numpy import where
 from os import extsep
 from PIL import Image
-from scipy.cluster.vq import vq
 from six import iterbytes
 
 FLAGS = flags.FLAGS
@@ -45,8 +45,8 @@ BWR_8_BIT = array([[0, 0, 0], [255, 255, 255], [255, 0, 0]], dtype=uint8)
 def encode(image, color):
     """Encodes the specified color channel of the image into 1-bit pixels."""
 
-    image_data = array(image).reshape((image.width * image.height, 3))
-    indices, _ = vq(image_data, BWR_8_BIT)
+    pixels = array(image).reshape((image.width * image.height, 3))
+    indices = vector_quantize(pixels, BWR_8_BIT)
     channel = CHANNEL_LUT[color]
     bits = where(indices == channel, 1, 0)
     bytes = packbits(bits)

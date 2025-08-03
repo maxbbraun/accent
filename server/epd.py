@@ -1,9 +1,6 @@
 from dithering import dither
-from numpy import array
-from numpy import packbits
-from numpy import uint8
+import numpy as np
 from PIL import Image
-from scipy.cluster.vq import vq
 
 # The default width of the display in pixels.
 DEFAULT_DISPLAY_WIDTH = 640
@@ -18,30 +15,54 @@ DISPLAY_VARIANTS = ['bwr', '7color']
 DEFAULT_DISPLAY_VARIANT = 'bwr'
 
 # Black, white, and red as an 8-bit RGB array.
-PALETTE_BWR = array([[0, 0, 0], [255, 255, 255], [255, 0, 0]], dtype=uint8)
+PALETTE_BWR = np.array([[0, 0, 0], [255, 255, 255], [255, 0, 0]],
+                       dtype=np.uint8)
 
 # Black, white and red as a 2-bit index array.
-ENCODING_BWR = array([[0, 0], [0, 1], [1, 1]], dtype=uint8)
+ENCODING_BWR = np.array([[0, 0], [0, 1], [1, 1]],
+                        dtype=np.uint8)
 
 # 7-color (black, white, green, blue, red, yellow, orange) as an 8-bit RGB
 # array.
-PALETTE_7COLOR = array([[16, 16, 16], [239, 239, 239], [27, 120, 27],
-                        [54, 43, 162], [180, 21, 21], [224, 212, 13],
-                        [193, 103, 13]], dtype=uint8)
+PALETTE_7COLOR = np.array([[16, 16, 16], [239, 239, 239], [27, 120, 27],
+                           [54, 43, 162], [180, 21, 21], [224, 212, 13],
+                           [193, 103, 13]],
+                          dtype=np.uint8)
 
 # 7-color (black, white, green, blue, red, yellow, orange) as a 4-bit index
 # array.
-ENCODING_7COLOR = array([[0, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0],
-                         [0, 0, 1, 1], [0, 1, 0, 0], [0, 1, 0, 1],
-                         [0, 1, 1, 0]], dtype=uint8)
+ENCODING_7COLOR = np.array([[0, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0],
+                            [0, 0, 1, 1], [0, 1, 0, 0], [0, 1, 0, 1],
+                            [0, 1, 1, 0]],
+                           dtype=np.uint8)
+
+
+def vector_quantize(pixels, palette, chunk_size=4096):
+    """Memory-efficient replacement for scipy.cluster.vq.vq."""
+
+    num_pixels = pixels.shape[0]
+    indices = np.zeros(num_pixels, dtype=np.uint8)
+
+    # Chunk the pixels to limit memory usage.
+    for chunk_start in range(0, num_pixels, chunk_size):
+        chunk_end = min(chunk_start + chunk_size, num_pixels)
+        chunk = pixels[chunk_start:chunk_end]
+
+        # Calculate squared Euclidean distances (as int32 to avoid overflow).
+        diffs = chunk[:, None, :] - palette[None, :, :]
+        squared_distances = np.sum(diffs * diffs, axis=2, dtype=np.int32)
+
+        # Find the index of the minimum distance for each pixel.
+        indices[chunk_start:chunk_end] = np.argmin(squared_distances, axis=1)
+
+    return indices
 
 
 def _dither(image, palette):
     """Dithers the image using the Floyd-Steinberg algorithm."""
 
     # Call the C extension to iterate over all image pixels efficiently.
-    image = image.convert('RGB')
-    pixels = array(image)
+    pixels = np.array(image.convert('RGB'))
     dither(pixels, palette)
 
     return Image.fromarray(pixels)
@@ -56,9 +77,8 @@ def _color_indices(image, variant):
         image = _dither(image, palette)
 
     # Map each pixel to the closest palette color.
-    image = image.convert('RGB')
-    image_data = array(image).reshape((image.width * image.height, 3))
-    indices, _ = vq(image_data, palette)
+    pixels = np.array(image.convert('RGB')).reshape(-1, 3)
+    indices = vector_quantize(pixels, palette)
 
     return indices
 
@@ -91,6 +111,7 @@ def to_epd_image(image, variant):
     indices = _color_indices(image, variant)
     palette = epd_palette(variant)
     epd_image_data = palette[indices.reshape((image.height, image.width))]
+
     return Image.fromarray(epd_image_data)
 
 
@@ -100,7 +121,8 @@ def to_epd_bytes(image, variant):
     indices = _color_indices(image, variant)
     encoding = epd_encoding(variant)
     epd_image_data = encoding[indices.reshape((image.height * image.width))]
-    return packbits(epd_image_data)
+
+    return np.packbits(epd_image_data)
 
 
 def adjust_xy(x, y, width, height):
