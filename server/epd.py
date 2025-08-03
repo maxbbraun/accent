@@ -22,17 +22,17 @@ PALETTE_BWR = np.array([[0, 0, 0], [255, 255, 255], [255, 0, 0]],
 ENCODING_BWR = np.array([[0, 0], [0, 1], [1, 1]],
                         dtype=np.uint8)
 
-# 7-color (black, white, green, blue, red, yellow, orange) as an 8-bit RGB
+# 7-color (black, white, red, green, blue, yellow, orange) as an 8-bit RGB
 # array.
-PALETTE_7COLOR = np.array([[16, 16, 16], [239, 239, 239], [27, 120, 27],
-                           [54, 43, 162], [180, 21, 21], [224, 212, 13],
+PALETTE_7COLOR = np.array([[16, 16, 16], [239, 239, 239], [180, 21, 21],
+                           [27, 120, 27], [54, 43, 162], [224, 212, 13],
                            [193, 103, 13]],
                           dtype=np.uint8)
 
-# 7-color (black, white, green, blue, red, yellow, orange) as a 4-bit index
+# 7-color (black, white, red, green, blue, yellow, orange) as a 4-bit index
 # array.
-ENCODING_7COLOR = np.array([[0, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0],
-                            [0, 0, 1, 1], [0, 1, 0, 0], [0, 1, 0, 1],
+ENCODING_7COLOR = np.array([[0, 0, 0, 0], [0, 0, 0, 1], [0, 1, 0, 0],
+                            [0, 0, 1, 0], [0, 0, 1, 1], [0, 1, 0, 1],
                             [0, 1, 1, 0]],
                            dtype=np.uint8)
 
@@ -62,28 +62,37 @@ def _dither(image, palette):
     """Dithers the image using the Floyd-Steinberg algorithm."""
 
     # Call the C extension to iterate over all image pixels efficiently.
-    pixels = np.array(image.convert('RGB'))
-    dither(pixels, palette)
+    with image.convert('RGB') as rgb_image:
+        pixels = np.array(rgb_image)
+        dither(pixels, palette)
 
-    return Image.fromarray(pixels)
+        return Image.fromarray(pixels)
 
 
 def _color_indices(image, variant):
     """Maps each image pixel to the index of the closest palette color."""
 
-    # Apply dithering unless the image is already quantized.
-    palette = epd_palette(variant)
-    if image.mode not in ('1', 'L', 'P'):
+    # Figure out if the image is already quantized.
+    is_quantized = image.mode in ('1', 'L', 'P')
+
+    # Apply dithering, if needed.
+    palette = _epd_palette(variant)
+    if not is_quantized:
         image = _dither(image, palette)
 
     # Map each pixel to the closest palette color.
-    pixels = np.array(image.convert('RGB')).reshape(-1, 3)
-    indices = vector_quantize(pixels, palette)
+    with image.convert('RGB') as rgb_image:
+        pixels = np.array(rgb_image).reshape(-1, 3)
 
-    return indices
+        # Match against the BWR palette for quantized images. This requires
+        # other palettes to start with the BWR color sequence in order.
+        match_palette = PALETTE_BWR if is_quantized else palette
+
+        # Quantize the image.
+        return vector_quantize(pixels, match_palette)
 
 
-def epd_palette(variant):
+def _epd_palette(variant):
     """Returns the RGB palette used by the display."""
 
     if variant == 'bwr':
@@ -94,7 +103,7 @@ def epd_palette(variant):
         raise ValueError('Unsupported display variant: %s' % variant)
 
 
-def epd_encoding(variant):
+def _epd_encoding(variant):
     """Returns the color encoding used to send data to the display."""
 
     if variant == 'bwr':
@@ -109,7 +118,7 @@ def to_epd_image(image, variant):
     """Converts the image's colors to the closest palette color."""
 
     indices = _color_indices(image, variant)
-    palette = epd_palette(variant)
+    palette = _epd_palette(variant)
     epd_image_data = palette[indices.reshape((image.height, image.width))]
 
     return Image.fromarray(epd_image_data)
@@ -119,7 +128,7 @@ def to_epd_bytes(image, variant):
     """Converts the image to the closest 2-bit palette color bytes."""
 
     indices = _color_indices(image, variant)
-    encoding = epd_encoding(variant)
+    encoding = _epd_encoding(variant)
     epd_image_data = encoding[indices.reshape((image.height * image.width))]
 
     return np.packbits(epd_image_data)
