@@ -4,13 +4,10 @@
 
 from absl import app
 from absl import flags
+from epd import color_indices
 from epd import ensure_rgb
-from epd import vector_quantize
 from ntpath import basename
-from numpy import array
-from numpy import packbits
-from numpy import uint8
-from numpy import where
+import numpy as np
 from os import extsep
 from PIL import Image
 from six import iterbytes
@@ -39,18 +36,14 @@ COLOR_LUT = {'black': 0x0000, 'white': 0xFFFF, 'red': 0xF800}
 # The mapping of color names to their channel index.
 CHANNEL_LUT = {'black': 0, 'white': 1, 'red': 2}
 
-# The 8-bit RGB values corresponding to black, white, and red.
-BWR_8_BIT = array([[0, 0, 0], [255, 255, 255], [255, 0, 0]], dtype=uint8)
-
 
 def encode(image, color):
     """Encodes the specified color channel of the image into 1-bit pixels."""
 
-    pixels = array(image).reshape((image.width * image.height, 3))
-    indices = vector_quantize(pixels, BWR_8_BIT)
+    indices = color_indices(image, 'bwr')
     channel = CHANNEL_LUT[color]
-    bits = where(indices == channel, 1, 0)
-    bytes = packbits(bits)
+    bits = np.where(indices == channel, 1, 0)
+    bytes = np.packbits(bits)
 
     return bytes
 

@@ -37,26 +37,6 @@ ENCODING_7COLOR = np.array([[0, 0, 0, 0], [0, 0, 0, 1], [0, 1, 0, 0],
                            dtype=np.uint8)
 
 
-def vector_quantize(pixels, palette, chunk_size=4096):
-    """Memory-efficient replacement for scipy.cluster.vq.vq."""
-
-    num_pixels = pixels.shape[0]
-    indices = np.zeros(num_pixels, dtype=np.uint8)
-
-    # Chunk the pixels to limit memory usage.
-    for chunk_start in range(0, num_pixels, chunk_size):
-        chunk_end = min(chunk_start + chunk_size, num_pixels)
-        chunk = pixels[chunk_start:chunk_end]
-
-        # Calculate squared Euclidean distances (as int32 to avoid overflow).
-        diffs = chunk[:, None, :] - palette[None, :, :]
-        squared_distances = np.sum(diffs * diffs, axis=2, dtype=np.int32)
-
-        # Find the index of the minimum distance for each pixel.
-        indices[chunk_start:chunk_end] = np.argmin(squared_distances, axis=1)
-
-    return indices
-
 
 def _dither(image, palette):
     """Dithers the image using the Floyd-Steinberg algorithm."""
@@ -69,7 +49,7 @@ def _dither(image, palette):
         return Image.fromarray(pixels)
 
 
-def _color_indices(image, variant):
+def color_indices(image, variant):
     """Maps each image pixel to the index of the closest palette color."""
 
     # Figure out if the image is already quantized.
@@ -80,16 +60,21 @@ def _color_indices(image, variant):
     if not is_quantized:
         image = _dither(image, palette)
 
-    # Map each pixel to the closest palette color.
     with ensure_rgb(image) as rgb_image:
-        pixels = np.array(rgb_image).reshape(-1, 3)
-
         # Match against the BWR palette for quantized images. This requires
         # other palettes to start with the BWR color sequence in order.
         match_palette = PALETTE_BWR if is_quantized else palette
 
-        # Quantize the image.
-        return vector_quantize(pixels, match_palette)
+        # Convert the palette to a flat padded list (256 colors, 3 channels).
+        palette_data = match_palette.flatten().tolist()
+        palette_data.extend([0] * (256 * 3 - len(palette_data)))
+
+        # Quantize the image using the palette.
+        with Image.new('P', (1, 1)) as palette_image:
+            palette_image.putpalette(palette_data)
+            with rgb_image.quantize(palette=palette_image,
+                                    dither=Image.NONE) as quantized_image:
+                return np.array(quantized_image)
 
 
 def _epd_palette(variant):
@@ -117,7 +102,7 @@ def _epd_encoding(variant):
 def to_epd_image(image, variant):
     """Converts the image's colors to the closest palette color."""
 
-    indices = _color_indices(image, variant)
+    indices = color_indices(image, variant)
     palette = _epd_palette(variant)
     epd_image_data = palette[indices.reshape((image.height, image.width))]
 
@@ -127,7 +112,7 @@ def to_epd_image(image, variant):
 def to_epd_bytes(image, variant):
     """Converts the image to the closest 2-bit palette color bytes."""
 
-    indices = _color_indices(image, variant)
+    indices = color_indices(image, variant)
     encoding = _epd_encoding(variant)
     epd_image_data = encoding[indices.reshape((image.height * image.width))]
 
