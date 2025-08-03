@@ -56,8 +56,6 @@ class Everyone(ImageContent):
                                                 marker_icon=MARKER_ICON_URL)
 
             # The map looks better without dithering.
-            image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
-
-            return image
+            return image.convert('P', dither=None, palette=Image.ADAPTIVE)
         except DataError as e:
             raise ContentError(e)

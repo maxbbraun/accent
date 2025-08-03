@@ -177,39 +177,38 @@ class Schedule(ImageContent):
     def empty_timeline(self):
         """Generates an empty timeline image."""
 
-        image = Image.new(mode='RGB', size=(TIMELINE_WIDTH, TIMELINE_HEIGHT),
-                          color=TIMELINE_BACKGROUND)
-        draw = Draw(image)
+        with Image.new(mode='RGB',
+                       size=(TIMELINE_WIDTH, TIMELINE_HEIGHT),
+                       color=TIMELINE_BACKGROUND) as image:
+            draw = Draw(image)
 
-        # Draw each day of the week.
-        num_days = len(day_abbr)
-        for day_index in range(num_days):
-            x = TIMELINE_DRAW_WIDTH * day_index / num_days
+            # Draw each day of the week.
+            num_days = len(day_abbr)
+            for day_index in range(num_days):
+                x = TIMELINE_DRAW_WIDTH * day_index / num_days
 
-            # Draw a dashed vertical line.
+                # Draw a dashed vertical line.
+                for y in range(0, TIMELINE_HEIGHT, 2 * TIMELINE_LINE_DASH):
+                    draw.line([(x, y), (x, y + TIMELINE_LINE_DASH - 1)],
+                            fill=TIMELINE_FOREGROUND, width=TIMELINE_LINE_WIDTH)
+
+                # Draw the abbreviated day name.
+                name = day_abbr[day_index]
+                day_x = x + TIMELINE_DRAW_WIDTH / num_days / 2
+                day_y = TIMELINE_HEIGHT - SCREENSTAR_SMALL_REGULAR['height']
+                draw_text(name, SCREENSTAR_SMALL_REGULAR, TIMELINE_FOREGROUND,
+                        xy=(day_x, day_y), anchor=None, box_color=None,
+                        box_padding=0, border_color=None, border_width=0,
+                        image=image, draw=draw)
+
+            # Draw another dashed line at the end.
             for y in range(0, TIMELINE_HEIGHT, 2 * TIMELINE_LINE_DASH):
-                draw.line([(x, y), (x, y + TIMELINE_LINE_DASH - 1)],
-                          fill=TIMELINE_FOREGROUND, width=TIMELINE_LINE_WIDTH)
+                draw.line([(TIMELINE_DRAW_WIDTH, y),
+                        (TIMELINE_DRAW_WIDTH, y + TIMELINE_LINE_DASH - 1)],
+                        fill=TIMELINE_FOREGROUND, width=TIMELINE_LINE_WIDTH)
 
-            # Draw the abbreviated day name.
-            name = day_abbr[day_index]
-            day_x = x + TIMELINE_DRAW_WIDTH / num_days / 2
-            day_y = TIMELINE_HEIGHT - SCREENSTAR_SMALL_REGULAR['height']
-            draw_text(name, SCREENSTAR_SMALL_REGULAR, TIMELINE_FOREGROUND,
-                      xy=(day_x, day_y), anchor=None, box_color=None,
-                      box_padding=0, border_color=None, border_width=0,
-                      image=image, draw=draw)
-
-        # Draw another dashed line at the end.
-        for y in range(0, TIMELINE_HEIGHT, 2 * TIMELINE_LINE_DASH):
-            draw.line([(TIMELINE_DRAW_WIDTH, y),
-                       (TIMELINE_DRAW_WIDTH, y + TIMELINE_LINE_DASH - 1)],
-                      fill=TIMELINE_FOREGROUND, width=TIMELINE_LINE_WIDTH)
-
-        # The calendar image is already quantized (no dithering).
-        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
-
-        return image
+            # The calendar image is already quantized (no dithering).
+            return image.convert('P', dither=None, palette=Image.ADAPTIVE)
 
     def timeline(self, user):
         """Generates a timeline image of the schedule for settings."""
@@ -274,6 +273,4 @@ class Schedule(ImageContent):
             time = next_datetime
 
         # The timeline image is already quantized (no dithering).
-        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
-
-        return image
+        return image.convert('P', dither=None, palette=Image.ADAPTIVE)

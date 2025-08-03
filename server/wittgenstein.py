@@ -31,7 +31,9 @@ class Wittgenstein(ImageContent):
 
         # Resize the image and extend the background.
         with BytesIO(image_bytes) as image_data:
-            with Image.open(image_data).convert('RGB') as image:
+            with Image.open(image_data) as image:
+                image = image.convert('RGB')
+
                 # Scale to fit.
                 scale = min(width / image.width, height / image.height)
                 scaled_width = int(image.width * scale)

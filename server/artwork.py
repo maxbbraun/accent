@@ -25,13 +25,13 @@ class Artwork(ImageContent):
         filename = choice(paths)
         info('Using artwork file: %s' % filename)
 
-        with Image.open(filename).convert('RGB') as image:
+        with Image.open(filename) as image:
+            image = image.convert('RGB')
+
             # Crop the image to a random display-sized area.
             x = randint(0, max(0, image.width - width))
             y = randint(0, max(0, image.height - height))
             image = image.crop((x, y, x + width, y + height))
 
             # The source artwork is already quantized (no dithering).
-            image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
-
-            return image
+            return image.convert('P', dither=None, palette=Image.ADAPTIVE)

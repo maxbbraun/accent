@@ -66,7 +66,9 @@ class AIcon(ImageContent):
         # Scale and crop the generated image.
         generated_image = response.generated_images[0]
         with BytesIO(generated_image.image.image_bytes) as image_data:
-            with Image.open(image_data).convert('RGB') as image:
+            with Image.open(image_data) as image:
+                image = image.convert('RGB')
+
                 # Scale to fill.
                 scale = max(width / image.width, height / image.height)
                 scaled_width = int(image.width * scale)

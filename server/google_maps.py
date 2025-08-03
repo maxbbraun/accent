@@ -145,7 +145,9 @@ class GoogleMaps(object):
                                         markers=markers,
                                         marker_icon=marker_icon)
         with BytesIO(image_data) as buffer:
-            with Image.open(buffer).convert('RGB') as image:
+            with Image.open(buffer) as image:
+                image = image.convert('RGB')
+
                 # Catch map size restrictions.
                 if image.width != width or image.height != height:
                     raise DataError(

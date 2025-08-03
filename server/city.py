@@ -1020,7 +1020,8 @@ class City(ImageContent):
 
             # Draw the layer.
             path = path_join(ASSETS_DIR, layer['file'])
-            with Image.open(path).convert('RGBA') as bitmap:
+            with Image.open(path) as bitmap:
+                bitmap = bitmap.convert('RGBA')
                 image.paste(bitmap, (x, y), bitmap)
 
             # Remember the drawn file for the else condition.
@@ -1029,13 +1030,11 @@ class City(ImageContent):
     def image(self, user, width, height, variant):
         """Generates the current city image."""
 
-        image = Image.new(mode='RGB', size=(width, height))
-        try:
-            self._draw_layers(image, self._layers(), user, width, height)
-        except DataError as e:
-            raise ContentError(e)
+        with Image.new(mode='RGB', size=(width, height)) as image:
+            try:
+                self._draw_layers(image, self._layers(), user, width, height)
+            except DataError as e:
+                raise ContentError(e)
 
-        # The city image is already quantized (no dithering).
-        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
-
-        return image
+            # The city image is already quantized (no dithering).
+            return image.convert('P', dither=None, palette=Image.ADAPTIVE)

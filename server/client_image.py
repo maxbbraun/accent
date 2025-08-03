@@ -89,24 +89,26 @@ def main(_):
         output.write('#ifndef %s\n' % include_guard)
         output.write('#define %s\n\n' % include_guard)
 
-        image = Image.open(FLAGS.input).convert('RGB')
-        assert image.width % 8 == 0, 'Image width must be a multiple of 8'
+        with Image.open(FLAGS.input) as image:
+            image = image.convert('RGB')
 
-        output.write('// Generated from "%s" using "%s".\n' % (
-            source_filename, script_filename))
-        output.write('const uint16_t %s = 0x%02X;  // %s\n' % (
-            background_variable_name, COLOR_LUT[FLAGS.background],
-            FLAGS.background))
-        output.write('const uint16_t %s = %d;\n' % (width_variable_name,
-                                                    image.width))
-        output.write('const uint16_t %s = %d;\n' % (height_variable_name,
-                                                    image.height))
+            assert image.width % 8 == 0, 'Image width must be a multiple of 8'
 
-        black_bytes = encode(image, 'black')
-        write_bytes(black_image_variable_name, black_bytes, output)
+            output.write('// Generated from "%s" using "%s".\n' % (
+                source_filename, script_filename))
+            output.write('const uint16_t %s = 0x%02X;  // %s\n' % (
+                background_variable_name, COLOR_LUT[FLAGS.background],
+                FLAGS.background))
+            output.write('const uint16_t %s = %d;\n' % (width_variable_name,
+                                                        image.width))
+            output.write('const uint16_t %s = %d;\n' % (height_variable_name,
+                                                        image.height))
 
-        red_bytes = encode(image, 'red')
-        write_bytes(red_image_variable_name, red_bytes, output)
+            black_bytes = encode(image, 'black')
+            write_bytes(black_image_variable_name, black_bytes, output)
+
+            red_bytes = encode(image, 'red')
+            write_bytes(red_image_variable_name, red_bytes, output)
 
         output.write('\n#endif  // %s\n' % include_guard)
 

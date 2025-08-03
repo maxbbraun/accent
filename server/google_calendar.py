@@ -153,65 +153,66 @@ class GoogleCalendar(ImageContent):
         event_counts = self._event_counts(time, user)
 
         # Create a blank image.
-        image = Image.new(mode='RGB', size=(width, height),
-                          color=BACKGROUND_COLOR)
-        draw = Draw(image)
+        with Image.new(mode='RGB',
+                       size=(width, height),
+                       color=BACKGROUND_COLOR) as image:
+            draw = Draw(image)
 
-        # Get this month's calendar.
-        calendar = Calendar(firstweekday=SUNDAY)
-        weeks = calendar.monthdayscalendar(time.year, time.month)
+            # Get this month's calendar.
+            calendar = Calendar(firstweekday=SUNDAY)
+            weeks = calendar.monthdayscalendar(time.year, time.month)
 
-        # Determine the spacing of the days in the image.
-        x_stride = width // (DAYS_IN_WEEK + 1)
-        y_stride = height // (len(weeks) + 1)
+            # Determine the spacing of the days in the image.
+            x_stride = width // (DAYS_IN_WEEK + 1)
+            y_stride = height // (len(weeks) + 1)
 
-        # Draw each week in a row.
-        for week_index in range(len(weeks)):
-            week = weeks[week_index]
+            # Draw each week in a row.
+            for week_index in range(len(weeks)):
+                week = weeks[week_index]
 
-            # Draw each day in a column.
-            for day_index in range(len(week)):
-                day = week[day_index]
+                # Draw each day in a column.
+                for day_index in range(len(week)):
+                    day = week[day_index]
 
-                # Ignore days from other months.
-                if day == 0:
-                    continue
+                    # Ignore days from other months.
+                    if day == 0:
+                        continue
 
-                # Determine the position of this day in the image.
-                x = (day_index + 1) * x_stride
-                y = (week_index + 1) * y_stride
+                    # Determine the position of this day in the image.
+                    x = (day_index + 1) * x_stride
+                    y = (week_index + 1) * y_stride
 
-                # Mark the current day with a squircle.
-                if day == time.day:
-                    with Image.open(SQUIRCLE_FILE).convert(mode='RGBA') as squircle:
-                        squircle_xy = (x - squircle.width // 2,
-                                       y - squircle.height // 2)
-                        draw.bitmap(squircle_xy, squircle, HIGHLIGHT_COLOR)
-                    number_color = TODAY_COLOR
-                    event_color = TODAY_COLOR
-                else:
-                    number_color = NUMBER_COLOR
-                    event_color = HIGHLIGHT_COLOR
+                    # Mark the current day with a squircle.
+                    if day == time.day:
+                        with Image.open(SQUIRCLE_FILE) as squircle:
+                            squircle = squircle.convert(mode='RGBA')
+                            squircle_xy = (x - squircle.width // 2,
+                                        y - squircle.height // 2)
+                            draw.bitmap(squircle_xy, squircle, HIGHLIGHT_COLOR)
+                        number_color = TODAY_COLOR
+                        event_color = TODAY_COLOR
+                    else:
+                        number_color = NUMBER_COLOR
+                        event_color = HIGHLIGHT_COLOR
 
-                # Draw the day of the month number.
-                number = str(day)
-                draw_text(number, SUBVARIO_CONDENSED_MEDIUM, number_color,
-                          xy=(x, y - NUMBER_Y_OFFSET), image=image)
+                    # Draw the day of the month number.
+                    number = str(day)
+                    draw_text(number, SUBVARIO_CONDENSED_MEDIUM, number_color,
+                            xy=(x, y - NUMBER_Y_OFFSET), image=image)
 
-                # Draw a dot for each event.
-                num_events = min(MAX_EVENTS, event_counts[day])
-                if num_events > 0:
-                    with Image.open(DOT_FILE).convert(mode='RGBA') as dot:
-                        events_width = (num_events * dot.width +
-                                        (num_events - 1) * DOT_MARGIN)
-                        for event_index in range(num_events):
-                            event_offset = (event_index * (dot.width +
-                                            DOT_MARGIN) - events_width // 2)
-                            dot_xy = [x + event_offset,
-                                    y + DOT_OFFSET - dot.width // 2]
-                            draw.bitmap(dot_xy, dot, event_color)
+                    # Draw a dot for each event.
+                    num_events = min(MAX_EVENTS, event_counts[day])
+                    if num_events > 0:
+                        with Image.open(DOT_FILE) as dot:
+                            dot = dot.convert(mode='RGBA')
+                            events_width = (num_events * dot.width +
+                                            (num_events - 1) * DOT_MARGIN)
+                            for event_index in range(num_events):
+                                event_offset = (event_index * (dot.width +
+                                                DOT_MARGIN) - events_width // 2)
+                                dot_xy = [x + event_offset,
+                                        y + DOT_OFFSET - dot.width // 2]
+                                draw.bitmap(dot_xy, dot, event_color)
 
-        # The calendar image is already quantized (no dithering).
-        image = image.convert('P', dither=None, palette=Image.ADAPTIVE)
-
-        return image
+            # The calendar image is already quantized (no dithering).
+            return image.convert('P', dither=None, palette=Image.ADAPTIVE)
