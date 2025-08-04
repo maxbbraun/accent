@@ -1,19 +1,28 @@
-from google import genai
-from google.genai.errors import APIError
-from google.genai.types import GenerateImagesConfig
-from google.genai.types import PersonGeneration
-from google.genai.types import SafetyFilterLevel
-from content import ContentError
-from content import ImageContent
-from epd import ensure_rgb
+import base64
+import binascii
+from google import auth
 from io import BytesIO
 from os import environ
 from PIL import Image
+import requests
+
+from content import ContentError
+from content import ImageContent
+from epd import ensure_rgb
 
 # The prompt for generating images.
 IMAGE_PROMPT = """
 Eastern Christian Orthodox icon with artificial intelligence elements
 """
+
+# The model to use for image generation.
+IMAGE_MODEL = 'imagen-4.0-ultra-generate-preview-06-06'
+
+# The scope for authenticating with the Google Cloud Vertex AI API.
+AUTH_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
+
+# The location for the Google Cloud Vertex AI API.
+LOCATION = 'us-central1'
 
 # Supported aspect ratios for the image generation API.
 ASPECT_RATIOS = [
@@ -28,10 +37,23 @@ class AIcon(ImageContent):
 
     def __init__(self):
         # Configure the API.
-        self._client = genai.Client(
-            vertexai=True,
-            project=environ['GOOGLE_CLOUD_PROJECT'],
-            location='us-central1')
+        self._project = environ['GOOGLE_CLOUD_PROJECT']
+        self._location = LOCATION
+        self._model = IMAGE_MODEL
+        self._credentials, _ = auth.default(scopes=[AUTH_SCOPE])
+
+    def _access_token(self):
+        """Gets a fresh access token for API calls."""
+
+        # Refresh the credentials, if needed.
+        if not self._credentials.valid:
+            try:
+                self._credentials.refresh(auth.transport.requests.Request())
+            except auth.exceptions.RefreshError as e:
+                raise ContentError(f'Failed to refresh credentials: {e}')
+
+        # Return the access token.
+        return self._credentials.token
 
     def image(self, user, width, height, variant):
         """Generates the AI icon image."""
@@ -49,24 +71,41 @@ class AIcon(ImageContent):
         best_ratio_tuple = min(ASPECT_RATIOS, key=calculate_crop_ratio)
         config_aspect_ratio = best_ratio_tuple[1]
 
-        # Call the API to generate the image.
+        # Request a generated image from the Google Cloud Vertex AI API.
+        url = (
+            f'https://{self._location}-aiplatform.googleapis.com/v1/'
+            f'projects/{self._project}/locations/{self._location}/'
+            f'publishers/google/models/{self._model}:predict')
+        headers = {
+            'Authorization': f'Bearer {self._access_token()}',
+            'Content-Type': 'application/json'}
+        payload = {
+            'instances': [{'prompt': IMAGE_PROMPT}],
+            'parameters': {
+                'sampleCount': 1,
+                'aspectRatio': config_aspect_ratio,
+                'personGeneration': 'allow_all',
+                'safetyFilterLevel': 'block_only_high'}}
         try:
-            response = self._client.models.generate_images(
-                model='imagen-4.0-ultra-generate-preview-06-06',
-                prompt=IMAGE_PROMPT,
-                config=GenerateImagesConfig(
-                    number_of_images=1,
-                    aspect_ratio=config_aspect_ratio,
-                    person_generation=PersonGeneration.ALLOW_ALL,
-                    safety_filter_level=SafetyFilterLevel.BLOCK_ONLY_HIGH))
-        except APIError as e:
-            raise ContentError(f'Image generation failed: {e}')
-        if not response.generated_images:
-            raise ContentError('Empty image generation response')
+            response = requests.post(
+                url, headers=headers, json=payload, timeout=60)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            raise ContentError(f'Image generation API request failed: {e}')
+
+        # Extract the Base64 image data from the response.
+        try:
+            result = response.json()
+            prediction = result['predictions'][0]
+            image_base64 = prediction['bytesBase64Encoded']
+            image_bytes = base64.b64decode(image_base64)
+        except (IndexError, KeyError, TypeError) as e:
+            raise ContentError(f'Invalid API response: {e}')
+        except (requests.JSONDecodeError, binascii.Error) as e:
+            raise ContentError(f'Invalid API response content: {e}')
 
         # Scale and crop the generated image.
-        generated_image = response.generated_images[0]
-        with BytesIO(generated_image.image.image_bytes) as image_data:
+        with BytesIO(image_bytes) as image_data:
             with ensure_rgb(Image.open(image_data)) as image:
 
                 # Scale to fill.
