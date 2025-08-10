@@ -48,6 +48,7 @@
     </head>
     <body>
         <form method="post" action="{{ url_for('hello_post', key=key) }}">
+            ⚠️ <i>Avoid entering sensitive information here until a more robust security model is implemented.</i><br /><br />
             <label for="home">Home:</label>
             {% set home = user.get('home') if user and 'home' in user._data else '' %}
             <input type="text" name="home" size="50" placeholder="San Francisco" value="{{ home }}"><br />
