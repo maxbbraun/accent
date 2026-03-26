@@ -10,5 +10,5 @@ oauth2client==4.1.3
 Pillow==12.1.1
 python-dateutil==2.9.0.post0
 pytz==2024.1
-requests==2.32.4
+requests==2.33.0
 ./dithering_extension
