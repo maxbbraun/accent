@@ -16,7 +16,7 @@ Eastern Christian Orthodox icon with artificial intelligence elements
 """
 
 # The model to use for image generation.
-IMAGE_MODEL = 'imagen-4.0-ultra-generate-preview-06-06'
+IMAGE_MODEL = 'imagen-4.0-ultra-generate-001'
 
 # The scope for authenticating with the Google Cloud Vertex AI API.
 AUTH_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
