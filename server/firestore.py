@@ -1,17 +1,26 @@
-from firebase_admin import _apps as firebase_apps
+from datetime import datetime
 from firebase_admin import initialize_app
+from firebase_admin import get_app
 from firebase_admin.credentials import ApplicationDefault
 from firebase_admin.firestore import client as firestore_client
-from googleapiclient.http import build_http
+from google.auth.exceptions import RefreshError
+from google.auth.transport.requests import Request as GoogleAuthRequest
 from google.cloud.firestore import DELETE_FIELD
+from google.oauth2.credentials import Credentials
+from json import loads
 from logging import error
 from logging import info
 from logging import warning
-from oauth2client.client import HttpAccessTokenRefreshError
-from oauth2client.client import OAuth2Credentials
-from oauth2client.client import Storage
 from os import environ
-from threading import Lock
+
+# The scope to request for the Google Calendar API.
+GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly'
+
+# The token endpoint for Google OAuth.
+GOOGLE_TOKEN_URI = 'https://oauth2.googleapis.com/token'
+
+# The timestamp format used by oauth2client credential JSON.
+OAUTH2CLIENT_EXPIRY_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
 class Firestore(object):
@@ -19,7 +28,9 @@ class Firestore(object):
 
     def __init__(self):
         # Only initialize Firebase once.
-        if not len(firebase_apps):
+        try:
+            get_app()
+        except ValueError:
             initialize_app(ApplicationDefault(), {
                 'projectId': environ['GOOGLE_CLOUD_PROJECT']
             })
@@ -54,6 +65,37 @@ class Firestore(object):
 
         return secrets.to_dict()
 
+    def _google_calendar_credentials_from_json(self, credentials_json):
+        """Loads Google Calendar credentials from current or legacy JSON."""
+
+        info = loads(credentials_json)
+        if info.get('invalid'):
+            return None
+
+        scopes = info.get('scopes') or [GOOGLE_CALENDAR_SCOPE]
+
+        # Migrate JSON written by the deprecated oauth2client package.
+        if 'access_token' in info:
+            return Credentials(
+                token=info.get('access_token'),
+                refresh_token=info.get('refresh_token'),
+                token_uri=info.get('token_uri') or GOOGLE_TOKEN_URI,
+                client_id=info.get('client_id'),
+                client_secret=info.get('client_secret'),
+                scopes=scopes,
+                expiry=self._parse_oauth2client_expiry(
+                    info.get('token_expiry')))
+
+        return Credentials.from_authorized_user_info(info, scopes=scopes)
+
+    def _parse_oauth2client_expiry(self, expiry):
+        """Parses oauth2client's naive UTC expiry timestamp."""
+
+        if not expiry:
+            return None
+
+        return datetime.strptime(expiry, OAUTH2CLIENT_EXPIRY_FORMAT)
+
     def google_calendar_credentials(self, key):
         """Loads and refreshes Google Calendar API credentials."""
 
@@ -64,23 +106,31 @@ class Firestore(object):
 
         # Load the credentials from storage.
         try:
-            json = user.get('google_calendar_credentials')
+            credentials_json = user.get('google_calendar_credentials')
         except KeyError:
             warning('Failed to load Google Calendar credentials.')
             return None
 
         # Use the valid credentials.
-        credentials = OAuth2Credentials.from_json(json)
-        if credentials and not credentials.invalid:
+        try:
+            credentials = self._google_calendar_credentials_from_json(
+                credentials_json)
+        except (TypeError, ValueError) as e:
+            warning('Failed to parse Google Calendar credentials: %s' % e)
+            self.delete_google_calendar_credentials(key)
+            return None
+
+        if credentials and credentials.valid:
             return credentials
 
         # Handle invalidation and expiration.
-        if credentials and credentials.access_token_expired:
+        if credentials and credentials.refresh_token:
             try:
                 info('Refreshing Google Calendar credentials.')
-                credentials.refresh(build_http())
+                credentials.refresh(GoogleAuthRequest())
+                self.update_google_calendar_credentials(key, credentials)
                 return credentials
-            except HttpAccessTokenRefreshError as e:
+            except RefreshError as e:
                 warning('Google Calendar refresh failed: %s' % e)
 
         # Credentials are missing or refresh failed.
@@ -136,30 +186,31 @@ class Firestore(object):
         user.update(fields)
 
 
-class GoogleCalendarStorage(Storage):
+class GoogleCalendarStorage(object):
     """Credentials storage for the Google Calendar API using Firestore."""
 
     def __init__(self, key):
-        super(GoogleCalendarStorage, self).__init__(lock=Lock())
         self._firestore = Firestore()
         self._key = key
 
-    def locked_get(self):
-        """Loads credentials from Firestore and attaches this storage."""
+    def get(self):
+        """Loads credentials from Firestore."""
 
-        credentials = self._firestore.google_calendar_credentials(self._key)
-        if not credentials:
-            return None
-        credentials.set_store(self)
-        return credentials
+        return self._firestore.google_calendar_credentials(self._key)
 
-    def locked_put(self, credentials):
+    def put(self, credentials):
         """Saves credentials to Firestore."""
 
         self._firestore.update_google_calendar_credentials(self._key,
                                                            credentials)
 
-    def locked_delete(self):
+    def refresh(self, credentials):
+        """Refreshes credentials and saves the refreshed token."""
+
+        credentials.refresh(GoogleAuthRequest())
+        self.put(credentials)
+
+    def delete(self):
         """Deletes credentials from Firestore."""
 
         self._firestore.delete_google_calendar_credentials(self._key)

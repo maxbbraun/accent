@@ -209,7 +209,9 @@ class Schedule(ImageContent):
                         fill=TIMELINE_FOREGROUND, width=TIMELINE_LINE_WIDTH)
 
             # The calendar image is already quantized (no dithering).
-            return image.convert('P', dither=None, palette=Image.ADAPTIVE)
+            return image.convert('P',
+                                 dither=Image.Dither.NONE,
+                                 palette=Image.Palette.ADAPTIVE)
 
     def timeline(self, user):
         """Generates a timeline image of the schedule for settings."""
@@ -274,4 +276,6 @@ class Schedule(ImageContent):
                 time = next_datetime
 
             # The timeline image is already quantized (no dithering).
-            return image.convert('P', dither=None, palette=Image.ADAPTIVE)
+            return image.convert('P',
+                                 dither=Image.Dither.NONE,
+                                 palette=Image.Palette.ADAPTIVE)

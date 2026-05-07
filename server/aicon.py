@@ -1,6 +1,8 @@
 import base64
 import binascii
 from google import auth
+from google.auth.exceptions import RefreshError
+from google.auth.transport.requests import Request as GoogleAuthRequest
 from io import BytesIO
 from os import environ
 from PIL import Image
@@ -48,8 +50,8 @@ class AIcon(ImageContent):
         # Refresh the credentials, if needed.
         if not self._credentials.valid:
             try:
-                self._credentials.refresh(auth.transport.requests.Request())
-            except auth.exceptions.RefreshError as e:
+                self._credentials.refresh(GoogleAuthRequest())
+            except RefreshError as e:
                 raise ContentError(f'Failed to refresh credentials: {e}')
 
         # Return the access token.
@@ -112,8 +114,9 @@ class AIcon(ImageContent):
                 scale = max(width / image.width, height / image.height)
                 scaled_width = int(image.width * scale)
                 scaled_height = int(image.height * scale)
-                with image.resize((scaled_width, scaled_height),
-                                  resample=Image.LANCZOS) as scaled_image:
+                with image.resize(
+                        (scaled_width, scaled_height),
+                        resample=Image.Resampling.LANCZOS) as scaled_image:
 
                     # Center crop.
                     left = (scaled_width - width) // 2

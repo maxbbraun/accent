@@ -72,8 +72,9 @@ def color_indices(image, variant):
         # Quantize the image using the palette.
         with Image.new('P', (1, 1)) as palette_image:
             palette_image.putpalette(palette_data)
-            with rgb_image.quantize(palette=palette_image,
-                                    dither=Image.NONE) as quantized_image:
+            with rgb_image.quantize(
+                    palette=palette_image,
+                    dither=Image.Dither.NONE) as quantized_image:
                 return np.array(quantized_image)
 
 

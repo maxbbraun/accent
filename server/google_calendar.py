@@ -5,11 +5,10 @@ from collections import Counter
 from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
+from google.auth.exceptions import RefreshError
 from googleapiclient import discovery
-from googleapiclient.http import build_http
 from logging import warning
 from logging import error
-from oauth2client.client import HttpAccessTokenRefreshError
 from PIL import Image
 from PIL.ImageDraw import Draw
 
@@ -89,8 +88,9 @@ class GoogleCalendar(ImageContent):
         if not credentials:
             error('No valid Google Calendar credentials.')
             return Counter()
-        authed_http = credentials.authorize(http=build_http())
-        service = discovery.build(API_NAME, API_VERSION, http=authed_http,
+        service = discovery.build(API_NAME,
+                                  API_VERSION,
+                                  credentials=credentials,
                                   cache_discovery=False)
 
         # Process calendar events for each day of the current month.
@@ -109,7 +109,7 @@ class GoogleCalendar(ImageContent):
                                             pageToken=page_token)
             try:
                 response = request.execute()
-            except HttpAccessTokenRefreshError as e:
+            except RefreshError as e:
                 warning('Google Calendar request failed: %s' % e)
                 return Counter()
 
@@ -215,4 +215,6 @@ class GoogleCalendar(ImageContent):
                                 draw.bitmap(dot_xy, dot, event_color)
 
             # The calendar image is already quantized (no dithering).
-            return image.convert('P', dither=None, palette=Image.ADAPTIVE)
+            return image.convert('P',
+                                 dither=Image.Dither.NONE,
+                                 palette=Image.Palette.ADAPTIVE)

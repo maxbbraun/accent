@@ -37,8 +37,9 @@ class Wittgenstein(ImageContent):
                 scale = min(width / image.width, height / image.height)
                 scaled_width = int(image.width * scale)
                 scaled_height = int(image.height * scale)
-                with image.resize((scaled_width, scaled_height),
-                                  resample=Image.LANCZOS) as scaled_image:
+                with image.resize(
+                        (scaled_width, scaled_height),
+                        resample=Image.Resampling.LANCZOS) as scaled_image:
 
                     # Extend the background.
                     with Image.new(mode='RGB', size=(width, height),

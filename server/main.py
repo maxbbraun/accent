@@ -2,10 +2,9 @@ from flask import Flask
 from flask import redirect
 from flask import render_template
 from flask import request
-from googleapiclient.http import build_http
+from google.auth.exceptions import RefreshError
 from logging import error
 from logging import exception
-from oauth2client.client import HttpAccessTokenRefreshError
 from time import time
 
 from aicon import AIcon
@@ -209,8 +208,8 @@ def hello_get(key):
     # Force a Google Calendar credentials refresh to get the latest status.
     if calendar_credentials:
         try:
-            calendar_credentials.refresh(build_http())
-        except HttpAccessTokenRefreshError as e:
+            calendar_storage.refresh(calendar_credentials)
+        except RefreshError as e:
             error('Calendar token refresh error: %s' % e)
             calendar_storage.delete()
             calendar_credentials = None
