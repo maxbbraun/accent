@@ -28,6 +28,17 @@ REQUEST_TIMEOUT_S = 10
 
 
 @dataclass(frozen=True)
+class GeocodedLocation(object):
+    """A geocoded location without timezone or elevation metadata."""
+
+    name: str
+    region: str
+    latitude: float
+    longitude: float
+    url: str
+
+
+@dataclass(frozen=True)
 class Location(object):
     """A geocoded location with the fields used by the server."""
 
@@ -47,20 +58,32 @@ class Geocoder(object):
         self._google_maps_api_key = Firestore().google_maps_api_key()
 
     @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
-    def __getitem__(self, key):
+    def geocode(self, key):
+        """Looks up coordinates for an address."""
+
         name, region, latitude, longitude = self._geocoding(key)
-        timezone = self._timezone(latitude, longitude)
-        elevation = self._elevation(latitude, longitude)
         url = 'https://maps.google.com/maps?q=loc:%f,%f' % (
             latitude, longitude)
 
-        return Location(name=name,
-                        region=region,
-                        latitude=latitude,
-                        longitude=longitude,
+        return GeocodedLocation(name=name,
+                                region=region,
+                                latitude=latitude,
+                                longitude=longitude,
+                                url=url)
+
+    @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
+    def __getitem__(self, key):
+        location = self.geocode(key)
+        timezone = self._timezone(location.latitude, location.longitude)
+        elevation = self._elevation(location.latitude, location.longitude)
+
+        return Location(name=location.name,
+                        region=location.region,
+                        latitude=location.latitude,
+                        longitude=location.longitude,
                         timezone=timezone,
                         elevation=elevation,
-                        url=url)
+                        url=location.url)
 
     def _request_json(self, url, params):
         """Requests JSON from a Google Maps API endpoint."""
