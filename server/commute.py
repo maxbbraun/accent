@@ -77,4 +77,6 @@ class Commute(ImageContent):
                   image=image)
 
         # The map looks better without dithering.
-        return image.convert('P', dither=None, palette=Image.ADAPTIVE)
+        return image.convert('P',
+                             dither=Image.Dither.NONE,
+                             palette=Image.Palette.ADAPTIVE)

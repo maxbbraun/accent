@@ -1,7 +1,7 @@
-from astral import AstralError
 from datetime import datetime
 from pytz import timezone
 from pytz import utc
+from pytz.exceptions import UnknownTimeZoneError
 
 from firestore import DataError
 
@@ -33,5 +33,5 @@ class LocalTime(object):
                 raise DataError('Missing home address')
             location = self._geocoder[home]
             return timezone(location.timezone)
-        except (AstralError, KeyError) as e:
+        except (DataError, KeyError, UnknownTimeZoneError) as e:
             raise DataError(e)

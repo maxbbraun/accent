@@ -1,4 +1,3 @@
-from astral import AstralError
 from cachetools import cached
 from cachetools import TTLCache
 from content import ContentError
@@ -41,7 +40,7 @@ class Everyone(ImageContent):
 
                 markers += '|%f,%f' % (anonymized.latitude,
                                        anonymized.longitude)
-            except (KeyError, AstralError):
+            except (KeyError, DataError):
                 # Skip users with address errors.
                 pass
 
@@ -56,6 +55,8 @@ class Everyone(ImageContent):
                                                 marker_icon=MARKER_ICON_URL)
 
             # The map looks better without dithering.
-            return image.convert('P', dither=None, palette=Image.ADAPTIVE)
+            return image.convert('P',
+                                 dither=Image.Dither.NONE,
+                                 palette=Image.Palette.ADAPTIVE)
         except DataError as e:
             raise ContentError(e)

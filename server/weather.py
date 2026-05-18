@@ -1,4 +1,3 @@
-from astral import AstralError
 from cachetools import cached
 from cachetools import TTLCache
 from json.decoder import JSONDecodeError
@@ -40,7 +39,7 @@ class Weather(object):
         try:
             home = user.get('home')
             return self._geocoder[home]
-        except (AstralError, KeyError) as e:
+        except (DataError, KeyError) as e:
             raise DataError(e)
 
     @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))

@@ -33,5 +33,7 @@ class Artwork(ImageContent):
             with image.crop((x, y, x + width, y + height)) as cropped_image:
 
                 # The source artwork is already quantized (no dithering).
-                return cropped_image.convert('P', dither=None,
-                                             palette=Image.ADAPTIVE)
+                return cropped_image.convert(
+                    'P',
+                    dither=Image.Dither.NONE,
+                    palette=Image.Palette.ADAPTIVE)

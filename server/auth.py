@@ -1,21 +1,24 @@
 from flask import request
 from flask import url_for
 from functools import wraps
-from googleapiclient.http import build_http
+from google_auth_oauthlib.flow import Flow
 from logging import error
-from oauth2client.client import HttpAccessTokenRefreshError
-from oauth2client.client import OAuth2WebServerFlow
 from re import compile as re_compile
 
 from firestore import Firestore
+from firestore import GOOGLE_CALENDAR_SCOPE
+from firestore import GOOGLE_TOKEN_URI
 from firestore import GoogleCalendarStorage
 from response import display_metadata
 from response import forbidden_response
 from response import settings_response
 from response import text_response
 
-# The scope to request for the Google Calendar API.
-GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly'
+# The Google OAuth authorization endpoint.
+GOOGLE_AUTH_URI = 'https://accounts.google.com/o/oauth2/v2/auth'
+
+# The OAuth client type expected by google-auth-oauthlib.
+OAUTH_CLIENT_TYPE = 'web'
 
 # The URL where Google Calendar access can be revoked.
 ACCOUNT_ACCESS_URL = 'https://myaccount.google.com/permissions'
@@ -107,11 +110,17 @@ def _google_calendar_flow(key):
     """Creates the OAuth flow."""
 
     secrets = Firestore().google_calendar_secrets()
-    return OAuth2WebServerFlow(client_id=secrets['client_id'],
-                               client_secret=secrets['client_secret'],
-                               scope=GOOGLE_CALENDAR_SCOPE,
-                               state=key,
-                               redirect_uri=_oauth_url())
+    client_config = {
+        OAUTH_CLIENT_TYPE: {
+            'client_id': secrets['client_id'],
+            'client_secret': secrets['client_secret'],
+            'auth_uri': GOOGLE_AUTH_URI,
+            'token_uri': GOOGLE_TOKEN_URI}}
+
+    return Flow.from_client_config(client_config,
+                                   scopes=[GOOGLE_CALENDAR_SCOPE],
+                                   state=key,
+                                   redirect_uri=_oauth_url())
 
 
 def google_calendar_step1(key):
@@ -119,28 +128,31 @@ def google_calendar_step1(key):
 
     # The user key is passed through the flow as state.
     flow = _google_calendar_flow(key)
-    return flow.step1_get_authorize_url(state=key)
+    authorization_url, _ = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true',
+        prompt='consent',
+        state=key)
+
+    return authorization_url
 
 
 def _google_calendar_step2(key, code):
-    """Creates the URL for the second OAuth step."""
+    """Exchanges an authorization code for credentials."""
 
     flow = _google_calendar_flow(key)
-    return flow.step2_exchange(code=code)
+    flow.fetch_token(code=code)
+
+    return flow.credentials
 
 
 def oauth_step2(key, scope, code):
     """Exchanges and saves the OAuth credentials."""
 
     # Use scope-specific token exchange and storage steps.
-    if scope == GOOGLE_CALENDAR_SCOPE:
+    if GOOGLE_CALENDAR_SCOPE in (scope or '').split():
         credentials = _google_calendar_step2(key, code)
         storage = GoogleCalendarStorage(key)
-        credentials.set_store(storage)
-        try:
-            credentials.refresh(build_http())
-        except HttpAccessTokenRefreshError as e:
-            storage.delete()
-            error('Token refresh error: %s' % e)
+        storage.put(credentials)
     else:
         error('Unknown OAuth scope: %s' % scope)

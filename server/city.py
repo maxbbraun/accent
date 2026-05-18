@@ -1037,4 +1037,6 @@ class City(ImageContent):
                 raise ContentError(e)
 
             # The city image is already quantized (no dithering).
-            return image.convert('P', dither=None, palette=Image.ADAPTIVE)
+            return image.convert('P',
+                                 dither=Image.Dither.NONE,
+                                 palette=Image.Palette.ADAPTIVE)
