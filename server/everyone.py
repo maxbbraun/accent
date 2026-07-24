@@ -1,5 +1,6 @@
 from cachetools import cached
 from cachetools import TTLCache
+from cachetools.keys import methodkey
 from content import ContentError
 from content import ImageContent
 from firestore import DataError
@@ -13,6 +14,9 @@ MARKER_ICON_URL = 'http://accent.ink/marker.png'
 # The time to live in seconds for cached markers.
 CACHE_TTL_S = 24 * 60 * 60  # 1 day
 
+# The maximum number of rendered everyone images kept in the cache.
+MAX_IMAGE_CACHE_SIZE = 4
+
 
 class Everyone(ImageContent):
     """A map of Accent users around the world."""
@@ -22,36 +26,47 @@ class Everyone(ImageContent):
         self._google_maps = GoogleMaps(geocoder)
         self._firestore = Firestore()
 
-    @cached(cache=TTLCache(maxsize=1, ttl=CACHE_TTL_S))
+    @cached(cache=TTLCache(maxsize=1, ttl=CACHE_TTL_S), key=methodkey)
     def _markers(self):
         """Returns a list of users' home locations to be shown on a map."""
 
-        markers = ''
+        markers = []
+        seen_markers = set()
 
-        for user in self._firestore.users():
+        for user in self._firestore.users(field_paths=['home']):
             try:
                 home = user.get('home')
-                location = self._geocoder[home]
+                location = self._geocoder.geocode(home)
 
                 # Use the latitude and longitude of the city name and region
                 # instead of the exact coordinates to anonymize user addresses.
                 city = '%s, %s' % (location.name, location.region)
-                anonymized = self._geocoder[city]
+                anonymized = self._geocoder.geocode(city)
 
-                markers += '|%f,%f' % (anonymized.latitude,
-                                       anonymized.longitude)
+                marker = '%f,%f' % (anonymized.latitude,
+                                    anonymized.longitude)
+                if marker not in seen_markers:
+                    seen_markers.add(marker)
+                    markers.append(marker)
             except (KeyError, DataError):
                 # Skip users with address errors.
                 pass
 
-        return markers
+        return '|'.join(markers)
 
     def image(self, user, width, height, variant):
         """Generates a map with user locations."""
 
+        return self._image(width, height, variant, self._markers()).copy()
+
+    @cached(cache=TTLCache(maxsize=MAX_IMAGE_CACHE_SIZE, ttl=CACHE_TTL_S),
+            key=methodkey)
+    def _image(self, width, height, variant, markers):
+        """Generates and caches a map with user locations."""
+
         try:
             image = self._google_maps.map_image(width, height, variant,
-                                                markers=self._markers(),
+                                                markers=markers,
                                                 marker_icon=MARKER_ICON_URL)
 
             # The map looks better without dithering.

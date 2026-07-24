@@ -1,5 +1,6 @@
 from cachetools import cached
 from cachetools import TTLCache
+from cachetools.keys import methodkey
 from google.cloud import vision
 from io import BytesIO
 from logging import warning
@@ -45,6 +46,9 @@ MAX_CACHE_SIZE = 10
 
 # The time to live in seconds for cached map images.
 CACHE_TTL_S = 24 * 60 * 60  # 1 day
+
+# The timeout for Google Maps image requests.
+REQUEST_TIMEOUT_S = 10
 
 
 class GoogleMaps(object):
@@ -105,7 +109,9 @@ class GoogleMaps(object):
                                          hide_map=hide_map)
 
         try:
-            return get(image_url).content
+            response = get(image_url, timeout=REQUEST_TIMEOUT_S)
+            response.raise_for_status()
+            return response.content
         except RequestException as e:
             raise DataError(e)
 
@@ -136,9 +142,18 @@ class GoogleMaps(object):
         time = self._local_time.utc_now()
         return COPYRIGHT_TEXT % time.year
 
-    @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S))
     def map_image(self, width, height, variant, polyline=None, markers=None,
                   marker_icon=None):
+        """Creates a map image with optional route or markers."""
+
+        return self._map_image(width, height, variant, polyline=polyline,
+                               markers=markers,
+                               marker_icon=marker_icon).copy()
+
+    @cached(cache=TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL_S),
+            key=methodkey)
+    def _map_image(self, width, height, variant, polyline=None, markers=None,
+                   marker_icon=None):
         """Creates a map image with optional route or markers."""
 
         # Get the static map as an image.
@@ -169,7 +184,7 @@ class GoogleMaps(object):
                           box_padding=COPYRIGHT_BOX_PADDING,
                           image=image)
 
-                return image
+                return image.copy()
 
     def _route_url(self, home, work, travel_mode):
         """Constructs the URL for the Directions API request."""
